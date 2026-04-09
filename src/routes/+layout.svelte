@@ -1,13 +1,15 @@
 <script lang="ts">
 	let { children, data } = $props();
-	import { siteConfig } from '$lib/siteConfig';
+	import '$lib/assets/tokens.css';
 	import HeaderTeams from '../components/HeaderTeams.svelte';
 	import LeagueLogo from '../components/LeagueLogo.svelte';
 </script>
 
 <svelte:head>
 	<link rel="icon" href="src/lib/assets/favicon.svg" sizes="16x16" />
-	<title>{siteConfig.siteName}</title>
+	<link href="//fonts.googleapis.com/css?family=Asap:200,400,700|Asap+Condensed:700|Righteous&display=swap" rel="stylesheet" />
+	<script src="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js" crossorigin="anonymous" async defer></script>
+	<title>{data.siteConfig.siteName}</title>
 </svelte:head>
 
 <header>
@@ -15,7 +17,7 @@
 		<ul class="header-section header-primary">
 			<li class="header-item">
 				<a class="header-link" href="/"
-					><LeagueLogo exists={data.logoExists} alt={siteConfig.siteName} /></a
+					><LeagueLogo alt={data.siteConfig.siteName} /></a
 				>
 			</li>
 			<li class="header-item">
@@ -70,81 +72,21 @@
 			</label>
 			<em><span title="Toggle Light/Dark Mode" class="fas fa-lightbulb"></span></em>
 		</div>
-		<p>&copy; 2020-{new Date().getFullYear()} - {siteConfig.siteName}</p>
+		<p>&copy; 2020-{new Date().getFullYear()} - {data.siteConfig.siteName}</p>
 		<p class="hidden-footer">Designed & developed by Brandon Elmes</p>
 	</footer>
 </div>
 
 <style>
 	:global {
-		:root {
-			--background-color: #eeefea;
-			--nav-background-color: #969c61;
-			--section-background-color: white;
-			--table-main-color: white;
-			--table-alternate-color: lightgrey;
-			--table-tertiary-color: darkgrey;
-			--table-border: 1px solid rgba(0, 0, 0, 1);
-			--text: #050506;
-			--text-soft: #a5a5a6;
-			--text-soft-contrast: #858584;
-			--h1: #886d47;
-			--h1-border: 1px solid rgba(0, 0, 0, 0);
-			--h2: #b47c45;
-			--h2-border: 1px solid rgba(0, 0, 0, 0);
-			--link: #886d47;
-			--link-hover: #b47c45;
-			--header-shadow: 0 1px 5px #050506;
-			--section-shadow: 0 1px 5px #886d47;
-			--text-inverted: #eeefea;
-			--game-border: 1px solid #eeefea;
-			--game-hover-background-color: #dfcebb;
-			--news-border: 1px solid #eeefea;
-			--news-hover-background-color: #dfcebb;
-			--standings-border: 1px solid #eeefea;
-			--standings-row-hover-background-color: #dfcebb;
-			--tournament-series-spot-background-color: #eeefea;
-			--tournament-series-spot-shadow: 0 1px 2px #886d47;
-			--tournament-series-winner-outline: 2px solid black;
-		}
-
-		[data-theme='dark'] {
-			--nav-background-color: black;
-			--background-color: #050506;
-			--section-background-color: #886d47;
-			--table-main-color: #886d47;
-			--table-alternate-color: #b47c45;
-			--table-tertiary-color: #5e5f5a;
-			--table-border: 1px solid #eeefea;
-			--text: #eeefea;
-			--text-soft: #5e5f5a;
-			--text-soft-contrast: #c3c3c9;
-			--h1: #969c61;
-			--h1-border: 1px solid #eeefea;
-			--h2-border: 1px solid #b47c45;
-			--link: #dfcebb;
-			--link-hover: #eeefea;
-			--header-shadow: 0 0 200px 80px #eeefea;
-			--section-shadow: 0 0 0 1px #eeefea;
-			--game-border: 1px solid #b47c45;
-			--game-hover-background-color: #b47c45;
-			--news-border: 1px dotted #dfcebb;
-			--news-hover-background-color: #b47c45;
-			--standings-border: 1px solid #b47c45;
-			--standings-row-hover-background-color: #b47c45;
-			--tournament-series-spot-background-color: #969c61;
-			--tournament-series-spot-shadow: none;
-			--tournament-series-winner-outline: 2px solid #eeefea;
-		}
-
 		html {
-			background-color: var(--background-color);
-			color: var(--text);
+			background-color: var(--surface-page);
+			color: var(--text-default);
 		}
 
 		[class*='fa-'] {
-			color: var(--link);
-			padding: 0 3px;
+			color: var(--link-default);
+			padding: 0 var(--space-1);
 		}
 
 		html,
@@ -155,8 +97,8 @@
 		button,
 		select,
 		textarea {
-			font-family: 'Asap', sans-serif;
-			font-size: 16px;
+			font-family: var(--font-primary);
+			font-size: var(--text-base);
 		}
 
 		.soft {
@@ -165,25 +107,24 @@
 
 		h1 {
 			font-weight: 700;
-			background-color: var(--h1);
+			background-color: var(--surface-heading-primary);
 			color: var(--text-inverted);
-			border: var(--h1-border);
-			padding: 15px 5px;
-			margin: 0 0 10px 0;
+			border: var(--border-heading-primary);
+			padding: var(--space-5) var(--space-2);
+			margin: 0 0 var(--space-4) 0;
 		}
 
 		h2 {
-			font-family: 'Asap Condensed';
+			font-family: var(--font-condensed);
 			font-weight: 700;
-			background-color: var(--h2);
+			background-color: var(--surface-heading-secondary);
 			color: var(--text-inverted);
-			border: var(--h2-border);
-			padding: 5px;
-			margin: 0 0 3px 0;
+			border: var(--border-heading-secondary);
+			padding: var(--space-2);
+			margin: 0 0 var(--space-1) 0;
 		}
 
 		.header-icon {
-			/* for font-awesome icons */
 			color: var(--text-inverted);
 		}
 
@@ -200,7 +141,7 @@
 		a:link,
 		a:visited,
 		a:active {
-			color: var(--link);
+			color: var(--link-default);
 		}
 		a:hover {
 			color: var(--link-hover);
@@ -222,15 +163,15 @@
 		hr {
 			height: 1px;
 			border: none;
-			border-top: 1px solid var(--text);
+			border-top: 1px solid var(--text-default);
 		}
 
 		.green {
-			color: rgb(72, 180, 0);
+			color: var(--color-win);
 		}
 
 		.red {
-			color: rgb(214, 0, 0);
+			color: var(--color-loss);
 		}
 
 		body {
@@ -252,7 +193,7 @@
 			display: inline-block;
 			height: 36px !important;
 			background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
-			border-radius: 3px;
+			border-radius: var(--radius-sm);
 			text-shadow: 0 1px 0 rgba(0, 51, 83, 0.3);
 			box-shadow:
 				0 1px 0 rgba(0, 0, 0, 0.2),
@@ -268,20 +209,68 @@
 		.bold-border {
 			border-width: 3px !important;
 		}
+
+		main {
+			padding: 0 var(--space-6);
+		}
+
+		.row {
+			display: flex;
+			justify-content: center;
+			margin-bottom: var(--space-6);
+		}
+
+		.section {
+			background-color: var(--surface-section);
+			padding: var(--space-2);
+			box-shadow: var(--shadow-section);
+		}
+
+		.subsection {
+			margin-bottom: var(--space-3);
+		}
+
+		.player-number {
+			font-family: var(--font-display);
+		}
+
+		.link {
+			cursor: pointer;
+			user-select: none;
+		}
+
+		.header-teams,
+		.header-teams .header-item,
+		.header-teams .header-item .header-link {
+			height: 100%;
+		}
+		.header-teams li {
+			width: var(--space-7);
+		}
+		.header-teams a {
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			align-items: center;
+			text-transform: uppercase;
+			font-family: var(--font-condensed);
+			font-size: var(--text-xs);
+			text-align: center;
+		}
 	}
 
 	header {
 		width: 100%;
 		text-align: center;
-		margin-bottom: 20px;
-		background-color: var(--nav-background-color);
-		box-shadow: var(--header-shadow);
+		margin-bottom: var(--space-6);
+		background-color: var(--surface-nav);
+		box-shadow: var(--shadow-header);
 		font-weight: 700;
 	}
 
 	header .container {
 		height: 80px;
-		padding: 0 20px;
+		padding: 0 var(--space-6);
 		box-sizing: border-box;
 		display: flex;
 		align-items: center;
@@ -305,10 +294,10 @@
 	}
 
 	.header-primary {
-		padding-left: 10px;
+		padding-left: var(--space-4);
 	}
 	.header-primary li {
-		padding-right: 10px;
+		padding-right: var(--space-4);
 	}
 
 	.header-primary a,
@@ -321,34 +310,34 @@
 	}
 
 	.header-login {
-		padding-right: 10px;
+		padding-right: var(--space-4);
 	}
 
 	.header-login li {
-		padding-left: 10px;
+		padding-left: var(--space-4);
 	}
 
 	footer {
-		padding: 0 20px;
+		padding: 0 var(--space-6);
 		text-align: center;
-		margin-bottom: 20px;
+		margin-bottom: var(--space-6);
 	}
 
 	.theme-switch-wrapper {
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 8px;
+		margin-bottom: var(--space-3);
 	}
 
 	.theme-switch-wrapper em {
-		margin-left: 10px;
+		margin-left: var(--space-4);
 		font-size: 1rem;
 	}
 
 	.theme-switch {
 		display: inline-block;
-		height: 28px;
+		height: var(--space-7);
 		position: relative;
 		width: 56px;
 	}
@@ -358,7 +347,7 @@
 	}
 
 	.slider {
-		background-color: #886d47;
+		background-color: var(--color-tan);
 		bottom: 0;
 		cursor: pointer;
 		left: 0;
@@ -369,18 +358,18 @@
 	}
 
 	.slider:before {
-		background-color: #eeefea;
-		bottom: 3px;
+		background-color: var(--color-cream);
+		bottom: var(--space-1);
 		content: '';
 		height: 22px;
-		left: 3px;
+		left: var(--space-1);
 		position: absolute;
 		transition: 0.4s;
 		width: 22px;
 	}
 
 	input:checked + .slider {
-		background-color: #969c61;
+		background-color: var(--color-olive);
 	}
 
 	input:checked + .slider:before {
@@ -388,7 +377,7 @@
 	}
 
 	.slider.round {
-		border-radius: 28px;
+		border-radius: var(--radius-full);
 	}
 
 	.slider.round:before {
@@ -396,7 +385,7 @@
 	}
 
 	.hidden-footer {
-		color: var(--background-color);
+		color: var(--surface-page);
 	}
 
 	.desktop-only {

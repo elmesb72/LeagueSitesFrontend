@@ -1,9 +1,5 @@
 <script lang="ts">
-	let { exists, alt } = $props();
+	let { alt } = $props();
 </script>
 
-{#if exists}
-	<img src='/images/logo.webp' alt="" />
-{:else}
-	{alt}
-{/if}
+<object data="/images/logo.webp" style="vertical-align: middle">{alt}</object>

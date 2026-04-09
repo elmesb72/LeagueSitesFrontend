@@ -1,0 +1,156 @@
+/*
+ * Design Tokens
+ *
+ * Organized into layers:
+ *   1. Primitive: raw color/size values
+ *   2. Semantic: purpose-driven aliases
+ *   3. Component: component-specific overrides
+ *
+ * Per-league theming: override the primitive layer.
+ * Dark mode: override the semantic layer via [data-theme="dark"].
+ */
+
+/* ========== Primitives ========== */
+
+:root {
+	/* Brand palette */
+	--color-cream: #eeefea;
+	--color-olive: #969c61;
+	--color-tan: #886d47;
+	--color-copper: #b47c45;
+	--color-sand: #dfcebb;
+	--color-charcoal: #050506;
+	--color-grey: #a5a5a6;
+	--color-grey-dark: #858584;
+	--color-grey-muted: #5e5f5a;
+	--color-grey-light: #c3c3c9;
+	--color-white: white;
+	--color-black: black;
+
+	/* Feedback */
+	--color-positive: rgb(72, 180, 0);
+	--color-negative: rgb(214, 0, 0);
+
+	/* Spacing scale */
+	--space-1: 3px;
+	--space-2: 5px;
+	--space-3: 8px;
+	--space-4: 10px;
+	--space-5: 15px;
+	--space-6: 20px;
+	--space-7: 28px;
+
+	/* Typography */
+	--font-primary: 'Asap', sans-serif;
+	--font-condensed: 'Asap Condensed';
+	--font-display: 'Righteous';
+	--text-xs: 11px;
+	--text-sm: 12px;
+	--text-base: 16px;
+	--text-md: 15px;
+	--text-lg: 20px;
+	--text-xl: 24px;
+	--text-2xl: 36px;
+
+	/* Borders */
+	--radius-sm: 3px;
+	--radius-md: 4px;
+	--radius-full: 28px;
+}
+
+/* ========== Semantic tokens (light mode) ========== */
+
+:root {
+	/* Surfaces */
+	--surface-page: var(--color-cream);
+	--surface-section: var(--color-white);
+	--surface-nav: var(--color-olive);
+	--surface-heading-primary: var(--color-tan);
+	--surface-heading-secondary: var(--color-copper);
+
+	/* Text */
+	--text-default: var(--color-charcoal);
+	--text-inverted: var(--color-cream);
+	--text-soft: var(--color-grey);
+	--text-soft-contrast: var(--color-grey-dark);
+
+	/* Links */
+	--link-default: var(--color-tan);
+	--link-hover: var(--color-copper);
+
+	/* Borders & shadows */
+	--border-heading-primary: 1px solid rgba(0, 0, 0, 0);
+	--border-heading-secondary: 1px solid rgba(0, 0, 0, 0);
+	--shadow-header: 0 1px 5px var(--color-charcoal);
+	--shadow-section: 0 1px 5px var(--color-tan);
+
+	/* Tables */
+	--table-row-primary: var(--color-white);
+	--table-row-alternate: lightgrey;
+	--table-row-tertiary: darkgrey;
+	--table-border: 1px solid rgba(0, 0, 0, 1);
+	--table-header-bg: var(--color-copper);
+	--table-header-text: var(--color-cream);
+
+	/* Interactive */
+	--game-border: 1px solid var(--color-cream);
+	--game-hover-bg: var(--color-sand);
+	--news-border: 1px solid var(--color-cream);
+	--news-hover-bg: var(--color-sand);
+	--standings-border: 1px solid var(--color-cream);
+	--standings-hover-bg: var(--color-sand);
+
+	/* Tournament */
+	--tournament-spot-bg: var(--color-cream);
+	--tournament-spot-shadow: 0 1px 2px var(--color-tan);
+	--tournament-winner-outline: 2px solid black;
+
+	/* Feedback */
+	--color-win: var(--color-positive);
+	--color-loss: var(--color-negative);
+}
+
+/* ========== Semantic tokens (dark mode) ========== */
+
+[data-theme='dark'] {
+	/* Surfaces */
+	--surface-page: var(--color-charcoal);
+	--surface-section: var(--color-tan);
+	--surface-nav: var(--color-black);
+	--surface-heading-primary: var(--color-olive);
+	--surface-heading-secondary: var(--color-copper);
+
+	/* Text */
+	--text-default: var(--color-cream);
+	--text-soft: var(--color-grey-muted);
+	--text-soft-contrast: var(--color-grey-light);
+
+	/* Links */
+	--link-default: var(--color-sand);
+	--link-hover: var(--color-cream);
+
+	/* Borders & shadows */
+	--border-heading-primary: 1px solid var(--color-cream);
+	--border-heading-secondary: 1px solid var(--color-copper);
+	--shadow-header: 0 0 200px 80px var(--color-cream);
+	--shadow-section: 0 0 0 1px var(--color-cream);
+
+	/* Tables */
+	--table-row-primary: var(--color-tan);
+	--table-row-alternate: var(--color-copper);
+	--table-row-tertiary: var(--color-grey-muted);
+	--table-border: 1px solid var(--color-cream);
+
+	/* Interactive */
+	--game-border: 1px solid var(--color-copper);
+	--game-hover-bg: var(--color-copper);
+	--news-border: 1px dotted var(--color-sand);
+	--news-hover-bg: var(--color-copper);
+	--standings-border: 1px solid var(--color-copper);
+	--standings-hover-bg: var(--color-copper);
+
+	/* Tournament */
+	--tournament-spot-bg: var(--color-olive);
+	--tournament-spot-shadow: none;
+	--tournament-winner-outline: 2px solid var(--color-cream);
+}
