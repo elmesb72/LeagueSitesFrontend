@@ -1,14 +1,30 @@
 <script lang="ts">
-	let { children, data } = $props();
+	import { onMount } from 'svelte';
 	import '$lib/assets/tokens.css';
 	import HeaderTeams from '../components/HeaderTeams.svelte';
 	import LeagueLogo from '../components/LeagueLogo.svelte';
+
+	let { children, data } = $props();
+	let darkMode = $state(false);
+
+	onMount(() => {
+		darkMode = localStorage.getItem('theme') === 'dark';
+		applyTheme();
+	});
+
+	function applyTheme(): void {
+		document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+		localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+	}
+
+	function toggleTheme(): void {
+		darkMode = !darkMode;
+		applyTheme();
+	}
 </script>
 
 <svelte:head>
 	<link rel="icon" href="src/lib/assets/favicon.svg" sizes="16x16" />
-	<link href="//fonts.googleapis.com/css?family=Asap:200,400,700|Asap+Condensed:700|Righteous&display=swap" rel="stylesheet" />
-	<script src="//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/js/all.min.js" crossorigin="anonymous" async defer></script>
 	<title>{data.siteConfig.siteName}</title>
 </svelte:head>
 
@@ -67,7 +83,7 @@
 	<footer>
 		<div class="theme-switch-wrapper">
 			<label class="theme-switch" for="checkbox">
-				<input type="checkbox" id="checkbox" />
+				<input type="checkbox" id="checkbox" checked={darkMode} onchange={toggleTheme} />
 				<div class="slider round"></div>
 			</label>
 			<em><span title="Toggle Light/Dark Mode" class="fas fa-lightbulb"></span></em>

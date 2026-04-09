@@ -1,7 +1,7 @@
 <script lang="ts">
 	let { href }: { href: string } = $props();
 
-	const extension = href.split('.').pop();
+	const extension = $derived(href.split('.').pop());
 </script>
 
 {#if extension === 'pdf'}

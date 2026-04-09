@@ -23,8 +23,8 @@
 	}
 
 	const gamesByDate = $derived(groupGamesByDate(data.games));
-	const siteConfig = data.siteConfig;
-	const home = siteConfig.home;
+	const siteConfig = $derived(data.siteConfig);
+	const home = $derived(siteConfig.home);
 </script>
 
 <div class="row row-home home-main">

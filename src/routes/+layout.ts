@@ -2,6 +2,8 @@ import type { SiteUser } from "$lib/models/SiteUser";
 import type { SiteConfig } from "$lib/models/SiteConfig";
 import type { Team } from "$lib/models/Team";
 
+export const ssr = false;
+
 const defaultSiteConfig: SiteConfig = {
   siteName: 'League Site',
   shortName: '',
