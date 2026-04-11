@@ -1,0 +1,53 @@
+/* Standings page */
+.standings-section {
+	width: 100%;
+}
+
+.standings {
+	width: 100%;
+	border: var(--standings-border);
+	overflow: hidden;
+}
+
+.standings tr {
+	vertical-align: middle;
+	border: var(--standings-border);
+}
+
+.standings tr:hover {
+	background-color: var(--standings-hover-bg);
+}
+
+.standings th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	padding: 6px var(--space-1);
+}
+
+.standings th:first-child {
+	text-align: left;
+}
+
+.standings td {
+	padding: 6px var(--space-1);
+}
+
+.standings td:not(:first-child) {
+	width: 6.5%;
+	padding: var(--space-1);
+	text-align: center;
+}
+
+.standings-link {
+	white-space: nowrap;
+}
+
+.standings-link object,
+.standings-link div {
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.standings-link object {
+	margin-right: var(--space-1);
+}

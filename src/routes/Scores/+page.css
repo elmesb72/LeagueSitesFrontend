@@ -1,0 +1,204 @@
+/* Date picker */
+.scores-date-picker {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-grow: 1;
+}
+
+.scores-date-picker-month {
+	padding: 6px var(--space-4);
+	margin-right: var(--space-6);
+	font-size: var(--text-lg);
+	cursor: pointer;
+	border: var(--game-border);
+	border-width: 3px;
+	border-radius: var(--radius-md);
+}
+
+.scores-date-picker-month-name {
+	color: var(--link-default);
+	background: none;
+	border: none;
+	font: inherit;
+	cursor: pointer;
+	padding: 0;
+}
+
+.scores-date-picker-month-name:hover {
+	color: var(--link-hover);
+}
+
+/* Datepicker popup theme overrides */
+.datepicker {
+	position: absolute;
+	border: var(--game-border);
+	border-radius: var(--radius-md);
+	z-index: 1;
+}
+
+:global(.datepicker-picker) {
+	background-color: var(--surface-section) !important;
+	color: var(--text-default);
+}
+
+:global(.datepicker-controls .button) {
+	background-color: var(--surface-section) !important;
+	color: var(--text-default) !important;
+}
+
+:global(.datepicker-cell.next:not(.disabled)),
+:global(.datepicker-cell.prev:not(.disabled)) {
+	color: var(--text-soft) !important;
+}
+
+:global(.datepicker-cell:not(.disabled):hover) {
+	background-color: var(--game-hover-bg) !important;
+}
+
+:global(.datepicker-cell.selected:not(.disabled)) {
+	background-color: var(--game-hover-bg) !important;
+}
+
+:global(.datepicker-cell.focused:not(.selected)) {
+	background-color: unset !important;
+}
+
+:global(.datepicker-footer) {
+	background-color: unset !important;
+	box-shadow: unset !important;
+}
+
+/* Week navigation */
+.scores-date-picker-week-back,
+.scores-date-picker-week-ahead {
+	font-size: 32px;
+	font-weight: 700;
+	color: var(--text-soft);
+	padding: 0 var(--space-4);
+}
+
+.scores-date-picker-days {
+	display: flex;
+	text-align: center;
+}
+
+.scores-date-picker-days a {
+	margin: 0 var(--space-4);
+}
+
+.scores-date-picker-selected-day {
+	font-weight: 700;
+}
+
+.scores-date-picker-day-no-games {
+	opacity: 0.5;
+}
+
+.scores-date-picker-weekday {
+	font-size: var(--text-sm);
+}
+
+.scores-date-picker-day-number {
+	font-size: 30px;
+	padding: var(--space-1) 0;
+}
+
+.scores-week-picker-day-games {
+	font-size: var(--text-sm);
+}
+
+/* Game cards */
+.scores-games-row {
+	justify-content: space-between;
+	flex-wrap: wrap;
+}
+
+.scores-games-row > .section {
+	flex-basis: 30%;
+	margin-bottom: var(--space-6);
+}
+
+.scores-game {
+	display: flex;
+	flex-direction: column;
+	padding: var(--space-3);
+}
+
+.scores-game-status {
+	font-size: 14px;
+	color: var(--text-soft-contrast);
+	font-weight: 700;
+	padding-bottom: 4px;
+	border-bottom: var(--game-border);
+}
+
+.scores-game-matchup {
+	display: flex;
+	justify-content: space-between;
+	align-items: end;
+}
+
+.scores-game-team-info {
+	padding-top: var(--space-6);
+}
+
+.scores-game-visitor,
+.scores-game-home {
+	display: flex;
+	align-items: center;
+	height: 30px;
+}
+
+.scores-game-matchup .team-logo {
+	margin-right: var(--space-4);
+}
+
+.scores-game-matchup .team {
+	margin-right: 4px;
+}
+
+.scores-game-matchup .record {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	display: flex;
+	height: 18px;
+	align-items: end;
+}
+
+/* Scoreboard summary */
+.scores-game-scoreboard-summary {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+	align-items: end;
+}
+
+.scores-game-scoreboard-summary div {
+	display: flex;
+	height: 30px;
+}
+
+.scores-game-scoreboard-summary div > div {
+	display: flex;
+	width: 20px;
+	justify-content: center;
+	align-items: center;
+}
+
+.scores-game-scoreboard-summary-header {
+	height: 20px !important;
+	align-items: start;
+}
+
+.scores-game-scoreboard-summary-header > div {
+	font-size: var(--text-sm);
+	font-weight: 700;
+}
+
+.scores-game-location {
+	font-size: var(--text-sm);
+	margin-top: var(--space-2);
+	padding: var(--space-2) 0 0 0;
+	border-top: var(--game-border);
+}

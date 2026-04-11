@@ -13,7 +13,8 @@ export default defineConfig({
 		setupFiles: ['src/tests/setup.ts'],
 		alias: {
 			'$lib': '/src/lib',
-			'$lib/*': '/src/lib/*'
+			'$lib/*': '/src/lib/*',
+			'$app/navigation': '/src/tests/mocks/app-navigation.ts'
 		}
 	}
 });
