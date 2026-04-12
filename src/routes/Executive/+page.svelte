@@ -2,6 +2,8 @@
 	import './+page.css';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import Datepicker from 'vanillajs-datepicker/Datepicker';
+	import 'vanillajs-datepicker/css/datepicker.css';
 
 	let { data } = $props();
 	const dashboard = $derived(data.dashboard);
@@ -33,6 +35,50 @@
 		}
 	}
 
+	let startDateEl = $state<HTMLDivElement>(undefined!);
+	let startDatePicker: Datepicker | null = null;
+
+	function toggleStartDatePicker(event: MouseEvent): void {
+		const target = event.target as HTMLElement;
+		if (startDatePicker) {
+			if (target.closest('.datepicker')) return;
+			startDateEl.removeEventListener('changeDate', handleStartDateChange);
+			startDatePicker.destroy();
+			startDatePicker = null;
+		} else {
+			startDatePicker = new Datepicker(startDateEl, {
+				todayButton: true,
+				todayHighlight: true,
+				format: 'yyyy-mm-dd'
+			});
+			if (season) {
+				startDatePicker.setDate(season.season.startDate.split('T')[0]);
+			}
+			startDateEl.addEventListener('changeDate', handleStartDateChange);
+		}
+	}
+
+	async function handleStartDateChange(): Promise<void> {
+		if (!startDatePicker) return;
+		const d = startDatePicker.getDate();
+		if (!d) return;
+		const formatted = d.toISOString().split('T')[0];
+		const current = season?.season.startDate.split('T')[0];
+		startDatePicker.destroy();
+		startDatePicker = null;
+		if (formatted === current) return;
+		const response = await fetch('/api/Executive/Season/StartDate', {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ startDate: formatted })
+		});
+		if (response.ok) {
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
 	onMount(() => {
 		if (data.redirect) {
 			goto(data.redirect);
@@ -51,6 +97,17 @@
 
 			<h2>Regular Season</h2>
 			{#if season}
+				<div class="executive-start-date">
+					<span>Season start date:</span>
+					<div class="executive-datepicker" bind:this={startDateEl}>
+						<!-- svelte-ignore a11y_click_events_have_key_events -->
+						<!-- svelte-ignore a11y_no_static_element_interactions -->
+						<span class="executive-datepicker-value" onclick={toggleStartDatePicker}>
+							{season.season.startDate.split('T')[0]} <i class="fa-regular fa-calendar"></i>
+						</span>
+					</div>
+				</div>
+				<br />
 				<div class="season-progress">
 					<div>Progress ({season.gamesScheduled} games):&nbsp;</div>
 					<div class="season-progress-bar">

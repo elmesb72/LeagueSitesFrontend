@@ -6,9 +6,23 @@
 	let { data } = $props();
 	const games = $derived(data.games);
 	const locations = $derived(data.locations);
+	const canCreateGame = $derived(data.canCreateGame);
 
 	function getDateRange(games: Game[]): string[] {
-		if (games.length === 0) return [];
+		if (games.length === 0) {
+			if (data.seasonStartDate) {
+				// Show a full week from the season start date
+				const start = new Date(data.seasonStartDate + 'T12:00:00');
+				const dates: string[] = [];
+				for (let i = 0; i < 7; i++) {
+					const d = new Date(start);
+					d.setDate(start.getDate() + i);
+					dates.push(d.toISOString().split('T')[0]);
+				}
+				return dates;
+			}
+			return [];
+		}
 		const dates: string[] = [];
 		const first = new Date(games[0].date);
 		const last = new Date(games[games.length - 1].date);
@@ -47,12 +61,18 @@
 
 <div class="row">
 	<div class="section schedule-section">
-		<h1>{data.year} Schedule</h1>
-		{#if games.length === 0}
+		<h1>
+			{data.year} Schedule
+			{#if canCreateGame}
+				<a title="Create Game" href="/Game/"><i class="fa-regular fa-square-plus header-icon"></i></a>
+			{/if}
+		</h1>
+		{#if games.length === 0 && !(canCreateGame && dateRange.length > 0)}
 			<div class="subsection">
 				<p>No games have been added yet for this year. Stay tuned!</p>
 			</div>
-		{:else}
+		{/if}
+		{#if dateRange.length > 0 && (games.length > 0 || canCreateGame)}
 			<table class="league-schedule">
 				<thead>
 					<tr>
@@ -83,7 +103,15 @@
 										<a href="/Game/{game.id}">{game.visitingTeam.name}</a>
 									</td>
 								{:else}
-									<td colspan="2" class="league-schedule-empty"></td>
+									{#if canCreateGame}
+										<td colspan="2" class="league-schedule-empty league-schedule-create">
+											<a title="Create Game on {dateStr} at {location.name}" href="/Game/?date={dateStr}&location={location.id}">
+												<i class="fa-regular fa-square-plus header-icon"></i>
+											</a>
+										</td>
+									{:else}
+										<td colspan="2" class="league-schedule-empty"></td>
+									{/if}
 								{/if}
 							{/each}
 						</tr>

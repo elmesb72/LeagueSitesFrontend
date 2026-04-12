@@ -77,10 +77,10 @@ describe('Executive Page', () => {
 		expect(screen.getByText('Playoffs')).toBeInTheDocument();
 	});
 
-	test('shows create season link when no season', () => {
+	test('shows create season button when no season', () => {
 		const noSeason = { ...baseData, dashboard: { ...mockDashboard, currentSeason: null } };
 		render(ExecutivePage, { props: { data: noSeason } });
-		expect(screen.getByText('Create season')).toBeInTheDocument();
+		expect(screen.getByText(/Create.*Regular Season/)).toBeInTheDocument();
 	});
 
 	test('shows set up playoffs link when no playoffs', () => {

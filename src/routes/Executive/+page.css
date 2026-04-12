@@ -82,3 +82,32 @@
 .executive-action:active {
 	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
 }
+
+.executive-start-date {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	margin-top: var(--space-5);
+}
+
+.executive-datepicker {
+	cursor: pointer;
+	position: relative;
+}
+
+.executive-datepicker-value {
+	padding: 6px var(--space-4);
+	border: var(--game-border);
+	border-width: 2px;
+	border-radius: var(--radius-md);
+	color: var(--link-default);
+	font-size: var(--text-base);
+	background: none;
+	cursor: pointer;
+	font-family: inherit;
+	user-select: none;
+}
+
+.executive-datepicker-value:hover {
+	color: var(--link-hover);
+}

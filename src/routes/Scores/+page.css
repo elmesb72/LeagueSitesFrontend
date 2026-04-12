@@ -27,50 +27,11 @@
 	font: inherit;
 	cursor: pointer;
 	padding: 0;
+	user-select: none;
 }
 
 .scores-date-picker-month-name:hover {
 	color: var(--link-hover);
-}
-
-/* Datepicker popup theme overrides */
-.datepicker {
-	position: absolute;
-	border: var(--game-border);
-	border-radius: var(--radius-md);
-	z-index: 1;
-}
-
-:global(.datepicker-picker) {
-	background-color: var(--surface-section) !important;
-	color: var(--text-default);
-}
-
-:global(.datepicker-controls .button) {
-	background-color: var(--surface-section) !important;
-	color: var(--text-default) !important;
-}
-
-:global(.datepicker-cell.next:not(.disabled)),
-:global(.datepicker-cell.prev:not(.disabled)) {
-	color: var(--text-soft) !important;
-}
-
-:global(.datepicker-cell:not(.disabled):hover) {
-	background-color: var(--game-hover-bg) !important;
-}
-
-:global(.datepicker-cell.selected:not(.disabled)) {
-	background-color: var(--game-hover-bg) !important;
-}
-
-:global(.datepicker-cell.focused:not(.selected)) {
-	background-color: unset !important;
-}
-
-:global(.datepicker-footer) {
-	background-color: unset !important;
-	box-shadow: unset !important;
 }
 
 /* Week navigation */

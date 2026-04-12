@@ -64,3 +64,17 @@
 	font-weight: bold;
 	color: var(--text-inverted) !important;
 }
+
+.league-schedule-create a {
+	display: inline-block;
+	width: 100%;
+	line-height: 32px;
+}
+
+.league-schedule-create .header-icon {
+	color: transparent;
+}
+
+.league-schedule-create:hover .header-icon {
+	color: var(--text-default);
+}

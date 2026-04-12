@@ -260,6 +260,44 @@
 			user-select: none;
 		}
 
+		/* Datepicker popup — must be global so it floats over content */
+		.datepicker {
+			position: absolute !important;
+			z-index: 10;
+		}
+		.datepicker-picker {
+			background-color: var(--surface-section) !important;
+			color: var(--text-default);
+		}
+		.datepicker-controls .button {
+			background-color: var(--surface-section) !important;
+			color: var(--text-default) !important;
+		}
+		.datepicker-cell.next:not(.disabled),
+		.datepicker-cell.prev:not(.disabled) {
+			color: var(--text-soft) !important;
+		}
+		.datepicker-cell:not(.disabled):hover {
+			background-color: var(--game-hover-bg) !important;
+		}
+		.datepicker-cell.selected:not(.disabled) {
+			background-color: var(--game-hover-bg) !important;
+		}
+		.datepicker-cell.focused:not(.selected) {
+			background-color: unset !important;
+		}
+		.datepicker-footer {
+			background-color: unset !important;
+			box-shadow: unset !important;
+		}
+		.datepicker-hidden-input {
+			position: absolute;
+			opacity: 0;
+			width: 0;
+			height: 0;
+			pointer-events: none;
+		}
+
 		.desktop-only {
 			display: initial;
 		}

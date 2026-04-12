@@ -44,15 +44,17 @@
 	const weekDays = $derived(getWeekDays(selectedDate));
 
 	$effect(() => {
-		// Track selectedDate so this runs when it changes (e.g. week navigation)
 		const date = selectedDate;
 		if (picker) {
 			picker.setDate(date);
 		}
 	});
 
-	function togglePicker(): void {
+	function togglePicker(event: MouseEvent): void {
 		if (picker) {
+			const target = event.target as HTMLElement;
+			if (target.closest('.datepicker')) return;
+			monthEl.removeEventListener('changeDate', handleDateChange);
 			picker.destroy();
 			picker = null;
 		} else {
@@ -61,9 +63,7 @@
 				todayHighlight: true,
 				format: 'yyyy-mm-dd'
 			});
-			// Set the picker to the currently selected date
 			picker.setDate(selectedDate);
-			picker.show();
 			monthEl.addEventListener('changeDate', handleDateChange);
 		}
 	}
@@ -73,6 +73,8 @@
 		const d = picker.getDate();
 		if (d) {
 			const formatted = formatDate(d);
+			picker.destroy();
+			picker = null;
 			goto(`/Scores?day=${formatted}`);
 		}
 	}
