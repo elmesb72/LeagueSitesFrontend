@@ -1,0 +1,41 @@
+/* Login page */
+.login-error {
+	width: 100%;
+}
+
+.login-error p {
+	margin-bottom: 6px;
+}
+
+.login-providers {
+	margin-right: var(--space-3);
+	min-width: 240px;
+}
+
+.login-privacy p {
+	margin-bottom: var(--space-4);
+}
+
+.oauth-provider-link {
+	display: flex;
+	justify-content: flex-start;
+	align-content: center;
+	height: var(--space-7);
+	padding: var(--space-2);
+	border: var(--game-border);
+	margin-bottom: var(--space-1);
+}
+
+.oauth-provider-link:hover {
+	background-color: var(--game-hover-bg);
+}
+
+.oauth-provider-image img {
+	height: var(--space-7);
+}
+
+.oauth-provider-text {
+	font-weight: 700;
+	line-height: var(--space-7);
+	padding: 0 var(--space-1);
+}
