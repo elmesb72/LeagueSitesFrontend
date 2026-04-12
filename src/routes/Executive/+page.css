@@ -1,0 +1,84 @@
+/* Executive page */
+.executive-section {
+	width: 100%;
+}
+
+.executive-league p {
+	padding: 4px;
+}
+
+.season-progress {
+	display: flex;
+}
+
+.season-progress > div {
+	display: inline-flex;
+	white-space: nowrap;
+}
+
+.season-progress-bar {
+	border: var(--border-heading-primary);
+	width: 100%;
+	display: flex;
+}
+
+.season-progress-bar > div {
+	text-align: center;
+}
+
+.executive-table {
+	width: 100%;
+	border: var(--standings-border);
+}
+
+.executive-table th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	text-align: left;
+	padding: 6px var(--space-2);
+}
+
+.executive-table td {
+	padding: 4px var(--space-2);
+}
+
+.executive-table tr {
+	border: var(--standings-border);
+}
+
+.executive-table tr:hover {
+	background-color: var(--standings-hover-bg);
+}
+
+.executive-toggle {
+	width: 60px;
+	padding-left: var(--space-3);
+}
+
+.executive-toggle input[type='checkbox'] {
+	width: 16px;
+	height: 16px;
+	cursor: pointer;
+}
+
+.executive-explanation {
+	color: var(--text-soft-contrast);
+	margin-bottom: var(--space-3);
+}
+
+.executive-action {
+	display: inline-block;
+	height: 36px;
+	padding: 0 var(--space-4);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+	margin-top: var(--space-3);
+}
+
+.executive-action:active {
+	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
+}
