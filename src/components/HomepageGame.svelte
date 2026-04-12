@@ -1,13 +1,10 @@
 <script lang="ts">
+	import './HomepageGame.css';
 	import type { Game } from '$lib/models/Game';
 	import TeamLogoSmall from './TeamLogoSmall.svelte';
+	import { formatTime } from '$lib/utils/date';
 
 	let { game }: { game: Game } = $props();
-
-	function formatTime(dateStr: string): string {
-		const d = new Date(dateStr);
-		return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-	}
 
 	function formatForfeitScore(score: number | null): string {
 		return score === null || score === 0 ? '0 (FF)' : score.toString();

@@ -1,0 +1,230 @@
+/* Playoffs page */
+.playoff-section {
+	width: 100%;
+}
+
+.tournament {
+	max-width: 100%;
+	overflow-x: auto;
+}
+
+.tournament-bracket {
+	display: flex;
+	flex-direction: column;
+}
+
+.tournament-bracket-name {
+	font-family: var(--font-condensed);
+	font-weight: 700;
+	background-color: var(--surface-heading-secondary);
+	color: var(--text-inverted);
+	border: var(--border-heading-secondary);
+	padding: var(--space-2);
+}
+
+.tournament-bracket-rounds {
+	display: flex;
+	flex-direction: row;
+	padding: var(--space-4);
+}
+
+.tournament-round {
+	display: flex;
+	flex-direction: column;
+}
+
+.tournament-round:not(:first-child) {
+	margin-left: 24px;
+}
+
+.tournament-round-name {
+	font-size: var(--text-sm);
+	text-transform: uppercase;
+	font-weight: 700;
+	text-align: center;
+}
+
+.tournament-series {
+	height: 84px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+
+.round-1 .tournament-series {
+	padding: var(--space-3) 0;
+}
+
+.round-2 .tournament-series {
+	padding: 58px 0;
+}
+
+.round-3 .tournament-series {
+	padding: 158px 0;
+}
+
+.tournament-series-number {
+	font-size: var(--text-sm);
+	font-weight: 700;
+	padding: 0 var(--space-1);
+}
+
+.tournament-series-matchup {
+	padding: 0 var(--space-2);
+	height: 84px;
+}
+
+.tournament-series-team {
+	background: var(--tournament-spot-bg);
+	color: var(--text-default);
+	box-shadow: var(--tournament-spot-shadow);
+	padding: 2px var(--space-1);
+	margin: var(--space-2) 0;
+	display: flex;
+	line-height: var(--space-7);
+	align-content: center;
+	width: 150px;
+}
+
+.tournament-series-matchup a {
+	display: flex;
+	line-height: var(--space-7);
+}
+
+.tournament sup {
+	font-size: var(--text-xs);
+	vertical-align: baseline;
+	position: relative;
+	top: -20%;
+}
+
+.tournament-series-winner {
+	outline: var(--tournament-winner-outline);
+}
+
+.tournament-series-team-name {
+	display: inline-block;
+	height: var(--space-7);
+	line-height: var(--space-7);
+}
+
+/* Series detail items */
+.tournament-items-series {
+	border-top: var(--standings-border);
+	border-top-width: 4px;
+	padding: var(--space-6) 0;
+}
+
+.tournament-items-series h2 {
+	background: unset;
+	color: var(--text-default);
+	border: none;
+	font-size: var(--text-xl);
+	padding: var(--space-1);
+}
+
+.tournament-items-series h3 {
+	padding: var(--space-1);
+	margin: 0;
+	margin-bottom: var(--space-1);
+}
+
+.tournament-items-game {
+	display: flex;
+	flex-direction: row;
+	padding: var(--space-1);
+	align-items: center;
+}
+
+.tournament-items-game-number {
+	flex: 0.5 0;
+}
+
+.tournament-items-game-team {
+	flex: 0.6 0;
+}
+
+.tournament-items-game-team a {
+	display: flex;
+	align-items: center;
+	color: var(--text-default);
+}
+
+.tournament-items-game-winner {
+	font-weight: 700;
+}
+
+.tournament-items-game-location {
+	flex: 0.6 0;
+}
+
+.tournament-items-game-lead {
+	flex: 0.7 0;
+}
+
+.tournament-items-game-tbd {
+	color: var(--text-soft);
+}
+
+/* Round robin */
+.round-robin {
+	margin-bottom: var(--space-6);
+}
+
+.round-robin-games .game {
+	width: 241px;
+}
+
+.round-robin-game-date {
+	width: 241px;
+}
+
+/* Standings table (reused from standings page) */
+.standings {
+	width: 100%;
+	border: var(--standings-border);
+	overflow: hidden;
+}
+
+.standings tr {
+	vertical-align: middle;
+	border: var(--standings-border);
+}
+
+.standings tr:hover {
+	background-color: var(--standings-hover-bg);
+}
+
+.standings th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	padding: 6px var(--space-1);
+}
+
+.standings th:first-child {
+	text-align: left;
+}
+
+.standings td {
+	padding: 6px var(--space-1);
+}
+
+.standings td:not(:first-child) {
+	width: 6.5%;
+	padding: var(--space-1);
+	text-align: center;
+}
+
+.standings-link {
+	white-space: nowrap;
+}
+
+.standings-link object,
+.standings-link div {
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.standings-link object {
+	margin-right: var(--space-1);
+}

@@ -2,13 +2,9 @@
 	import type { Game } from '$lib/models/Game';
 	import type { StandingsEntry } from '$lib/models/StandingsEntry';
 	import TeamLogoSmall from './TeamLogoSmall.svelte';
+	import { formatTime } from '$lib/utils/date';
 
 	let { game, standings }: { game: Game; standings: StandingsEntry[] } = $props();
-
-	function formatTime(dateStr: string): string {
-		const d = new Date(dateStr);
-		return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-	}
 
 	function isOverdue(dateStr: string): boolean {
 		return new Date(dateStr) < new Date();

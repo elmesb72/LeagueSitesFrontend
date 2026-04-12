@@ -1,0 +1,66 @@
+/* Schedule page */
+.schedule-section {
+	width: 100%;
+}
+
+.schedule-section h1 {
+	display: flex;
+}
+
+.schedule-section h1 > a {
+	margin-left: auto;
+}
+
+.league-schedule {
+	border: var(--standings-border);
+	width: 100%;
+}
+
+.league-schedule th {
+	text-align: left;
+	background-color: var(--surface-heading-primary) !important;
+	color: var(--text-inverted);
+}
+
+.league-schedule th,
+.league-schedule td {
+	padding: 4px;
+	font-size: 14px;
+}
+
+.league-schedule th:not(:first-child),
+.league-schedule td:not(:first-child) {
+	text-align: center;
+}
+
+.league-schedule td:first-child,
+.league-schedule th:nth-child(2n-1):not([colspan]),
+.league-schedule-empty,
+.league-schedule-game-away {
+	border-right: var(--standings-border);
+}
+
+.league-schedule th:nth-child(n-1)[colspan] {
+	border-right: var(--standings-border);
+}
+
+.league-schedule tr:nth-child(even) {
+	background-color: var(--table-row-primary);
+}
+
+.league-schedule tr:nth-child(odd) {
+	background-color: var(--table-row-alternate);
+}
+
+.league-schedule .weekend td {
+	background-color: var(--table-row-tertiary);
+}
+
+.league-schedule-game {
+	background-color: var(--surface-nav) !important;
+}
+
+.league-schedule-game a {
+	font-weight: bold;
+	color: var(--text-inverted) !important;
+}

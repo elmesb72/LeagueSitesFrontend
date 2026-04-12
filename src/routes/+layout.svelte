@@ -255,6 +255,13 @@
 			user-select: none;
 		}
 
+		.desktop-only {
+			display: initial;
+		}
+		.mobile-only {
+			display: none;
+		}
+
 		.header-teams,
 		.header-teams .header-item,
 		.header-teams .header-item .header-link {
@@ -402,12 +409,5 @@
 
 	.hidden-footer {
 		color: var(--surface-page);
-	}
-
-	.desktop-only {
-		display: initial;
-	}
-	.mobile-only {
-		display: none;
 	}
 </style>

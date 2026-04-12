@@ -15,53 +15,8 @@
 .home-games {
 	width: 100%;
 }
-.game {
-	padding: var(--space-2);
-	border: var(--game-border);
-	margin-bottom: var(--space-1);
-}
-.game:hover {
-	background-color: var(--game-hover-bg);
-}
-.game .visitor,
-.game .home {
-	display: flex;
-	flex-wrap: nowrap;
-	align-items: center;
-}
-.game .team-logo {
-	flex: 0 0 36px;
-}
 .team-logo img {
 	vertical-align: middle;
-}
-.game .team,
-.game .score,
-.game .time,
-.game .location,
-.game .postponed {
-	flex: 1;
-}
-.game .postponed p {
-	font-size: var(--text-lg);
-	position: relative;
-	top: 14px;
-}
-.home .team-location::before {
-	content: '@';
-}
-.game .team-name {
-	text-transform: uppercase;
-	font-size: var(--text-xs);
-}
-.home-games .score {
-	font-size: var(--text-lg);
-}
-.home-games .score,
-.home-games .time,
-.home-games .location,
-.home-games .postponed {
-	text-align: center;
 }
 
 /* News */
