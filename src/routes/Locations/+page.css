@@ -1,0 +1,49 @@
+/* Locations page */
+.location-row .section {
+	width: 100%;
+}
+
+.location-row .subsection {
+	flex-basis: 50%;
+}
+
+.location-map {
+	height: 25vw;
+	width: 100%;
+}
+
+.location-row .inner-row {
+	display: flex;
+	justify-content: start;
+	align-items: start;
+}
+
+.location-games {
+	align-self: baseline;
+}
+
+.location-details-right {
+	margin-left: var(--space-2);
+}
+
+.location-details-left {
+	margin-right: var(--space-2);
+}
+
+.location-diamond-subtitle {
+	text-decoration: underline;
+}
+
+.location-info-fallback {
+	padding: var(--space-4);
+}
+
+.location-info-name {
+	font-weight: 700;
+	font-size: var(--text-lg);
+	margin-bottom: var(--space-2);
+}
+
+.location-info-fallback p {
+	margin-bottom: var(--space-1);
+}

@@ -1,0 +1,28 @@
+/* History page */
+.history-section {
+	width: 100%;
+}
+
+.history {
+	width: 100%;
+	border: var(--standings-border);
+}
+
+.history th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	text-align: left;
+	padding: 6px var(--space-2);
+}
+
+.history td {
+	padding: 6px var(--space-2);
+}
+
+.history tr {
+	border: var(--standings-border);
+}
+
+.history tr:hover {
+	background-color: var(--standings-hover-bg);
+}
