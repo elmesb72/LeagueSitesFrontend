@@ -251,6 +251,13 @@
 			flex-wrap: wrap;
 		}
 
+		.game-upcoming,
+		.game-forfeit {
+			width: 100%;
+			text-align: center;
+			padding: var(--space-6) 0;
+		}
+
 		.player-number {
 			font-family: var(--font-display);
 		}

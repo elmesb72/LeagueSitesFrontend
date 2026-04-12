@@ -1,0 +1,60 @@
+/* Game page */
+.game-row {
+	box-shadow: var(--shadow-section);
+	background-color: var(--surface-section);
+	display: flex;
+	flex-direction: column;
+	padding: var(--space-4) 0;
+}
+
+.inner-row {
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+}
+
+.inner-row > .section {
+	box-shadow: none;
+	background-color: unset;
+}
+
+.game-team {
+	width: 20%;
+	text-align: center;
+}
+
+.game-team img {
+	max-width: 120px;
+	max-height: 120px;
+}
+
+.game-header {
+	width: 60%;
+	text-align: center;
+}
+
+.game-matchup {
+	font-size: var(--text-xl);
+	padding-bottom: var(--space-2);
+}
+
+.game-time,
+.game-location {
+	font-size: var(--text-base);
+	padding-bottom: 2px;
+}
+
+.game-edit-link {
+	width: 100%;
+	padding-bottom: var(--space-2);
+}
+
+.game-edit-link a {
+	animation: color-change 1s infinite;
+}
+
+@keyframes color-change {
+	0% { text-shadow: none; }
+	50% { text-shadow: 1px 1px 1px var(--link-hover); }
+	100% { text-shadow: none; }
+}
