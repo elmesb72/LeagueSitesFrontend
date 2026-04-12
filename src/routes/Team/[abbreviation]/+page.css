@@ -1,0 +1,149 @@
+/* Team header */
+.team-header {
+	width: 100%;
+	height: 160px;
+	padding: 0;
+	display: flex;
+}
+
+.team-header-logo {
+	height: 160px;
+	max-height: 160px;
+	width: 225px;
+	max-width: 225px;
+	overflow: hidden;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.team-header-logo img {
+	max-height: 160px;
+}
+
+.team-header-main {
+	padding: var(--space-2) var(--space-5);
+	flex-grow: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	flex-wrap: nowrap;
+}
+
+.team-header-details {
+	font-size: var(--text-2xl);
+	font-weight: 700;
+}
+
+.team-header-record {
+	padding-left: var(--space-5);
+	font-size: var(--text-xl);
+	font-weight: 700;
+}
+
+.team-header-manager {
+	padding-top: var(--space-6);
+}
+
+/* Team main layout */
+.team-main {
+	display: flex;
+}
+
+.team-main .section {
+	flex-grow: 0;
+	flex-shrink: 1;
+	flex-basis: 50%;
+}
+
+.team-schedule {
+	margin-right: var(--space-3);
+	display: flex;
+	flex-direction: column;
+}
+
+.team-schedule .subsection {
+	display: flex;
+	flex-grow: 1;
+	flex-direction: column;
+	justify-content: start;
+	align-items: center;
+}
+
+/* Schedule table */
+.schedule {
+	width: 100%;
+}
+
+.schedule table {
+	border: var(--border-heading-primary);
+	width: 100%;
+	white-space: nowrap;
+}
+
+.schedule th {
+	text-align: left;
+	background-color: var(--surface-heading-primary);
+	color: var(--text-inverted);
+}
+
+.schedule th:last-child {
+	text-align: center;
+}
+
+.schedule th,
+.schedule td {
+	padding: 4px;
+}
+
+.schedule tr:nth-child(even) {
+	background-color: var(--table-row-alternate);
+}
+
+.schedule-result {
+	vertical-align: middle;
+	text-align: center;
+}
+
+.schedule-result small {
+	font-size: 14px;
+}
+
+/* Roster */
+.team-roster h1 {
+	display: flex;
+}
+
+.team-roster h1 > a {
+	margin-left: auto;
+}
+
+.team-roster-list {
+	padding-left: 0;
+	margin-bottom: var(--space-4);
+}
+
+.team-roster-invitation {
+	display: flex;
+	flex-wrap: nowrap;
+	height: var(--space-7);
+	padding: 0 var(--space-2);
+}
+
+.team-roster-invitation > div {
+	line-height: var(--space-7);
+}
+
+.team-roster-invitation .player-number {
+	flex-basis: 25px;
+}
+
+.team-roster-invitation .player-name {
+	flex-grow: 1;
+}
+
+.team-roster-invitation .invitation-status {
+	display: flex;
+	flex-grow: 0;
+	margin-left: auto;
+}
