@@ -1,0 +1,122 @@
+/* User page */
+.user-main {
+	align-content: stretch;
+}
+
+.user-main .section {
+	flex-grow: 1;
+}
+
+.user-role h2 {
+	display: flex;
+	line-height: 19px;
+}
+
+.user-role h2 > i {
+	line-height: 19px;
+	vertical-align: middle;
+	cursor: text !important;
+	margin-right: var(--space-1);
+}
+
+.user-invitation {
+	display: flex;
+	justify-content: space-between;
+	align-content: center;
+	flex-wrap: nowrap;
+	height: var(--space-7);
+	padding: var(--space-2);
+	border: var(--game-border);
+	margin-bottom: var(--space-1);
+}
+
+.user-invitation-link {
+	display: flex;
+	flex: 4;
+}
+
+.user-invitation-link div {
+	line-height: var(--space-7);
+}
+
+.user-invitation-link-name {
+	padding-left: var(--space-1);
+}
+
+.user-invitation-roles {
+	line-height: var(--space-7);
+	flex: 1;
+	text-align: right;
+}
+
+.user-logins {
+	margin: 0 var(--space-3);
+}
+
+.user-login {
+	display: flex;
+	justify-content: flex-start;
+	align-content: center;
+	height: var(--space-7);
+	padding: var(--space-2);
+	border: var(--game-border);
+	margin-bottom: var(--space-1);
+}
+
+.user-login-source img {
+	height: var(--space-7);
+}
+
+.user-login-details {
+	line-height: var(--space-7);
+	padding: 0 var(--space-1);
+}
+
+.user-login-update {
+	margin-left: auto;
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+}
+
+.user-login-update a,
+.user-login-update i {
+	margin-left: 6px;
+}
+
+.user-logout ul {
+	padding: var(--space-2) 0 var(--space-2) 12px;
+}
+
+.oauth-provider-link {
+	display: flex;
+	justify-content: flex-start;
+	align-content: center;
+	height: var(--space-7);
+	padding: var(--space-2);
+	border: var(--game-border);
+	margin-bottom: var(--space-1);
+}
+
+.oauth-provider-link:hover {
+	background-color: var(--game-hover-bg);
+}
+
+.oauth-provider-image img {
+	height: var(--space-7);
+}
+
+.oauth-provider-text {
+	font-weight: 700;
+	line-height: var(--space-7);
+	padding: 0 var(--space-1);
+}
+
+.login-action {
+	background: none;
+	border: none;
+	padding: 0;
+	margin-left: 6px;
+	cursor: pointer;
+	font-size: inherit;
+}

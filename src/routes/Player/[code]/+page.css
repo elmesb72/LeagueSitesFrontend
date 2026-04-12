@@ -1,0 +1,57 @@
+/* Player page */
+.player-row {
+	display: flex;
+}
+
+.player-info {
+	width: 200px;
+}
+
+.player-info h1 {
+	max-height: 18px;
+}
+
+.player-photo {
+	vertical-align: middle;
+	max-width: 200px;
+	padding-bottom: 18px;
+}
+
+.player-team {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	width: 100%;
+	align-items: center;
+}
+
+.player-team-logo {
+	height: var(--space-7);
+	width: var(--space-7);
+	margin-right: var(--space-1);
+}
+
+.player-socials {
+	line-height: 18px;
+	max-height: 18px;
+	display: flex;
+	align-items: center;
+	float: right;
+}
+
+.player-socials a {
+	display: flex;
+	margin: 0;
+	padding: 0;
+}
+
+.player-socials img {
+	height: 18px;
+	padding-left: var(--space-2);
+	vertical-align: middle;
+}
+
+.player-stats-section {
+	margin-left: var(--space-4);
+	flex-grow: 1;
+}

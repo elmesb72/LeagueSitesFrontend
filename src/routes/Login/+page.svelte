@@ -12,7 +12,7 @@
 	async function devLogin(): Promise<void> {
 		const response = await fetch('/api/DevLogin', { method: 'POST' });
 		if (response.ok) {
-			goto('/User');
+			goto('/User', { invalidateAll: true });
 		}
 	}
 
