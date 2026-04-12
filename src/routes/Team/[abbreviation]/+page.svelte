@@ -6,7 +6,12 @@
 
 	let { data } = $props();
 	const teamPage = $derived(data.teamPage);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
+
+<svelte:head>
+	<title>{shortName} » {teamPage ? `${teamPage.team.location} ${teamPage.team.name}` : 'Team Not Found'}</title>
+</svelte:head>
 
 {#if teamPage}
 	<div class="row">

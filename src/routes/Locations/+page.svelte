@@ -5,6 +5,7 @@
 	let { data } = $props();
 	const locations = $derived(data.locations);
 	const googleMapsKey = $derived(data.googleMapsKey);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
 	interface SiteGroup {
 		globalIndex: number;
@@ -53,6 +54,10 @@
 
 	const cityGroups = $derived(buildCityGroups(locations));
 </script>
+
+<svelte:head>
+	<title>{shortName} » Locations</title>
+</svelte:head>
 
 {#each cityGroups as cityGroup}
 	<div class="row location-row">

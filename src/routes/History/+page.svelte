@@ -3,7 +3,12 @@
 
 	let { data } = $props();
 	const years = $derived(data.years);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
+
+<svelte:head>
+	<title>{shortName} » League History</title>
+</svelte:head>
 
 <div class="row">
 	<div class="section history-section">

@@ -6,7 +6,12 @@
 
 	let { data } = $props();
 	const playoffs = $derived(data.playoffs);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
+
+<svelte:head>
+	<title>{shortName} » Playoffs{playoffs?.season?.year ? ` (${playoffs.season.year})` : ''}</title>
+</svelte:head>
 
 <div class="row">
 	<div class="section playoff-section">

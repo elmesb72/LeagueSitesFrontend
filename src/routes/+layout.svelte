@@ -246,6 +246,11 @@
 			margin-bottom: var(--space-3);
 		}
 
+		.scores-games-row {
+			justify-content: space-between;
+			flex-wrap: wrap;
+		}
+
 		.player-number {
 			font-family: var(--font-display);
 		}

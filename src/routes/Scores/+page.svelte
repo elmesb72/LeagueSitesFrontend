@@ -6,21 +6,24 @@
 	let { data } = $props();
 	const games = $derived(data.games);
 	const standings = $derived(data.standings);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
 
+<svelte:head>
+	<title>{shortName} » Scores</title>
+</svelte:head>
+
 <div class="row">
-	<ScoresDatePicker selectedDate={data.date} gameCounts={data.gameCounts} />
+	<div class="section scores-date-picker-section">
+		<ScoresDatePicker selectedDate={data.date} gameCounts={data.gameCounts} />
+	</div>
 </div>
-<div class="row scores-games-row">
-	{#if games.length === 0}
-		<div class="section">
-			<p>No games scheduled for this date.</p>
-		</div>
-	{:else}
+{#if games.length > 0}
+	<div class="row scores-games-row">
 		{#each games as game}
 			<div class="section">
 				<ScoresGame {game} {standings} />
 			</div>
 		{/each}
-	{/if}
-</div>
+	</div>
+{/if}

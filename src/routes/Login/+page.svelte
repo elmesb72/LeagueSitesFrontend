@@ -6,6 +6,15 @@
 	let { data } = $props();
 	const providers = $derived(data.providers);
 	const errorMessage = $derived(data.errorMessage);
+	const isDevelopment = $derived(data.isDevelopment);
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
+
+	async function devLogin(): Promise<void> {
+		const response = await fetch('/api/DevLogin', { method: 'POST' });
+		if (response.ok) {
+			goto('/User');
+		}
+	}
 
 	onMount(() => {
 		if (data.redirect) {
@@ -13,6 +22,10 @@
 		}
 	});
 </script>
+
+<svelte:head>
+	<title>{shortName} » Log In</title>
+</svelte:head>
 
 {#if errorMessage}
 	<div class="row">
@@ -26,7 +39,7 @@
 <div class="row">
 	<div class="section login-providers">
 		<h1>Select a Provider</h1>
-		{#if providers.length === 0}
+		{#if providers.length === 0 && !isDevelopment}
 			<span>No authentication providers have been configured. Contact the webmaster to set up authentication via a valid provider.</span>
 		{:else}
 			{#each providers as provider}
@@ -37,6 +50,16 @@
 					<div class="oauth-provider-text">Sign in with {provider.name}</div>
 				</a>
 			{/each}
+			{#if isDevelopment}
+				<!-- svelte-ignore a11y_click_events_have_key_events -->
+				<!-- svelte-ignore a11y_no_static_element_interactions -->
+				<div class="oauth-provider-link dev-login" onclick={devLogin}>
+					<div class="oauth-provider-image">
+						<i class="fas fa-tools"></i>
+					</div>
+					<div class="oauth-provider-text">Dev: Sign in as Webmaster</div>
+				</div>
+			{/if}
 		{/if}
 	</div>
 	<div class="section login-privacy">

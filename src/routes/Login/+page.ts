@@ -10,7 +10,7 @@ export const load = async ({ fetch, url, parent }) => {
 	// Redirect if already authenticated
 	const { user } = await parent();
 	if (user.isAuthenticated) {
-		return { redirect: '/User', providers: [], errorMessage: '' };
+		return { redirect: '/User', providers: [], isDevelopment: false, errorMessage: '' };
 	}
 
 	let errorMessage = '';
@@ -36,17 +36,18 @@ export const load = async ({ fetch, url, parent }) => {
 	try {
 		const response = await fetch('/api/Login');
 		if (!response.ok) {
-			return { redirect: null, providers: [] as LoginProvider[], errorMessage };
+			return { redirect: null, providers: [] as LoginProvider[], isDevelopment: false, errorMessage };
 		}
 
 		const data = await response.json();
 		return {
 			redirect: null,
 			providers: data.providers as LoginProvider[],
+			isDevelopment: data.isDevelopment as boolean,
 			errorMessage
 		};
 	} catch {
 		console.error('Failed to fetch login config. Is the backend available?');
-		return { redirect: null, providers: [] as LoginProvider[], errorMessage };
+		return { redirect: null, providers: [] as LoginProvider[], isDevelopment: false, errorMessage };
 	}
 };

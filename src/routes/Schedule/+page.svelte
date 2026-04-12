@@ -38,7 +38,12 @@
 	}
 
 	const dateRange = $derived(getDateRange(games));
+	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
+
+<svelte:head>
+	<title>{shortName} » Schedule ({data.year})</title>
+</svelte:head>
 
 <div class="row">
 	<div class="section schedule-section">

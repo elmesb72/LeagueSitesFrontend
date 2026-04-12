@@ -39,3 +39,19 @@
 	line-height: var(--space-7);
 	padding: 0 var(--space-1);
 }
+
+.dev-login {
+	cursor: pointer;
+	border-style: dashed;
+	color: var(--link-default);
+}
+
+.dev-login .oauth-provider-image {
+	display: flex;
+	align-items: center;
+	font-size: var(--text-lg);
+}
+
+.dev-login .oauth-provider-image i {
+	color: var(--text-default);
+}

@@ -1,4 +1,8 @@
 /* Date picker */
+.scores-date-picker-section {
+	flex-grow: 1;
+}
+
 .scores-date-picker {
 	display: flex;
 	align-items: center;
@@ -109,11 +113,6 @@
 }
 
 /* Game cards */
-.scores-games-row {
-	justify-content: space-between;
-	flex-wrap: wrap;
-}
-
 .scores-games-row > .section {
 	flex-basis: 30%;
 	margin-bottom: var(--space-6);
