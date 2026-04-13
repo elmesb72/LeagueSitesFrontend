@@ -1,11 +1,16 @@
 <script lang="ts">
 	import type { RosterEntry } from '$lib/models/TeamPage';
 
-	let { roster, title = 'Active Roster' }: { roster: RosterEntry[]; title?: string } = $props();
+	let { roster, title = 'Active Roster', canAdd = false, addHref = '/Invitation' }: { roster: RosterEntry[]; title?: string; canAdd?: boolean; addHref?: string } = $props();
 </script>
 
 <div class="subsection team-roster-active">
-	<h1>{title}</h1>
+	<h1>
+		{title}
+		{#if canAdd}
+			<a href={addHref} title="Add"><i class="fas fa-user-plus header-icon"></i></a>
+		{/if}
+	</h1>
 	<ul class="team-roster-list">
 		{#if roster.length === 0}
 			<li class="team-roster-invitation">
@@ -21,6 +26,10 @@
 						<div class="player-name">
 							<a href="/Player/{entry.player.shortCode}">{entry.player.name}</a>
 						</div>
+					{:else if entry.userName}
+						<div class="player-name">{entry.userName}</div>
+					{:else if entry.email}
+						<div class="player-name">Invited: {entry.email}</div>
 					{/if}
 					<div class="invitation-status">
 						{#if entry.userRoles.includes('Webmaster')}

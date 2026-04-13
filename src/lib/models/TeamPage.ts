@@ -12,8 +12,16 @@ export interface RosterEntry {
 		number: string | null;
 		shortCode: string;
 	} | null;
+	userName?: string;
+	email?: string;
 	roles: string[];
 	userRoles: string[];
+}
+
+export interface InactiveRoster {
+	substitutes: RosterEntry[];
+	formerPlayers: RosterEntry[];
+	nonPlayerUsers: RosterEntry[];
 }
 
 export interface TeamPageData {
@@ -23,4 +31,8 @@ export interface TeamPageData {
 	managers: string[];
 	games: Game[];
 	roster: RosterEntry[];
+	canAddPlayer: boolean;
+	canEditTeam: boolean;
+	isTeamMember: boolean;
+	inactiveRoster: InactiveRoster | null;
 }

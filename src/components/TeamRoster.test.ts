@@ -78,3 +78,29 @@ describe('TeamRoster', () => {
 		expect(screen.getByText('(none)')).toBeInTheDocument();
 	});
 });
+
+	test('shows add icon when canAdd is true', () => {
+		const { container } = render(TeamRoster, { props: { roster: mockRoster, canAdd: true } });
+		expect(container.querySelector('.fa-user-plus')).not.toBeNull();
+	});
+
+	test('hides add icon when canAdd is false', () => {
+		const { container } = render(TeamRoster, { props: { roster: mockRoster, canAdd: false } });
+		expect(container.querySelector('.fa-user-plus')).toBeNull();
+	});
+
+	test('renders userName for non-player user', () => {
+		const nonPlayer: RosterEntry = {
+			id: 4, player: null, userName: 'Marge Simpson', roles: [], userRoles: []
+		};
+		render(TeamRoster, { props: { roster: [nonPlayer] } });
+		expect(screen.getByText('Marge Simpson')).toBeInTheDocument();
+	});
+
+	test('renders email for invited user', () => {
+		const invited: RosterEntry = {
+			id: 5, player: null, email: 'invited@example.com', roles: [], userRoles: []
+		};
+		render(TeamRoster, { props: { roster: [invited] } });
+		expect(screen.getByText('Invited: invited@example.com')).toBeInTheDocument();
+	});

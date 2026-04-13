@@ -147,3 +147,110 @@
 	flex-grow: 0;
 	margin-left: auto;
 }
+
+/* Team edit form */
+.team-edit-toggle {
+	background: none;
+	border: none;
+	color: var(--link-default);
+	cursor: pointer;
+	font: inherit;
+}
+
+.team-edit-toggle:hover {
+	color: var(--link-hover);
+}
+
+.team-edit-row {
+	display: flex;
+	gap: var(--space-3);
+}
+
+.team-edit-basic {
+	flex: 1;
+}
+
+.team-edit-colors {
+	flex: 1;
+}
+
+.team-edit-fields {
+	display: flex;
+	gap: var(--space-3);
+	flex-wrap: wrap;
+}
+
+.team-edit-field {
+	margin-bottom: var(--space-2);
+}
+
+.team-edit-field label {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.team-edit-field input[type='text'] {
+	height: 28px;
+	width: 120px;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	border: 1px solid #d0d0d0;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.team-edit-field input[type='color'] {
+	width: 40px;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	padding: 0;
+}
+
+.team-edit-color-row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.team-edit-color-hex {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+}
+
+.team-edit-preview {
+	font-weight: 700;
+	font-size: var(--text-lg);
+}
+
+.team-edit-actions {
+	margin-top: var(--space-3);
+	display: flex;
+	gap: var(--space-3);
+}
+
+.team-edit-submit {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.team-edit-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.team-edit-cancel {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	color: var(--text-default);
+}
