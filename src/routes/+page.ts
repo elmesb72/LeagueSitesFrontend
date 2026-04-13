@@ -13,17 +13,19 @@ export const load = async ({ fetch }) => {
 
 		return {
 			games: data.games as Game[],
-			news: data.news as News[],
+			news: data.news as { news: News; canEdit: boolean; renderedContents: string }[],
 			standings: (data.standings ?? []) as StandingsEntry[],
-			isPlayoffs: data.isPlayoffs as boolean
+			isPlayoffs: data.isPlayoffs as boolean,
+			canPost: data.canPost as boolean
 		};
 	} catch {
 		console.error('Failed to fetch homepage data. Is the backend available?');
 		return {
 			games: [] as Game[],
-			news: [] as News[],
+			news: [] as { news: News; canEdit: boolean; renderedContents: string }[],
 			standings: [] as StandingsEntry[],
-			isPlayoffs: false
+			isPlayoffs: false,
+			canPost: false
 		};
 	}
 };

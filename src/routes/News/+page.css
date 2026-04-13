@@ -1,0 +1,88 @@
+/* News edit/create */
+.news-edit {
+	width: 100%;
+}
+
+.news-edit-form {
+	padding: var(--space-2);
+}
+
+.news-edit-field {
+	margin-bottom: var(--space-3);
+}
+
+.news-edit-field label {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.news-edit-field input[type='text'],
+.news-edit-field select {
+	width: 100%;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	box-sizing: border-box;
+}
+
+.news-edit-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-top: var(--space-3);
+}
+
+.news-edit-submit {
+	display: flex;
+	gap: var(--space-3);
+}
+
+.news-edit-checkboxes {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+}
+
+.news-edit-checkboxes label {
+	cursor: pointer;
+}
+
+.news-edit-btn {
+	display: inline-block;
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.news-edit-btn:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.news-edit-btn-cancel {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	color: var(--text-default);
+}
+
+.news-edit-btn-delete {
+	background: none;
+	border: none;
+	color: var(--color-negative);
+	cursor: pointer;
+	font: inherit;
+}
+
+.news-edit-btn-delete:hover {
+	opacity: 0.7;
+}

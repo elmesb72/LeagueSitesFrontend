@@ -56,7 +56,12 @@
 	</div>
 
 	<div class="section home-main-middle home-middle">
-		<h1>News and Game Recaps</h1>
+		<h1>
+			News and Game Recaps
+			{#if data.canPost}
+				<a href="/News"><i title="Add" class="fa-regular fa-square-plus header-icon"></i></a>
+			{/if}
+		</h1>
 		{#if data.news.length === 0}
 			<div class="home-news">
 				<div class="home-news-header">
@@ -67,8 +72,8 @@
 				</div>
 			</div>
 		{:else}
-			{#each data.news as news}
-				<HomepageNews {news} />
+			{#each data.news as entry}
+				<HomepageNews news={entry.news} canEdit={entry.canEdit} renderedContents={entry.renderedContents} />
 			{/each}
 		{/if}
 	</div>

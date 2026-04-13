@@ -1,7 +1,9 @@
 <script lang="ts">
 	import type { News } from '$lib/models/News';
 
-	let { news, canEdit = false }: { news: News; canEdit?: boolean } = $props();
+	let { news, canEdit = false, renderedContents = '' }: { news: News; canEdit?: boolean; renderedContents?: string } = $props();
+
+	const displayContents = $derived(renderedContents || news.contents);
 
 	function formatDate(dateStr: string): string {
 		return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -32,6 +34,6 @@
 				This post (authored by you) is hidden. Publish the post by editing it to uncheck the "Hidden" checkbox or, if it's no longer needed, set it to Deleted.
 			</div>
 		{/if}
-		{@html news.contents}
+		{@html displayContents}
 	</div>
 </div>

@@ -39,6 +39,7 @@
 		"vitest": "^4.1.3"
 	},
 	"dependencies": {
+		"easymde": "^2.20.0",
 		"vanillajs-datepicker": "^1.3.4"
 	}
 }
