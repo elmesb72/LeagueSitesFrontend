@@ -46,3 +46,19 @@ describe('TagInput', () => {
 		expect(container.querySelector('.tag-input-disabled')).not.toBeNull();
 	});
 });
+
+	test('rejects invalid email format', async () => {
+		const { container } = render(TagInput, { props: { value: '' } });
+		const input = container.querySelector('.tag-input-field') as HTMLInputElement;
+		await fireEvent.input(input, { target: { value: 'notanemail' } });
+		await fireEvent.keyDown(input, { key: 'Enter' });
+		expect(container.querySelectorAll('.tag').length).toBe(0);
+	});
+
+	test('accepts valid email format', async () => {
+		const { container } = render(TagInput, { props: { value: '' } });
+		const input = container.querySelector('.tag-input-field') as HTMLInputElement;
+		await fireEvent.input(input, { target: { value: 'valid@test.com' } });
+		await fireEvent.keyDown(input, { key: 'Enter' });
+		expect(container.querySelectorAll('.tag').length).toBe(1);
+	});
