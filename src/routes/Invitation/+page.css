@@ -1,0 +1,120 @@
+/* Invitation form */
+.invitation-form {
+	padding: var(--space-2);
+}
+
+.invitation-team-selector {
+	margin-bottom: var(--space-3);
+}
+
+.team-selector {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+	padding: var(--space-2);
+	overflow: visible;
+}
+
+.invitation-form-main {
+	display: flex;
+	gap: var(--space-3);
+}
+
+.invitation-form-player {
+	flex: 3;
+}
+
+.invitation-form-user {
+	flex: 2;
+}
+
+.invitation-form-row {
+	display: flex;
+	gap: var(--space-3);
+	margin-bottom: var(--space-2);
+}
+
+.invitation-field {
+	margin-bottom: var(--space-2);
+}
+
+.invitation-field label {
+	display: block;
+	margin-bottom: 2px;
+}
+
+.invitation-field input[type='text'] {
+	width: 100%;
+	box-sizing: border-box;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.invitation-field select {
+	width: 100%;
+	box-sizing: border-box;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: var(--space-1) var(--space-2);
+}
+
+.invitation-field input:disabled {
+	opacity: 0.6;
+}
+
+.invitation-note {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+}
+
+/* Number selector - in global CSS for consistent loading */
+
+/* Roles */
+.invitation-roles label {
+	display: block;
+	cursor: pointer;
+	line-height: 24px;
+}
+
+.invitation-roles input[type='checkbox'] {
+	width: 13px;
+	height: 13px;
+	vertical-align: middle;
+	margin-right: var(--space-1);
+}
+
+/* Actions */
+.invitation-actions {
+	margin-top: var(--space-3);
+	display: flex;
+	gap: var(--space-3);
+}
+
+.invitation-submit {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.invitation-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.invitation-cancel {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	color: var(--text-default);
+}

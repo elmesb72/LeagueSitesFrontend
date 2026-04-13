@@ -73,16 +73,16 @@
 			</div>
 		</div>
 		<div class="section team-roster">
-			<TeamRoster roster={teamPage.roster} canAdd={teamPage.canAddPlayer} />
+			<TeamRoster roster={teamPage.roster} canAdd={teamPage.canAddPlayer} canEditEntries={teamPage.canAddPlayer} />
 
 			{#if teamPage.isTeamMember && teamPage.inactiveRoster}
 				<div class="subsection team-roster-inactive">
 					<h1>Inactive Roster</h1>
-					<TeamRoster roster={teamPage.inactiveRoster.substitutes} title="Substitutes" canAdd={teamPage.canAddPlayer} />
+					<TeamRoster roster={teamPage.inactiveRoster.substitutes} title="Substitutes" canAdd={teamPage.canAddPlayer} canEditEntries={teamPage.canAddPlayer} />
 					{#if teamPage.inactiveRoster.formerPlayers.length > 0}
-						<TeamRoster roster={teamPage.inactiveRoster.formerPlayers} title="Former Players" />
+						<TeamRoster roster={teamPage.inactiveRoster.formerPlayers} title="Former Players" canEditEntries={teamPage.canAddPlayer} />
 					{/if}
-					<TeamRoster roster={teamPage.inactiveRoster.nonPlayerUsers} title="Non-Player Users" canAdd={teamPage.canAddPlayer} />
+					<TeamRoster roster={teamPage.inactiveRoster.nonPlayerUsers} title="Non-Player Users" canAdd={teamPage.canAddPlayer} canEditEntries={teamPage.canAddPlayer} />
 				</div>
 			{/if}
 		</div>

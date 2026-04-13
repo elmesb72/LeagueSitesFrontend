@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { RosterEntry } from '$lib/models/TeamPage';
 
-	let { roster, title = 'Active Roster', canAdd = false, addHref = '/Invitation' }: { roster: RosterEntry[]; title?: string; canAdd?: boolean; addHref?: string } = $props();
+	let { roster, title = 'Active Roster', canAdd = false, canEditEntries = false, addHref = '/Invitation' }: { roster: RosterEntry[]; title?: string; canAdd?: boolean; canEditEntries?: boolean; addHref?: string } = $props();
 </script>
 
 <div class="subsection team-roster-active">
@@ -25,11 +25,24 @@
 						{/if}
 						<div class="player-name">
 							<a href="/Player/{entry.player.shortCode}">{entry.player.name}</a>
+							{#if canEditEntries}
+								<a title="Edit Invitation" href="/Invitation/{entry.id}"><i class="fas fa-user-edit"></i></a>
+							{/if}
 						</div>
 					{:else if entry.userName}
-						<div class="player-name">{entry.userName}</div>
+						<div class="player-name">
+							{entry.userName}
+							{#if canEditEntries}
+								<a title="Edit Invitation" href="/Invitation/{entry.id}"><i class="fas fa-user-edit"></i></a>
+							{/if}
+						</div>
 					{:else if entry.email}
-						<div class="player-name">Invited: {entry.email}</div>
+						<div class="player-name">
+							Invited: {entry.email}
+							{#if canEditEntries}
+								<a title="Edit Invitation" href="/Invitation/{entry.id}"><i class="fas fa-user-edit"></i></a>
+							{/if}
+						</div>
 					{/if}
 					<div class="invitation-status">
 						{#if entry.userRoles.includes('Webmaster')}
