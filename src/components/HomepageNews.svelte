@@ -1,7 +1,8 @@
 <script lang="ts">
+	import './HomepageNews.css';
 	import type { News } from '$lib/models/News';
 
-	let { news, canEdit = false, renderedContents = '' }: { news: News; canEdit?: boolean; renderedContents?: string } = $props();
+	let { news, canEdit = false, renderedContents = '', isDeleted = false }: { news: News; canEdit?: boolean; renderedContents?: string; isDeleted?: boolean } = $props();
 
 	const displayContents = $derived(renderedContents || news.contents);
 
@@ -29,7 +30,11 @@
 		<div class="home-news-title">{news.title}</div>
 	</div>
 	<div class="home-news-post">
-		{#if news.isHidden}
+		{#if isDeleted}
+			<div class="home-news-hidden-disclaimer">
+				This post has been deleted. You can restore it by editing it and unchecking the "Deleted" checkbox.
+			</div>
+		{:else if news.isHidden}
 			<div class="home-news-hidden-disclaimer">
 				This post (authored by you) is hidden. Publish the post by editing it to uncheck the "Hidden" checkbox or, if it's no longer needed, set it to Deleted.
 			</div>

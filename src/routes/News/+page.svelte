@@ -11,7 +11,7 @@
 
 	let authorInvitationId = $state(0);
 	let title = $state('');
-	let isHidden = $state(false);
+	let isHidden = $state(true);
 	let saving = $state(false);
 	let editorEl: HTMLTextAreaElement;
 	let mde: EasyMDE | null = null;
