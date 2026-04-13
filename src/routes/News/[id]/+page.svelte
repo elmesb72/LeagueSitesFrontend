@@ -19,7 +19,7 @@
 
 	function initForm(): void {
 		if (!newsData?.news) return;
-		authorInvitationId = newsData.news.authorInvitationId;
+		authorInvitationId = newsData.news.authorInvitationID;
 		title = newsData.news.title;
 		isHidden = newsData.news.isHidden;
 	}

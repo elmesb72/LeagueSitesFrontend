@@ -11,6 +11,6 @@ export interface News {
 	edited: string | null;
 	isHidden: boolean;
 	authorId: number;
-	authorInvitationId: number;
+	authorInvitationID: number;
 	author: NewsAuthor;
 }
