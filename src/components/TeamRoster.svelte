@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { RosterEntry } from '$lib/models/TeamPage';
 
-	let { roster, title = 'Active Roster', canAdd = false, canEditEntries = false, addHref = '/Invitation' }: { roster: RosterEntry[]; title?: string; canAdd?: boolean; canEditEntries?: boolean; addHref?: string } = $props();
+	let { roster, title = 'Active Roster', canAdd = false, canEditEntries = false, canViewAdminIcons = false, addHref = '/Invitation' }: { roster: RosterEntry[]; title?: string; canAdd?: boolean; canEditEntries?: boolean; canViewAdminIcons?: boolean; addHref?: string } = $props();
 </script>
 
 <div class="subsection team-roster-active">
@@ -59,6 +59,12 @@
 						{/if}
 						{#if entry.roles.includes('Reporter')}
 							<div><i title="Reporter" class="fas fa-newspaper"></i></div>
+						{/if}
+						{#if canViewAdminIcons && entry.hasUser}
+							<div><i title="Registered User" class="fas fa-user-check"></i></div>
+						{/if}
+						{#if canViewAdminIcons && !entry.hasUser && entry.player && entry.hasInvitationEmails}
+							<div><i title="Invited User" class="fas fa-envelope"></i></div>
 						{/if}
 					</div>
 				</li>

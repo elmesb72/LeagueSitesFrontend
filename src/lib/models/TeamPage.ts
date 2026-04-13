@@ -16,6 +16,8 @@ export interface RosterEntry {
 	email?: string;
 	roles: string[];
 	userRoles: string[];
+	hasUser?: boolean;
+	hasInvitationEmails?: boolean;
 }
 
 export interface InactiveRoster {
@@ -34,5 +36,6 @@ export interface TeamPageData {
 	canAddPlayer: boolean;
 	canEditTeam: boolean;
 	isTeamMember: boolean;
+	canViewAdminIcons: boolean;
 	inactiveRoster: InactiveRoster | null;
 }
