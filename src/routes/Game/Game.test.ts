@@ -35,17 +35,18 @@ describe('Game Page', () => {
 		expect(link.closest('a')?.getAttribute('href')).toBe('/Locations/#Diamond Park');
 	});
 
-	test('renders team logo images', () => {
+	test('renders team logo components', () => {
 		const { container } = render(GamePage, { props: { data: baseData(mockPlayedGame) } });
-		const imgs = container.querySelectorAll('.game-team img');
-		expect(imgs.length).toBe(2);
+		const logos = container.querySelectorAll('.game-team object');
+		expect(logos.length).toBe(2);
 	});
 
-	test('renders team links', () => {
-		render(GamePage, { props: { data: baseData(mockPlayedGame) } });
-		const links = screen.getAllByRole('link');
-		expect(links.some(l => l.getAttribute('href') === '/Team/SPR')).toBe(true);
-		expect(links.some(l => l.getAttribute('href') === '/Team/SHL')).toBe(true);
+	test('renders team links on logos', () => {
+		const { container } = render(GamePage, { props: { data: baseData(mockPlayedGame) } });
+		const links = container.querySelectorAll('.game-team a');
+		expect(links.length).toBe(2);
+		expect(links[0].getAttribute('href')).toBe('/Team/SHL');
+		expect(links[1].getAttribute('href')).toBe('/Team/SPR');
 	});
 
 	test('shows edit link when canEdit is true', () => {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Team } from '$lib/models/Team';
+	import TeamLogoLarge from './TeamLogoLarge.svelte';
 
 	let { team, record, managers }: { team: Team; record: string; managers: string[] } = $props();
 </script>
@@ -9,7 +10,7 @@
 	style="background-color: #{team.backgroundColor}; color: #{team.color};"
 >
 	<div class="team-header-logo">
-		<img src="/images/teams/{team.id}-lg.webp" alt="{team.fullName} logo" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+		<TeamLogoLarge {team} />
 	</div>
 	<div class="team-header-main">
 		<p class="team-header-details">{team.location} {team.name}</p>

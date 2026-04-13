@@ -1,0 +1,112 @@
+/* Game edit page */
+.game-edit-field {
+	margin-bottom: var(--space-2);
+}
+
+.game-edit-field label {
+	display: block;
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	margin-bottom: 2px;
+}
+
+.game-edit-field select,
+.game-edit-field input[type='date'],
+.game-edit-field input[type='time'] {
+	width: 100%;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-1);
+}
+
+.game-edit-matchup {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	margin-bottom: var(--space-2);
+}
+
+.game-edit-matchup select {
+	flex: 1;
+	height: 28px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+}
+
+.game-edit-scores input[type='number'] {
+	width: 60px;
+	height: 60px;
+	border-radius: var(--radius-md);
+	text-align: center;
+	vertical-align: middle;
+	font-size: var(--text-2xl);
+	border: 1px solid #d0d0d0;
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.game-edit-scores input[type='number']:disabled {
+	opacity: 0.4;
+}
+
+.game-edit-statuses {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: var(--space-3);
+}
+
+.game-edit-status {
+	cursor: pointer;
+}
+
+.game-edit-status input[type='radio'] {
+	margin-right: var(--space-1);
+}
+
+.game-edit-submit {
+	display: inline-block;
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.game-edit-submit:active {
+	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
+}
+
+.game-edit-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.game-edit-scores input[type='number']::-webkit-outer-spin-button,
+.game-edit-scores input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+.game-edit-scores input[type='number'] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+
+.game-edit-cancel {
+	margin-left: var(--space-3);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	height: 36px;
+	padding: 0 var(--space-6);
+	cursor: pointer;
+	color: var(--text-default);
+}
+
+.game-edit-cancel:hover {
+	background-color: var(--table-row-alternate);
+}

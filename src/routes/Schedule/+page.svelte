@@ -64,7 +64,7 @@
 		<h1>
 			{data.year} Schedule
 			{#if canCreateGame}
-				<a title="Create Game" href="/Game/"><i class="fa-regular fa-square-plus header-icon"></i></a>
+				<a title="Create Game" href="/Game/Create"><i class="fa-regular fa-square-plus header-icon"></i></a>
 			{/if}
 		</h1>
 		{#if games.length === 0 && !(canCreateGame && dateRange.length > 0)}
@@ -105,7 +105,7 @@
 								{:else}
 									{#if canCreateGame}
 										<td colspan="2" class="league-schedule-empty league-schedule-create">
-											<a title="Create Game on {dateStr} at {location.name}" href="/Game/?date={dateStr}&location={location.id}">
+											<a title="Create Game on {dateStr} at {location.name}" href="/Game/Create?date={dateStr}&location={location.id}">
 												<i class="fa-regular fa-square-plus header-icon"></i>
 											</a>
 										</td>

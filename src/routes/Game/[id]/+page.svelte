@@ -1,6 +1,8 @@
 <script lang="ts">
 	import './+page.css';
+	import { goto } from '$app/navigation';
 	import { formatTime } from '$lib/utils/date';
+	import TeamLogoMedium from '../../../components/TeamLogoMedium.svelte';
 
 	let { data } = $props();
 	const gameData = $derived(data.gameData);
@@ -20,6 +22,18 @@
 			? `${shortName} » ${game.visitingTeam.abbreviation}@${game.hostTeam.abbreviation} (${new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})`
 			: `${shortName} » Game`
 	);
+
+	async function deleteGame(): Promise<void> {
+		if (!game || !gameData?.canDelete) return;
+		if (!confirm('Are you sure you want to delete this game? It can be recovered from the Deleted Games page.')) return;
+
+		const response = await fetch(`/api/Game/${game.id}`, { method: 'DELETE' });
+		if (response.ok) {
+			goto('/Schedule', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
 </script>
 
 <svelte:head>
@@ -30,11 +44,12 @@
 	<div class="row game-row">
 		<div class="inner-row">
 			<div class="section game-team">
-				<div>
-					<img src="/images/teams/{game.visitingTeam.id}-md.webp" alt="{game.visitingTeam.name}"
-						onerror={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-				</div>
-				<div><a href="/Team/{game.visitingTeam.abbreviation}">{game.visitingTeam.name}</a></div>
+				<a href="/Team/{game.visitingTeam.abbreviation}">
+					<div><TeamLogoMedium team={game.visitingTeam} /></div>
+				</a>
+				{#if gameData?.visitorRecord}
+					<div class="game-team-record">{gameData.visitorRecord}</div>
+				{/if}
 			</div>
 			<div class="section game-header">
 				{#if game.status.name === 'Played'}
@@ -58,11 +73,12 @@
 				</div>
 			</div>
 			<div class="section game-team">
-				<div>
-					<img src="/images/teams/{game.hostTeam.id}-md.webp" alt="{game.hostTeam.name}"
-						onerror={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
-				</div>
-				<div><a href="/Team/{game.hostTeam.abbreviation}">{game.hostTeam.name}</a></div>
+				<a href="/Team/{game.hostTeam.abbreviation}">
+					<div><TeamLogoMedium team={game.hostTeam} /></div>
+				</a>
+				{#if gameData?.hostRecord}
+					<div class="game-team-record">{gameData.hostRecord}</div>
+				{/if}
 			</div>
 		</div>
 	</div>
@@ -104,6 +120,11 @@
 		<div class="row">
 			<div class="section game-edit-link">
 				<a href="/Game/{game.id}/Edit"><i class="fas fa-edit"></i> Edit this game</a>
+				{#if gameData.canDelete && game.status.name !== 'Deleted'}
+					<button class="game-delete-btn" onclick={deleteGame}>
+						<i class="fas fa-trash"></i> Delete this game
+					</button>
+				{/if}
 			</div>
 		</div>
 	{/if}

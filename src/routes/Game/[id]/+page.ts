@@ -9,6 +9,7 @@ interface GamePageData {
 		statusId: number;
 	};
 	canEdit: boolean;
+	canDelete: boolean;
 }
 
 export const load = async ({ fetch, params }) => {
