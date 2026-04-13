@@ -52,3 +52,24 @@ describe('HomepageNews', () => {
 		expect(screen.queryByRole('link')).toBeNull();
 	});
 });
+
+	test('renders renderedContents when provided', () => {
+		render(HomepageNews, { props: { news: mockNews, renderedContents: '<p>Rendered HTML</p>' } });
+		expect(screen.getByText('Rendered HTML')).toBeInTheDocument();
+	});
+
+	test('falls back to raw contents when renderedContents is empty', () => {
+		render(HomepageNews, { props: { news: mockNews, renderedContents: '' } });
+		expect(screen.getByText('Great game last night!')).toBeInTheDocument();
+	});
+
+	test('deleted post shows deleted disclaimer', () => {
+		render(HomepageNews, { props: { news: mockNews, isDeleted: true } });
+		expect(screen.getByText(/has been deleted/)).toBeInTheDocument();
+	});
+
+	test('deleted post does not show hidden disclaimer', () => {
+		render(HomepageNews, { props: { news: mockHiddenNews, isDeleted: true } });
+		expect(screen.queryByText(/is hidden/)).toBeNull();
+		expect(screen.getByText(/has been deleted/)).toBeInTheDocument();
+	});
