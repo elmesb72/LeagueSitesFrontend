@@ -11,7 +11,8 @@
 	function groupGamesByDate(games: Game[]): Map<string, Game[]> {
 		const groups = new Map<string, Game[]>();
 		for (const game of games) {
-			const dateKey = new Date(game.date).toLocaleDateString('en-US', {
+			const d = new Date(game.date.split('T')[0] + 'T12:00:00');
+			const dateKey = d.toLocaleDateString('en-US', {
 				weekday: 'long',
 				month: 'long',
 				day: 'numeric'

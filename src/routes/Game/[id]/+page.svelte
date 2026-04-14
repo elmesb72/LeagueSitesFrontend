@@ -10,7 +10,7 @@
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
 	function formatFullDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+		return new Date(dateStr.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', {
 			month: 'long',
 			day: 'numeric',
 			year: 'numeric'
@@ -19,7 +19,7 @@
 
 	const title = $derived(
 		game
-			? `${shortName} » ${game.visitingTeam.abbreviation}@${game.hostTeam.abbreviation} (${new Date(game.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})`
+			? `${shortName} » ${game.visitingTeam.abbreviation}@${game.hostTeam.abbreviation} (${new Date(game.date.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})`
 			: `${shortName} » Game`
 	);
 

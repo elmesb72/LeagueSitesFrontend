@@ -1,14 +1,9 @@
 <script lang="ts">
 	import type { Game } from '$lib/models/Game';
 	import type { Team } from '$lib/models/Team';
-	import { formatTime } from '$lib/utils/date';
+	import { formatDate, formatTime } from '$lib/utils/date';
 
 	let { games, focusTeam }: { games: Game[]; focusTeam: Team } = $props();
-
-	function formatDateLabel(dateStr: string): string {
-		const d = new Date(dateStr);
-		return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-	}
 
 	function getResult(game: Game): string {
 		if (game.status.name === 'Played') {
@@ -44,7 +39,7 @@
 		<tbody>
 			{#each games as game}
 				<tr>
-					<td><a href="/Game/{game.id}">{formatDateLabel(game.date)}</a></td>
+					<td><a href="/Game/{game.id}">{formatDate(game.date)}</a></td>
 					<td><a href="/Game/{game.id}">{formatTime(game.date)}</a></td>
 					<td><a href="/Locations/#{game.location.name}">{game.location.name}</a></td>
 					<td class:soft={game.hostTeam.id === focusTeam.id}>

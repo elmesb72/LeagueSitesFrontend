@@ -2,6 +2,7 @@
 	import './+page.css';
 	import type { Game } from '$lib/models/Game';
 	import type { Location } from '$lib/models/Location';
+	import { toDateKey, formatDateLabel, getDayOfWeek, addDays } from '$lib/utils/date';
 
 	let { data } = $props();
 	const games = $derived(data.games);
@@ -11,44 +12,27 @@
 	function getDateRange(games: Game[]): string[] {
 		if (games.length === 0) {
 			if (data.seasonStartDate) {
-				// Show a full week from the season start date
-				const start = new Date(data.seasonStartDate + 'T12:00:00');
-				const dates: string[] = [];
-				for (let i = 0; i < 7; i++) {
-					const d = new Date(start);
-					d.setDate(start.getDate() + i);
-					dates.push(d.toISOString().split('T')[0]);
-				}
-				return dates;
+				const start = data.seasonStartDate;
+				return Array.from({ length: 7 }, (_, i) => addDays(start, i));
 			}
 			return [];
 		}
 		const dates: string[] = [];
-		const first = new Date(games[0].date);
-		const last = new Date(games[games.length - 1].date);
-		first.setHours(12, 0, 0, 0);
-		last.setHours(12, 0, 0, 0);
-		for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
-			dates.push(d.toISOString().split('T')[0]);
+		const first = toDateKey(games[0].date);
+		const last = toDateKey(games[games.length - 1].date);
+		for (let d = first; d <= last; d = addDays(d, 1)) {
+			dates.push(d);
 		}
 		return dates;
 	}
 
-	function formatDateLabel(dateStr: string): string {
-		const d = new Date(dateStr + 'T12:00:00');
-		return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-	}
-
 	function isWeekend(dateStr: string): boolean {
-		const day = new Date(dateStr + 'T12:00:00').getDay();
+		const day = getDayOfWeek(dateStr);
 		return day === 0 || day === 6;
 	}
 
 	function findGame(games: Game[], dateStr: string, location: Location): Game | undefined {
-		return games.find((g) => {
-			const gameDate = new Date(g.date).toISOString().split('T')[0];
-			return gameDate === dateStr && g.location.id === location.id;
-		});
+		return games.find((g) => toDateKey(g.date) === dateStr && g.location.id === location.id);
 	}
 
 	const dateRange = $derived(getDateRange(games));

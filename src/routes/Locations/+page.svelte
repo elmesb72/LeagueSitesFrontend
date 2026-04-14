@@ -43,13 +43,16 @@
 	}
 
 	function formatGameDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+		const datePart = new Date(dateStr.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', {
 			month: 'short',
 			day: 'numeric',
-			year: 'numeric',
+			year: 'numeric'
+		});
+		const timePart = new Date(dateStr).toLocaleTimeString('en-US', {
 			hour: 'numeric',
 			minute: '2-digit'
 		});
+		return `${datePart}, ${timePart}`;
 	}
 
 	const cityGroups = $derived(buildCityGroups(locations));

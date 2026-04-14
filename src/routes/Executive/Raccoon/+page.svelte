@@ -7,13 +7,16 @@
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
 	function formatGameDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+		const datePart = new Date(dateStr.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', {
 			year: 'numeric',
 			month: 'long',
-			day: 'numeric',
+			day: 'numeric'
+		});
+		const timePart = new Date(dateStr).toLocaleTimeString('en-US', {
 			hour: 'numeric',
 			minute: '2-digit'
 		});
+		return `${datePart}, ${timePart}`;
 	}
 
 	onMount(() => {

@@ -7,7 +7,7 @@
 	const displayContents = $derived(renderedContents || news.contents);
 
 	function formatDate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+		return new Date(dateStr.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 	}
 
 	const displayDate = $derived(news.edited ? formatDate(news.edited) : formatDate(news.date));

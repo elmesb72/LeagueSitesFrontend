@@ -9,7 +9,7 @@
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
 	function calculateAge(birthdate: string): number {
-		const birth = new Date(birthdate);
+		const birth = new Date(birthdate.split('T')[0] + 'T12:00:00');
 		const today = new Date();
 		let age = today.getFullYear() - birth.getFullYear();
 		if (birth > new Date(today.getFullYear(), birth.getMonth(), birth.getDate())) {
@@ -19,7 +19,7 @@
 	}
 
 	function formatBirthdate(dateStr: string): string {
-		return new Date(dateStr).toLocaleDateString('en-US', {
+		return new Date(dateStr.split('T')[0] + 'T12:00:00').toLocaleDateString('en-US', {
 			month: 'long',
 			day: 'numeric',
 			year: 'numeric'
