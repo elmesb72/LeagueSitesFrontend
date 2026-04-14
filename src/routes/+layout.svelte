@@ -4,6 +4,7 @@
 	import './+layout.css';
 	import HeaderTeams from '../components/HeaderTeams.svelte';
 	import LeagueLogo from '../components/LeagueLogo.svelte';
+	import PageTransition from '../components/PageTransition.svelte';
 
 	let { children, data } = $props();
 	let darkMode = $state(false);
@@ -79,7 +80,9 @@
 </header>
 <div class="container">
 	<main>
-		{@render children?.()}
+		<PageTransition>
+			{@render children?.()}
+		</PageTransition>
 	</main>
 	<footer>
 		<div class="theme-switch-wrapper">
