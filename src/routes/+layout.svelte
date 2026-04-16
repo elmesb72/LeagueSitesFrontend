@@ -26,7 +26,7 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href="src/lib/assets/favicon.svg" sizes="16x16" />
+	<link rel="icon" href="/favicon.png" />
 	<title>{data.siteConfig.siteName}</title>
 </svelte:head>
 
