@@ -254,3 +254,78 @@
 	cursor: pointer;
 	color: var(--text-default);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.team-header {
+		width: 100%;
+		display: flex;
+		justify-content: space-between;
+		height: unset;
+	}
+
+	.team-header-logo {
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		width: unset;
+		max-width: unset;
+	}
+
+	.team-header-main {
+		max-width: calc(100vw - 225px);
+		margin: unset;
+	}
+
+	.team-header-main p {
+		text-align: center;
+	}
+
+	.team-header-details {
+		font-size: 30px;
+	}
+
+	p.team-header-record {
+		padding-left: unset;
+	}
+
+	.team-header-manager {
+		display: none;
+	}
+
+	.team-main {
+		flex-direction: column;
+	}
+
+	.team-schedule {
+		margin-right: unset;
+	}
+
+	.team-schedule table {
+		font-size: 14px;
+	}
+
+	.team-schedule td {
+		padding: 0 4px;
+		vertical-align: middle;
+	}
+
+	.team-edit-row {
+		flex-direction: column;
+	}
+
+	.team-edit-basic {
+		padding-right: unset;
+	}
+
+	.team-edit-field {
+		margin-right: unset;
+		margin-bottom: 1vw;
+	}
+
+	#team-edit-form input[type='text'] {
+		box-sizing: border-box;
+		width: 100%;
+		height: 32px;
+	}
+}

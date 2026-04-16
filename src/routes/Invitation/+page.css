@@ -118,3 +118,18 @@
 	cursor: pointer;
 	color: var(--text-default);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.invitation-form-main {
+		flex-direction: column;
+	}
+
+	.invitation-form-player {
+		margin-right: unset;
+	}
+
+	.invitation-field input[type='text'] {
+		width: 100%;
+	}
+}

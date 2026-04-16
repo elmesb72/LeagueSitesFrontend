@@ -42,3 +42,10 @@
 	color: var(--text-soft-contrast);
 	margin-top: var(--space-1);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.game-matchup {
+		font-size: var(--text-base);
+	}
+}

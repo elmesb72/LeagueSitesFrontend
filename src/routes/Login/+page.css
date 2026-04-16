@@ -55,3 +55,10 @@
 .dev-login .oauth-provider-image i {
 	color: var(--text-default);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.login-providers {
+		margin-right: unset;
+	}
+}

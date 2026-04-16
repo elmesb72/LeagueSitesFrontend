@@ -332,3 +332,119 @@ main {
 	opacity: 0.33 !important;
 	cursor: not-allowed !important;
 }
+
+/* ========== Mobile (max-width: 768px) ========== */
+
+@media (max-width: 768px) {
+	body {
+		min-width: 100vw;
+		width: 100vw;
+		max-width: 100vw;
+	}
+
+	.container {
+		min-width: 100vw;
+		width: 100vw;
+		max-width: 100vw;
+	}
+
+	.desktop-only {
+		display: none;
+	}
+
+	.mobile-only {
+		display: initial;
+	}
+
+	/* Header */
+	header {
+		margin-bottom: 2vw;
+	}
+
+	header .container {
+		height: unset;
+		padding: 0 1vw;
+	}
+
+	.header-primary > li:not(:first-child) {
+		display: none;
+	}
+
+	.header-primary img {
+		height: 28px;
+	}
+
+	.header-primary {
+		padding-left: unset;
+	}
+
+	.header-primary li {
+		padding-right: unset;
+	}
+
+	.header-teams li {
+		padding: 0 0.5vw;
+	}
+
+	.header-teams a {
+		font-size: 0;
+	}
+
+	[id^='header-team-'] {
+		padding: 12px 0;
+		transition: unset;
+	}
+
+	[id^='header-team-']:hover {
+		transition: unset;
+		background-color: unset !important;
+		padding: unset;
+	}
+
+	.header-login {
+		padding-right: unset;
+	}
+
+	.header-login li {
+		padding-left: unset;
+	}
+
+	/* Main content */
+	main {
+		padding: 0 2vw;
+	}
+
+	.row {
+		flex-direction: column;
+		margin-bottom: unset;
+	}
+
+	.section {
+		margin-bottom: 4vw;
+	}
+
+	/* Game layout */
+	.game-row {
+		margin-bottom: 4vw;
+	}
+
+	.game-header > div {
+		margin: 2vw 0;
+	}
+
+	.game-row select,
+	.game-row input[type='text'] {
+		box-sizing: border-box;
+		height: 32px;
+	}
+
+	.game-row input[id^='score'] {
+		width: 50px;
+		height: 50px;
+	}
+
+	/* Number selector */
+	.number-selector {
+		max-width: 100%;
+	}
+}

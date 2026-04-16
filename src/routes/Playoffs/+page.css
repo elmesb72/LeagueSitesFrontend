@@ -228,3 +228,42 @@
 .standings-link object {
 	margin-right: var(--space-1);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.playoff-section {
+		width: unset;
+	}
+
+	.tournament {
+		overflow-x: auto;
+	}
+
+	.tournament-series-team {
+		width: 75px;
+		box-shadow: none;
+		border: var(--table-border);
+		justify-content: center;
+	}
+
+	.tournament-series-winner {
+		outline: none;
+	}
+
+	.tournament-series-team-name {
+		display: none;
+	}
+
+	.tournament-items-game {
+		overflow-x: auto;
+	}
+
+	.tournament-items-game-team img {
+		display: none;
+	}
+
+	.tournament-items-game-location,
+	.tournament-items-game-lead {
+		display: none;
+	}
+}

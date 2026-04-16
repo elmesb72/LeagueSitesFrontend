@@ -47,3 +47,32 @@
 .location-info-fallback p {
 	margin-bottom: var(--space-1);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.location-row .subsection {
+		flex-basis: unset;
+	}
+
+	.location-row .inner-row {
+		flex-direction: column;
+	}
+
+	.location-details-right {
+		order: 0;
+		margin-left: unset;
+	}
+
+	.location-details-left {
+		margin-right: unset;
+	}
+
+	.location-games {
+		order: 1;
+	}
+
+	.location-map {
+		height: 250px;
+		width: 100%;
+	}
+}

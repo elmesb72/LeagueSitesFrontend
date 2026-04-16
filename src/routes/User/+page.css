@@ -120,3 +120,16 @@
 	cursor: pointer;
 	font-size: inherit;
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.user-logins {
+		margin: unset;
+		margin-bottom: 4vw;
+	}
+
+	.user-login-details {
+		white-space: nowrap;
+		overflow: scroll;
+	}
+}

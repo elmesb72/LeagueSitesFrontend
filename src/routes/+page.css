@@ -100,3 +100,38 @@
 	height: 24px;
 	margin-right: var(--space-2);
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.home-left {
+		margin: unset;
+	}
+
+	.home-right {
+		margin-left: unset;
+	}
+
+	.home-main-left {
+		order: 1;
+	}
+
+	.home-main-right {
+		order: 2;
+	}
+
+	.home-main-middle {
+		order: 3;
+	}
+
+	.home-news-header {
+		flex-direction: column;
+		align-items: baseline;
+		height: unset;
+		margin-bottom: 1.5vw;
+	}
+
+	.home-news-date {
+		align-self: baseline;
+		font-size: 14px;
+	}
+}

@@ -55,3 +55,23 @@
 	margin-left: var(--space-4);
 	flex-grow: 1;
 }
+
+/* Mobile */
+@media (max-width: 768px) {
+	.player-row {
+		flex-direction: column;
+	}
+
+	.player-info {
+		width: unset;
+	}
+
+	.player-photo {
+		max-width: 100%;
+	}
+
+	.player-stats-section {
+		margin-left: unset;
+		width: unset;
+	}
+}
