@@ -31,7 +31,6 @@
 		width: 24px;
 		vertical-align: middle;
 		display: inline-block;
-		margin-right: var(--space-1);
 	}
 
 	.team-logo-fallback {
@@ -45,6 +44,5 @@
 		font-weight: 700;
 		vertical-align: middle;
 		display: inline-block;
-		margin-right: var(--space-1);
 	}
 </style>

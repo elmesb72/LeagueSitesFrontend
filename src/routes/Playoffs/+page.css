@@ -219,13 +219,14 @@
 	white-space: nowrap;
 }
 
-.standings-link object,
+.standings-link img,
 .standings-link div {
 	vertical-align: middle;
 	display: inline-block;
 }
 
-.standings-link object {
+.standings-link img,
+.standings-link .team-logo-fallback {
 	margin-right: var(--space-1);
 }
 

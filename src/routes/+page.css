@@ -63,12 +63,13 @@
 .home-standings-link {
 	white-space: nowrap;
 }
-.home-standings-link object,
+.home-standings-link img,
 .home-standings-link div {
 	vertical-align: middle;
 	display: inline-block;
 }
-.home-standings-link object {
+.home-standings-link img,
+.home-standings-link .team-logo-fallback {
 	margin-right: var(--space-1);
 }
 
