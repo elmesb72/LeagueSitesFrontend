@@ -20,9 +20,9 @@
 </div>
 {#if games.length > 0}
 	<div class="row scores-games-row">
-		{#each games as game}
+		{#each games as entry}
 			<div class="section">
-				<ScoresGame {game} {standings} />
+				<ScoresGame game={entry.game} canEdit={entry.canEdit} {standings} />
 			</div>
 		{/each}
 	</div>

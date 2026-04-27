@@ -4,7 +4,7 @@
 	import TeamLogoSmall from './TeamLogoSmall.svelte';
 	import { formatTime } from '$lib/utils/date';
 
-	let { game, standings }: { game: Game; standings: StandingsEntry[] } = $props();
+	let { game, canEdit = false, standings }: { game: Game; canEdit?: boolean; standings: StandingsEntry[] } = $props();
 
 	function isOverdue(dateStr: string): boolean {
 		return new Date(dateStr) < new Date();
@@ -28,16 +28,21 @@
 	<div class="scores-game-status">
 		{#if game.status.name === 'Upcoming'}
 			{#if isOverdue(game.date)}
-				<span>{formatTime(game.date)} (OVERDUE/UNSCORED)</span>
+				<a href="/Game/{game.id}">{formatTime(game.date)} (OVERDUE/UNSCORED)</a>
 			{:else}
-				<span>{formatTime(game.date)}</span>
+				<a href="/Game/{game.id}">{formatTime(game.date)}</a>
 			{/if}
 		{:else if game.status.name === 'Played'}
-			<span>FINAL</span>
+			<a href="/Game/{game.id}">FINAL</a>
 		{:else if game.status.name === 'Postponed'}
-			<span>POSTPONED</span>
+			<a href="/Game/{game.id}">POSTPONED</a>
 		{:else if game.status.name === 'Forfeit'}
-			<span>FORFEIT ({getForfeitTeam(game)})</span>
+			<a href="/Game/{game.id}">FORFEIT ({getForfeitTeam(game)})</a>
+		{/if}
+		{#if canEdit}
+			<a href="/Game/{game.id}/Edit" title="Edit game" class="scores-game-edit">
+				<i class="fa-solid fa-pen-to-square"></i>
+			</a>
 		{/if}
 	</div>
 	<div class="scores-game-matchup">

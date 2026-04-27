@@ -91,6 +91,9 @@
 	font-weight: 700;
 	padding-bottom: 4px;
 	border-bottom: var(--game-border);
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
 }
 
 .scores-game-matchup {
@@ -161,4 +164,8 @@
 	margin-top: var(--space-2);
 	padding: var(--space-2) 0 0 0;
 	border-top: var(--game-border);
+}
+
+.scores-game-edit {
+	font-size: var(--text-sm);
 }

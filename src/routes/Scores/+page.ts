@@ -1,13 +1,18 @@
 import type { Game } from '$lib/models/Game';
 import type { StandingsEntry } from '$lib/models/StandingsEntry';
 
+export interface ScoresGameEntry {
+	game: Game;
+	canEdit: boolean;
+}
+
 export const load = async ({ fetch, url }) => {
 	const day = url.searchParams.get('day') ?? new Date().toISOString().split('T')[0];
 
 	try {
 		const response = await fetch(`/api/Scores?day=${day}`);
 		if (!response.ok) {
-			return { date: day, games: [] as Game[], standings: [] as StandingsEntry[], gameCounts: {} };
+			return { date: day, games: [] as ScoresGameEntry[], standings: [] as StandingsEntry[], gameCounts: {} };
 		}
 
 		const data = await response.json();
@@ -37,12 +42,12 @@ export const load = async ({ fetch, url }) => {
 
 		return {
 			date: day,
-			games: (data.games ?? []) as Game[],
+			games: (data.games ?? []) as ScoresGameEntry[],
 			standings: (data.standings ?? []) as StandingsEntry[],
 			gameCounts
 		};
 	} catch {
 		console.error('Failed to fetch scores. Is the backend available?');
-		return { date: day, games: [] as Game[], standings: [] as StandingsEntry[], gameCounts: {} };
+		return { date: day, games: [] as ScoresGameEntry[], standings: [] as StandingsEntry[], gameCounts: {} };
 	}
 };
