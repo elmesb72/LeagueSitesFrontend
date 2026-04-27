@@ -6,6 +6,7 @@
 	import ErrorsOverTimeChart from '../../components/ErrorsOverTimeChart.svelte';
 	import EventsPerDayChart from '../../components/EventsPerDayChart.svelte';
 	import TopErrorSourcesChart from '../../components/TopErrorSourcesChart.svelte';
+	import TrafficChart from '../../components/TrafficChart.svelte';
 
 	let { data } = $props();
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
@@ -77,6 +78,13 @@
 					{/if}
 				</div>
 			{/if}
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="section webmaster-section">
+			<h1>Traffic</h1>
+			<TrafficChart traffic={data.traffic ?? []} />
 		</div>
 	</div>
 
