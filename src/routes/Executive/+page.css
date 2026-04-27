@@ -3,6 +3,28 @@
 	width: 100%;
 }
 
+/* Consistent vertical rhythm — but not between h1 and the first h2 */
+.executive-section > h2,
+.executive-section > .season-progress,
+.executive-section > .executive-start-date,
+.executive-section > .executive-import,
+.executive-section > ul,
+.executive-section > table {
+	margin-top: var(--space-5);
+}
+
+.executive-section > h1 + h2 {
+	margin-top: var(--space-3);
+}
+
+.executive-section > :last-child {
+	margin-bottom: var(--space-3);
+}
+
+.executive-section > p + ul {
+	margin-top: var(--space-2);
+}
+
 .executive-league p {
 	padding: 4px;
 }
@@ -83,11 +105,21 @@
 	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
 }
 
+.executive-action:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	background-image: linear-gradient(to bottom, #8cb8d4, #7eaace);
+	border-color: #6b91b0;
+}
+
+.executive-action:disabled:active {
+	background-image: linear-gradient(to bottom, #8cb8d4, #7eaace);
+}
+
 .executive-start-date {
 	display: flex;
 	align-items: center;
 	gap: var(--space-3);
-	margin-top: var(--space-5);
 }
 
 .executive-datepicker {
@@ -110,4 +142,48 @@
 
 .executive-datepicker-value:hover {
 	color: var(--link-hover);
+}
+
+
+.executive-import {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	flex-wrap: wrap;
+}
+
+.executive-import-button {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	height: 36px;
+	padding: 0 var(--space-4);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.executive-import-button input[type='file'] {
+	display: none;
+}
+
+.executive-import-button.disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+	background-image: linear-gradient(to bottom, #8cb8d4, #7eaace);
+	border-color: #6b91b0;
+}
+
+.executive-import-error {
+	color: var(--color-loss);
+	font-size: var(--text-sm);
+}
+
+.executive-import-status {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	font-style: italic;
 }

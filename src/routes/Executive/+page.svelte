@@ -4,6 +4,7 @@
 	import { onMount } from 'svelte';
 	import Datepicker from 'vanillajs-datepicker/Datepicker';
 	import 'vanillajs-datepicker/css/datepicker.css';
+	import { scheduleImportPreview, type ImportPreview } from '$lib/stores/scheduleImport';
 
 	let { data } = $props();
 	const dashboard = $derived(data.dashboard);
@@ -84,6 +85,36 @@
 			goto(data.redirect);
 		}
 	});
+
+	let importFileInput = $state<HTMLInputElement>(undefined!);
+	let importing = $state(false);
+	let importError = $state('');
+
+	async function uploadSchedule() {
+		const file = importFileInput.files?.[0];
+		if (!file) return;
+
+		importing = true;
+		importError = '';
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		const response = await fetch('/api/Executive/Schedule/Preview', {
+			method: 'POST',
+			body: formData
+		});
+
+		importing = false;
+		if (response.ok) {
+			const preview: ImportPreview = await response.json();
+			scheduleImportPreview.set(preview);
+			goto('/Executive/ImportSchedule');
+		} else {
+			importError = (await response.text()) || 'Failed to parse spreadsheet.';
+			importFileInput.value = '';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -107,7 +138,27 @@
 						</span>
 					</div>
 				</div>
-				<br />
+
+				<div class="executive-import" class:disabled={season.gamesScheduled > 0}>
+					<span>Import schedule:</span>
+					<label class="executive-import-button" class:disabled={importing || season.gamesScheduled > 0}>
+						<i class="fa-regular fa-file-excel"></i> Choose spreadsheet
+						<input
+							type="file"
+							accept=".xlsx"
+							bind:this={importFileInput}
+							disabled={importing || season.gamesScheduled > 0}
+							onchange={uploadSchedule}
+						/>
+					</label>
+					{#if importing}
+						<span class="executive-import-status">Parsing...</span>
+					{/if}
+					{#if importError}
+						<span class="executive-import-error">{importError}</span>
+					{/if}
+				</div>
+
 				<div class="season-progress">
 					<div>Progress ({season.gamesScheduled} games):&nbsp;</div>
 					<div class="season-progress-bar">
@@ -131,12 +182,11 @@
 						{/if}
 					</div>
 				</div>
-				<br />
+
 				<ul>
 					<li><a href="/Schedule">Edit schedule</a></li>
 				</ul>
 
-				<br />
 				<h2>Tournaments</h2>
 				<ul>
 					<li><a href="/Executive/Create/Tournament/{season.season.id}">Add mid-season tournament</a></li>
@@ -171,7 +221,6 @@
 			{/if}
 
 			{#if playoffs}
-				<br />
 				<h2>Playoffs</h2>
 				{#each playoffs.tournaments as tournament}
 					<ul>
@@ -226,7 +275,6 @@
 				</tbody>
 			</table>
 
-			<br />
 			<h2>Locations ({dashboard.locations.filter((l) => l.active).length} active)</h2>
 			<p class="executive-explanation">Active locations appear on the Locations page and can be selected in drop-down lists. Deactivate locations that are not being used in the current season.</p>
 			<table class="executive-table">
@@ -255,7 +303,6 @@
 				</tbody>
 			</table>
 
-			<br />
 			<h2>Miscellaneous</h2>
 			<ul>
 				<li><a href="/Executive/Raccoon">Recover deleted games</a></li>

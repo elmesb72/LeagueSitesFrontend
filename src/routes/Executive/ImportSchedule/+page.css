@@ -1,0 +1,144 @@
+.import-section {
+	width: 100%;
+}
+
+.import-instructions {
+	color: var(--text-soft-contrast);
+	margin-bottom: var(--space-3);
+}
+
+.import-summary {
+	display: flex;
+	gap: var(--space-6);
+	padding: var(--space-3);
+	margin-bottom: var(--space-3);
+	background-color: var(--surface-page);
+	border-radius: var(--radius-sm);
+}
+
+.import-summary .valid {
+	color: var(--color-win);
+}
+
+.import-summary .invalid {
+	color: var(--color-loss);
+}
+
+.import-global-warnings {
+	color: var(--color-loss);
+	margin-bottom: var(--space-3);
+}
+
+.matrix-wrapper,
+.import-games-wrapper {
+	overflow-x: auto;
+	margin-bottom: var(--space-5);
+}
+
+.matrix {
+	border: var(--standings-border);
+	border-collapse: collapse;
+}
+
+.matrix th,
+.matrix td {
+	padding: 4px var(--space-2);
+	border: 1px solid var(--color-cream);
+	text-align: center;
+	min-width: 40px;
+}
+
+.matrix thead th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	white-space: nowrap;
+}
+
+.matrix tbody th {
+	background-color: var(--surface-heading-secondary);
+	color: var(--text-inverted);
+	text-align: left;
+	white-space: nowrap;
+}
+
+.matrix td.zero {
+	background-color: var(--surface-page);
+}
+
+.matrix td.diagonal {
+	background-color: var(--color-grey-light);
+}
+
+.matrix td.total {
+	font-weight: 700;
+	background-color: var(--surface-page);
+}
+
+.import-games {
+	width: 100%;
+	border: var(--standings-border);
+}
+
+.import-games th {
+	background-color: var(--table-header-bg);
+	color: var(--table-header-text);
+	text-align: left;
+	padding: 6px var(--space-2);
+}
+
+.import-games td {
+	padding: 4px var(--space-2);
+	vertical-align: top;
+	border-bottom: 1px solid var(--color-cream);
+}
+
+.import-games tr.invalid td {
+	background-color: rgba(214, 0, 0, 0.08);
+}
+
+.warning-list {
+	margin: 0;
+	padding-left: var(--space-4);
+	color: var(--color-loss);
+	font-size: var(--text-sm);
+}
+
+.import-actions {
+	display: flex;
+	gap: var(--space-3);
+	align-items: center;
+	margin-top: var(--space-5);
+}
+
+.import-actions .executive-action {
+	margin-top: 0;
+}
+
+.import-cancel {
+	height: 36px;
+	padding: 0 var(--space-6);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	color: var(--text-default);
+}
+
+.import-error {
+	color: var(--color-loss);
+	margin-top: var(--space-3);
+}
+
+@media (max-width: 768px) {
+	.import-summary {
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.matrix th,
+	.matrix td {
+		padding: 2px var(--space-1);
+		font-size: var(--text-sm);
+		min-width: 30px;
+	}
+}
