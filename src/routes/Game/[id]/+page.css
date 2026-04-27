@@ -49,3 +49,8 @@
 		font-size: var(--text-base);
 	}
 }
+
+
+.game-reschedule-link {
+	margin-left: var(--space-6);
+}

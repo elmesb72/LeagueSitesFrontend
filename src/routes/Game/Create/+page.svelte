@@ -34,10 +34,11 @@
 
 	function initForm(): void {
 		if (!createData) return;
-		seasonId = createData.seasons[0]?.id ?? 0;
-		visitingTeamId = createData.teams[0]?.id ?? 0;
-		hostTeamId = createData.teams[1]?.id ?? createData.teams[0]?.id ?? 0;
-		locationId = data.prefillLocationId || createData.locations[0]?.id || 0;
+		const prefill = data.prefillFromGame;
+		seasonId = prefill?.seasonID ?? createData.seasons[0]?.id ?? 0;
+		visitingTeamId = prefill?.visitingTeamID ?? createData.teams[0]?.id ?? 0;
+		hostTeamId = prefill?.hostTeamID ?? createData.teams[1]?.id ?? createData.teams[0]?.id ?? 0;
+		locationId = prefill?.locationID ?? (data.prefillLocationId || createData.locations[0]?.id || 0);
 		statusId = createData.statuses.find((s) => s.name === 'Upcoming')?.id ?? createData.statuses[0]?.id ?? 0;
 		gameDate = data.prefillDate || new Date().toISOString().split('T')[0];
 	}
@@ -202,7 +203,7 @@
 				<button class="game-edit-submit" onclick={createGame} disabled={saving}>
 					{saving ? 'Creating...' : 'Create Game'}
 				</button>
-				<button class="game-edit-cancel" onclick={() => goto('/Schedule')}>
+				<button class="game-edit-cancel" onclick={() => goto(data.rescheduleFromId ? `/Game/${data.rescheduleFromId}` : '/Schedule')}>
 					Cancel
 				</button>
 			</div>

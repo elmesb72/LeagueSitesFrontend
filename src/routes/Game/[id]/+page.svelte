@@ -120,6 +120,11 @@
 		<div class="row">
 			<div class="section game-edit-link">
 				<a href="/Game/{game.id}/Edit"><i class="fas fa-edit"></i> Edit this game</a>
+				{#if game.status.name === 'Postponed'}
+					<a class="game-reschedule-link" href="/Game/Create?rescheduleFrom={game.id}">
+						<i class="fa-solid fa-calendar-plus"></i> Reschedule this game
+					</a>
+				{/if}
 				{#if gameData.canDelete && game.status.name !== 'Deleted'}
 					<button class="game-delete-btn" onclick={deleteGame}>
 						<i class="fas fa-trash"></i> Delete this game

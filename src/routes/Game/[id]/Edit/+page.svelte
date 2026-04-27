@@ -21,9 +21,13 @@
 	let scoreVisitor = $state<string>('');
 	let scoreHost = $state<string>('');
 	let saving = $state(false);
+	let previousStatusId = $state(0);
 
 	const selectedStatus = $derived(
 		editData?.statuses.find((s) => s.id === statusId)?.name ?? ''
+	);
+	const previousStatus = $derived(
+		editData?.statuses.find((s) => s.id === previousStatusId)?.name ?? ''
 	);
 	const scoresEnabled = $derived(
 		selectedStatus === 'Played' || selectedStatus === 'Upcoming'
@@ -42,6 +46,7 @@
 		hostTeamId = game.hostTeamId ?? game.hostTeam.id;
 		locationId = game.locationId ?? game.location.id;
 		statusId = game.statusId ?? game.status.id;
+		previousStatusId = statusId;
 		const d = new Date(game.date);
 		const year = d.getFullYear();
 		const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -63,6 +68,21 @@
 	}
 
 	function onStatusChange(): void {
+		// Warn if moving OFF Postponed on a game that was loaded as Postponed.
+		// Only the persisted state matters — toggling around pre-save is fine.
+		if (game?.status.name === 'Postponed' && previousStatus === 'Postponed' && selectedStatus !== 'Postponed') {
+			const confirmed = confirm(
+				'Heads up: scorers typically leave postponed games alone and create a new ' +
+				'game record for the rescheduled date. Continue un-postponing this game?'
+			);
+			if (!confirmed) {
+				statusId = previousStatusId;
+				return;
+			}
+		}
+
+		previousStatusId = statusId;
+
 		if (!scoresEnabled) {
 			scoreVisitor = '';
 			scoreHost = '';
