@@ -1,0 +1,73 @@
+/* Location edit page */
+.location-edit-section {
+	width: 100%;
+	max-width: 640px;
+}
+
+.location-edit-field {
+	margin-bottom: var(--space-3);
+}
+
+.location-edit-field label {
+	display: block;
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	margin-bottom: 2px;
+}
+
+.location-edit-field input[type='text'] {
+	width: 100%;
+	height: 32px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	font-family: inherit;
+	font-size: var(--text-base);
+	box-sizing: border-box;
+}
+
+.location-edit-help {
+	margin-top: 4px;
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+}
+
+.location-edit-actions {
+	margin-top: var(--space-4);
+}
+
+.location-edit-submit {
+	display: inline-block;
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.location-edit-submit:active {
+	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
+}
+
+.location-edit-submit:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.location-edit-cancel {
+	margin-left: var(--space-3);
+	background: none;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	height: 36px;
+	padding: 0 var(--space-6);
+	cursor: pointer;
+	color: var(--text-default);
+}
+
+.location-edit-cancel:hover {
+	background-color: var(--table-row-alternate);
+}

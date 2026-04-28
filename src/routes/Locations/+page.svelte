@@ -4,6 +4,7 @@
 
 	let { data } = $props();
 	const locations = $derived(data.locations);
+	const canEdit = $derived(data.canEdit);
 	const googleMapsKey = $derived(data.googleMapsKey);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
@@ -94,7 +95,14 @@
 					{/if}
 					<div class="subsection location-games">
 						{#each site.locations as diamond}
-							<h2 id={diamond.name}>{diamond.name}</h2>
+							<h2 id={diamond.name} class="location-diamond-heading">
+								<span>{diamond.name}</span>
+								{#if canEdit}
+									<a href="/Locations/{diamond.id}/Edit" class="location-edit-icon" title="Edit {diamond.name}" aria-label="Edit {diamond.name}">
+										<i class="fa-solid fa-pen-to-square"></i>
+									</a>
+								{/if}
+							</h2>
 							{#if diamond.recentGames.length > 0 || diamond.upcomingGames.length > 0}
 								{#if diamond.recentGames.length > 0}
 									<p class="location-diamond-subtitle">Recent Games</p>

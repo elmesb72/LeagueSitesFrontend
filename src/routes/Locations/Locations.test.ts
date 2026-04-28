@@ -50,9 +50,9 @@ describe('Locations Page', () => {
 	test('renders diamond names as subheadings', () => {
 		render(LocationsPage, { props: { data: { locations: allLocations, googleMapsKey: 'test-key' } } });
 		const subheadings = screen.getAllByRole('heading', { level: 2 });
-		expect(subheadings.some(h => h.textContent === 'Diamond 1')).toBe(true);
-		expect(subheadings.some(h => h.textContent === 'Diamond 2')).toBe(true);
-		expect(subheadings.some(h => h.textContent === 'Shark Field')).toBe(true);
+		expect(subheadings.some(h => h.textContent?.includes('Diamond 1'))).toBe(true);
+		expect(subheadings.some(h => h.textContent?.includes('Diamond 2'))).toBe(true);
+		expect(subheadings.some(h => h.textContent?.includes('Shark Field'))).toBe(true);
 	});
 
 	test('renders recent games section when games exist', () => {
@@ -105,5 +105,21 @@ describe('Locations Page', () => {
 	test('shows empty message when no locations', () => {
 		render(LocationsPage, { props: { data: { locations: [], googleMapsKey: '' } } });
 		expect(screen.getByText('No location data available.')).toBeInTheDocument();
+	});
+
+	test('shows edit icon in h2 when canEdit is true', () => {
+		const { container } = render(LocationsPage, {
+			props: { data: { locations: allLocations, canEdit: true, googleMapsKey: '' } }
+		});
+		const editLinks = container.querySelectorAll('.location-edit-icon');
+		expect(editLinks.length).toBe(3);
+		expect(editLinks[0].getAttribute('href')).toMatch(/^\/Locations\/\d+\/Edit$/);
+	});
+
+	test('hides edit icon when canEdit is false or missing', () => {
+		const { container } = render(LocationsPage, {
+			props: { data: { locations: allLocations, canEdit: false, googleMapsKey: '' } }
+		});
+		expect(container.querySelectorAll('.location-edit-icon').length).toBe(0);
 	});
 });

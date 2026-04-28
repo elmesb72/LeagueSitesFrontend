@@ -76,3 +76,21 @@
 		width: 100%;
 	}
 }
+
+.location-diamond-heading {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.location-edit-icon {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.location-edit-icon:hover {
+	color: var(--link-hover);
+}

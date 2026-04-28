@@ -429,7 +429,7 @@
 				<h3>Add a location</h3>
 				<div class="executive-create-fields">
 					<input type="text" placeholder="City" bind:value={newLocationCity} disabled={creatingLocation} />
-					<input type="text" placeholder="Location (e.g. St. Agatha or New Hamburg - 3)" bind:value={newLocationName} disabled={creatingLocation} />
+					<input type="text" placeholder="Short name (e.g. Springfield or Shelbyville - 3)" bind:value={newLocationName} disabled={creatingLocation} />
 					<input type="text" placeholder="Park" bind:value={newLocationFormalName} disabled={creatingLocation} />
 					<button type="submit" class="executive-action" disabled={creatingLocation}>Add location</button>
 				</div>
