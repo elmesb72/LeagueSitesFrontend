@@ -5,12 +5,12 @@ import type { ExecutiveDashboard } from '$lib/models/Executive';
 
 const mockDashboard: ExecutiveDashboard = {
 	teams: [
-		{ id: 1, location: 'Springfield', name: 'Isotopes', fullName: 'Springfield Isotopes', abbreviation: 'SPR', backgroundColor: '003366', color: 'FFFFFF', active: true, hidden: false },
-		{ id: 2, location: 'Shelbyville', name: 'Sharks', fullName: 'Shelbyville Sharks', abbreviation: 'SHL', backgroundColor: 'CC0000', color: 'FFFFFF', active: false, hidden: false }
+		{ id: 1, location: 'Springfield', name: 'Isotopes', fullName: 'Springfield Isotopes', abbreviation: 'SPR', backgroundColor: '003366', color: 'FFFFFF', active: true, hidden: false, canDelete: false },
+		{ id: 2, location: 'Shelbyville', name: 'Sharks', fullName: 'Shelbyville Sharks', abbreviation: 'SHL', backgroundColor: 'CC0000', color: 'FFFFFF', active: false, hidden: false, canDelete: true }
 	],
 	locations: [
-		{ id: 1, active: true, name: 'Diamond Park', formalName: 'Central Park', city: 'Springfield', address: null, mapsPlaceId: null },
-		{ id: 2, active: false, name: 'Shark Field', formalName: null, city: 'Shelbyville', address: null, mapsPlaceId: null }
+		{ id: 1, active: true, name: 'Diamond Park', formalName: 'Central Park', city: 'Springfield', address: null, mapsPlaceId: null, canDelete: false },
+		{ id: 2, active: false, name: 'Shark Field', formalName: null, city: 'Shelbyville', address: null, mapsPlaceId: null, canDelete: true }
 	],
 	currentSeason: {
 		season: { id: 1, year: 2026, subseason: 'Regular Season', name: '2026 Regular Season', startDate: '2026-05-01' },

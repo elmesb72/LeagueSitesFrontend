@@ -36,6 +36,94 @@
 		}
 	}
 
+	// New team form state
+	let newTeamLocation = $state('');
+	let newTeamName = $state('');
+	let newTeamAbbreviation = $state('');
+	let creatingTeam = $state(false);
+
+	async function createTeam(): Promise<void> {
+		if (!newTeamLocation.trim() || !newTeamName.trim() || !newTeamAbbreviation.trim()) {
+			alert('Location, name, and abbreviation are required.');
+			return;
+		}
+		creatingTeam = true;
+		const response = await fetch('/api/Teams', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				location: newTeamLocation.trim(),
+				name: newTeamName.trim(),
+				abbreviation: newTeamAbbreviation.trim(),
+				backgroundColor: 'FFFFFF',
+				color: '000000'
+			})
+		});
+		creatingTeam = false;
+		if (response.ok) {
+			newTeamLocation = '';
+			newTeamName = '';
+			newTeamAbbreviation = '';
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
+	async function deleteTeam(id: number, fullName: string): Promise<void> {
+		if (!confirm(`Delete ${fullName}? This cannot be undone.`)) return;
+		const response = await fetch(`/api/Teams/${id}`, { method: 'DELETE' });
+		if (response.ok) {
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
+	// New location form state
+	let newLocationCity = $state('');
+	let newLocationName = $state('');
+	let newLocationFormalName = $state('');
+	let creatingLocation = $state(false);
+
+	async function createLocation(): Promise<void> {
+		if (!newLocationName.trim() || !newLocationCity.trim()) {
+			alert('Name and city are required.');
+			return;
+		}
+		creatingLocation = true;
+		const response = await fetch('/api/Locations', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				name: newLocationName.trim(),
+				formalName: newLocationFormalName.trim() || null,
+				city: newLocationCity.trim(),
+				address: null,
+				mapsPlaceID: null
+			})
+		});
+		creatingLocation = false;
+		if (response.ok) {
+			newLocationCity = '';
+			newLocationName = '';
+			newLocationFormalName = '';
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
+	async function deleteLocation(id: number, name: string): Promise<void> {
+		if (!confirm(`Delete ${name}? This cannot be undone.`)) return;
+		const response = await fetch(`/api/Locations/${id}`, { method: 'DELETE' });
+		if (response.ok) {
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
 	let startDateEl = $state<HTMLDivElement>(undefined!);
 	let startDatePicker: Datepicker | null = null;
 
@@ -253,6 +341,7 @@
 					<tr>
 						<th>Active</th>
 						<th>Team</th>
+						<th class="executive-actions-col"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -270,10 +359,31 @@
 								/>
 							</td>
 							<td><a href="/Team/{team.abbreviation}">{team.fullName}</a></td>
+							<td class="executive-actions-col">
+								<button
+									type="button"
+									class="executive-delete"
+									title={team.canDelete ? `Delete ${team.fullName}` : `${team.fullName} has associated records and cannot be deleted`}
+									aria-label="Delete {team.fullName}"
+									disabled={!team.canDelete}
+									onclick={() => deleteTeam(team.id, team.fullName)}
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</td>
 						</tr>
 					{/each}
 				</tbody>
 			</table>
+			<form class="executive-create-form" onsubmit={(e) => { e.preventDefault(); createTeam(); }}>
+				<h3>Add a team</h3>
+				<div class="executive-create-fields">
+					<input type="text" placeholder="Location (e.g. Springfield)" bind:value={newTeamLocation} disabled={creatingTeam} />
+					<input type="text" placeholder="Name (e.g. Isotopes)" bind:value={newTeamName} disabled={creatingTeam} />
+					<input type="text" placeholder="Abbrev." maxlength="5" bind:value={newTeamAbbreviation} disabled={creatingTeam} class="executive-input-short" />
+					<button type="submit" class="executive-action" disabled={creatingTeam}>Add team</button>
+				</div>
+			</form>
 
 			<h2>Locations ({dashboard.locations.filter((l) => l.active).length} active)</h2>
 			<p class="executive-explanation">Active locations appear on the Locations page and can be selected in drop-down lists. Deactivate locations that are not being used in the current season.</p>
@@ -283,6 +393,7 @@
 						<th>Active</th>
 						<th>Location</th>
 						<th>Park</th>
+						<th class="executive-actions-col"></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -298,10 +409,31 @@
 							</td>
 							<td>{location.name}</td>
 							<td>{location.formalName ?? ''}</td>
+							<td class="executive-actions-col">
+								<button
+									type="button"
+									class="executive-delete"
+									title={location.canDelete ? `Delete ${location.name}` : `${location.name} has associated records and cannot be deleted`}
+									aria-label="Delete {location.name}"
+									disabled={!location.canDelete}
+									onclick={() => deleteLocation(location.id, location.name)}
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</td>
 						</tr>
 					{/each}
 				</tbody>
 			</table>
+			<form class="executive-create-form" onsubmit={(e) => { e.preventDefault(); createLocation(); }}>
+				<h3>Add a location</h3>
+				<div class="executive-create-fields">
+					<input type="text" placeholder="City" bind:value={newLocationCity} disabled={creatingLocation} />
+					<input type="text" placeholder="Location (e.g. St. Agatha or New Hamburg - 3)" bind:value={newLocationName} disabled={creatingLocation} />
+					<input type="text" placeholder="Park" bind:value={newLocationFormalName} disabled={creatingLocation} />
+					<button type="submit" class="executive-action" disabled={creatingLocation}>Add location</button>
+				</div>
+			</form>
 
 			<h2>Miscellaneous</h2>
 			<ul>

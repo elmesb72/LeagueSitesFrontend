@@ -4,6 +4,7 @@ import type { Season } from './Season';
 export interface ExecutiveTeam extends Team {
 	active: boolean;
 	hidden: boolean;
+	canDelete: boolean;
 }
 
 export interface ExecutiveLocation {
@@ -14,6 +15,7 @@ export interface ExecutiveLocation {
 	city: string;
 	address: string | null;
 	mapsPlaceId: string | null;
+	canDelete: boolean;
 }
 
 export interface TournamentSummary {
