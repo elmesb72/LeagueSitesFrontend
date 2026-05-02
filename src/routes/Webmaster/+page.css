@@ -154,3 +154,170 @@
 		font-size: var(--text-xs);
 	}
 }
+
+/* Tabs */
+.webmaster-tabs {
+	display: flex;
+	gap: 0;
+	border-bottom: 2px solid var(--surface-heading-primary);
+}
+
+.webmaster-tab {
+	padding: var(--space-3) var(--space-6);
+	background: none;
+	border: none;
+	border-bottom: 3px solid transparent;
+	margin-bottom: -2px;
+	cursor: pointer;
+	font-family: var(--font-condensed);
+	font-weight: 700;
+	font-size: var(--text-base);
+	color: var(--text-soft-contrast);
+	transition: color 0.15s, border-color 0.15s;
+}
+
+.webmaster-tab:hover {
+	color: var(--text-default);
+}
+
+.webmaster-tab.active {
+	color: var(--text-default);
+	border-bottom-color: var(--surface-heading-primary);
+}
+
+/* Config form */
+.config-field {
+	margin-bottom: var(--space-4);
+}
+
+.config-field label {
+	display: block;
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	margin-bottom: 2px;
+}
+
+.config-field input[type='text'],
+.config-field input[type='number'],
+.config-field textarea {
+	width: 100%;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: var(--space-2);
+	font-family: inherit;
+	font-size: var(--text-base);
+	box-sizing: border-box;
+}
+
+.config-field input[type='text'],
+.config-field input[type='number'] {
+	height: 32px;
+}
+
+.config-field textarea {
+	resize: vertical;
+	min-height: 80px;
+}
+
+.config-input-short {
+	max-width: 200px;
+}
+
+.config-field-row {
+	display: flex;
+	gap: var(--space-4);
+}
+
+.config-explanation {
+	color: var(--text-soft-contrast);
+	font-size: var(--text-sm);
+	margin-bottom: var(--space-3);
+	padding: 0 var(--space-1);
+}
+
+/* Key-value rows */
+.config-kv-row {
+	display: flex;
+	gap: var(--space-2);
+	margin-bottom: var(--space-2);
+	align-items: center;
+}
+
+.config-kv-row input[type='text'],
+.config-kv-row input[type='number'] {
+	flex: 1;
+	height: 32px;
+	border: 1px solid #d0d0d0;
+	border-radius: var(--radius-sm);
+	padding: 0 var(--space-2);
+	font-family: inherit;
+	font-size: var(--text-base);
+	box-sizing: border-box;
+}
+
+.config-kv-row .config-input-short {
+	flex: 0 0 100px;
+}
+
+.config-remove {
+	background: none;
+	border: none;
+	color: var(--text-soft-contrast);
+	cursor: pointer;
+	padding: 2px var(--space-2);
+	font-size: var(--text-base);
+}
+
+.config-remove:hover {
+	color: var(--color-loss);
+}
+
+.config-add {
+	background: none;
+	border: 1px dashed var(--text-soft-contrast);
+	border-radius: var(--radius-sm);
+	color: var(--text-soft-contrast);
+	cursor: pointer;
+	padding: var(--space-2) var(--space-4);
+	font-size: var(--text-sm);
+	margin-top: var(--space-2);
+}
+
+.config-add:hover {
+	color: var(--link-hover);
+	border-color: var(--link-hover);
+}
+
+/* Save */
+.config-actions {
+	display: flex;
+	align-items: center;
+	gap: var(--space-4);
+	padding: var(--space-4);
+}
+
+.config-save {
+	display: inline-block;
+	height: 36px;
+	padding: 0 var(--space-6);
+	background-image: linear-gradient(to bottom, #1da7ee, #178ee9);
+	border-radius: var(--radius-sm);
+	border: 1px solid #0073bb;
+	color: white;
+	cursor: pointer;
+	font-weight: 700;
+}
+
+.config-save:active {
+	background-image: linear-gradient(to bottom, #008fd8, #0075cf);
+}
+
+.config-save:disabled {
+	opacity: 0.6;
+	cursor: not-allowed;
+}
+
+.config-saved-message {
+	color: var(--color-win);
+	font-weight: 700;
+}
