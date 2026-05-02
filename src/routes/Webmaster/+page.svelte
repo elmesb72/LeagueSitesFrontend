@@ -194,6 +194,9 @@
 						{/if}
 					</div>
 				{/if}
+				<div class="status-actions">
+					<a href="/api/Database/Export" class="config-save" download>Export League DB</a>
+				</div>
 			</div>
 		</div>
 

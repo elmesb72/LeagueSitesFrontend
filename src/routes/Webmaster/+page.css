@@ -321,3 +321,15 @@
 	color: var(--color-win);
 	font-weight: 700;
 }
+
+/* Status actions */
+.status-actions {
+	padding: var(--space-3);
+}
+
+.status-actions a.config-save {
+	display: inline-flex;
+	align-items: center;
+	text-decoration: none;
+	color: white;
+}
