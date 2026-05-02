@@ -14,7 +14,7 @@
 	const status = $derived(data.status);
 
 	// Tab state
-	let activeTab = $state<'monitor' | 'config'>('monitor');
+	let activeTab = $state<'monitor' | 'config'>('config');
 
 	// Monitor tab filters
 	let typeFilter = $state('');
@@ -152,17 +152,17 @@
 			<div class="webmaster-tabs">
 				<button
 					class="webmaster-tab"
-					class:active={activeTab === 'monitor'}
-					onclick={() => activeTab = 'monitor'}
-				>
-					Monitor
-				</button>
-				<button
-					class="webmaster-tab"
 					class:active={activeTab === 'config'}
 					onclick={() => activeTab = 'config'}
 				>
 					Site Config
+				</button>
+				<button
+					class="webmaster-tab"
+					class:active={activeTab === 'monitor'}
+					onclick={() => activeTab = 'monitor'}
+				>
+					Monitor
 				</button>
 			</div>
 		</div>
