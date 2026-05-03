@@ -379,3 +379,15 @@
 .config-upload-label input[type='file'] {
 	display: none;
 }
+
+/* Broken link (DB references a file not on disk) */
+.config-row-missing input[type='text'] {
+	border-color: var(--color-loss);
+}
+
+.config-file-pill.config-file-missing {
+	background-color: var(--surface-page);
+	border-color: var(--color-loss);
+	color: var(--color-loss);
+	font-style: italic;
+}

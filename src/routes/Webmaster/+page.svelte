@@ -45,6 +45,7 @@
 	let configLinks = $state<[string, string][]>([]);
 	let configInformation = $state<[string, string][]>([]);
 	let configHistory = $state<SiteHistoryEntry[]>([]);
+	let configFilesOnDisk = $state<Set<string>>(new Set());
 	let configSaving = $state(false);
 	let configSaved = $state(false);
 
@@ -59,6 +60,7 @@
 		configLinks = Object.entries(cfg.home.links);
 		configInformation = Object.entries(cfg.home.information);
 		configHistory = [...cfg.history];
+		configFilesOnDisk = new Set(cfg.files);
 
 		// Append ghost rows for any files on disk not already linked in
 		// Information Links. These surface orphans so they can be labeled
@@ -104,6 +106,7 @@
 		}
 
 		const result = (await response.json()) as { filename: string; path: string };
+		configFilesOnDisk = new Set([...configFilesOnDisk, result.filename]);
 
 		if (rowIndex !== null) {
 			// Replace an existing empty row with the uploaded file
@@ -127,6 +130,14 @@
 		}
 
 		const filename = url.slice('/files/'.length);
+		const fileMissing = !configFilesOnDisk.has(filename);
+
+		if (fileMissing) {
+			// File is already gone — just remove the stale entry
+			removeRow(configInformation, index, (v) => configInformation = v);
+			return;
+		}
+
 		if (!confirm(`Delete file '${filename}'? This cannot be undone.`)) return;
 
 		const response = await fetch(`/api/Site/Files/${encodeURIComponent(filename)}`, {
@@ -138,6 +149,7 @@
 			return;
 		}
 
+		configFilesOnDisk = new Set([...configFilesOnDisk].filter(f => f !== filename));
 		removeRow(configInformation, index, (v) => configInformation = v);
 	}
 
@@ -460,7 +472,8 @@
 					{#each configInformation as row, i}
 						{@const isFileRow = row[1].startsWith('/files/')}
 						{@const filename = isFileRow ? row[1].slice('/files/'.length) : ''}
-						<div class="config-kv-row">
+						{@const fileMissing = isFileRow && !configFilesOnDisk.has(filename)}
+						<div class="config-kv-row" class:config-row-missing={fileMissing}>
 							<input
 								type="text"
 								placeholder={isFileRow ? 'Label (blank = unlinked)' : 'Label'}
@@ -468,15 +481,22 @@
 								disabled={configSaving}
 							/>
 							{#if isFileRow}
-								<a class="config-file-pill" href={row[1]} target="_blank" rel="noopener" title="Open in new tab">
-									<i class="fa-regular fa-file"></i>
-									{filename}
-								</a>
+								{#if fileMissing}
+									<span class="config-file-pill config-file-missing" title="File not found on server">
+										<i class="fa-solid fa-triangle-exclamation"></i>
+										{filename} (missing)
+									</span>
+								{:else}
+									<a class="config-file-pill" href={row[1]} target="_blank" rel="noopener" title="Open in new tab">
+										<i class="fa-regular fa-file"></i>
+										{filename}
+									</a>
+								{/if}
 								<button
 									type="button"
 									class="config-remove"
 									onclick={() => deleteInfoFile(i)}
-									title="Delete file"
+									title={fileMissing ? 'Remove entry' : 'Delete file'}
 									disabled={configSaving}
 								>
 									<i class="fa-regular fa-trash-can"></i>
