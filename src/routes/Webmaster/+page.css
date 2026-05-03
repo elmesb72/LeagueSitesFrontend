@@ -272,6 +272,30 @@
 	color: var(--color-loss);
 }
 
+/* Drag-and-drop reordering */
+.config-dnd-list {
+	outline: none;
+}
+
+.config-drag-handle {
+	flex: 0 0 auto;
+	color: var(--text-soft-contrast);
+	cursor: grab;
+	padding: 0 var(--space-1);
+	font-size: var(--text-sm);
+	user-select: none;
+	touch-action: none;
+}
+
+.config-drag-handle:hover {
+	color: var(--text-default);
+}
+
+.config-dnd-list:has(> [aria-roledescription='draggable']:active) .config-drag-handle,
+.config-kv-row:active .config-drag-handle {
+	cursor: grabbing;
+}
+
 .config-add {
 	background: none;
 	border: 1px dashed var(--text-soft-contrast);

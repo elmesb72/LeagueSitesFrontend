@@ -1,7 +1,11 @@
 <script lang="ts">
 	import './+page.css';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
+	import { flip } from 'svelte/animate';
+	import { dndzone, type DndEvent } from 'svelte-dnd-action';
+	import EasyMDE from 'easymde';
+	import 'easymde/dist/easymde.min.css';
 	import type { SiteEvent, SiteConfigEdit, SiteHomeConfigEdit, SiteHistoryEntry } from './+page';
 	import ErrorsOverTimeChart from '../../components/ErrorsOverTimeChart.svelte';
 	import EventsPerDayChart from '../../components/EventsPerDayChart.svelte';
@@ -34,20 +38,93 @@
 		return true;
 	}));
 
+	// Drag-and-drop config
+	const flipDurationMs = 150;
+
+	// Config tab row types — svelte-dnd-action requires each item to carry a
+	// stable, unique `id`. We keep ids purely client-side and strip them
+	// before saving.
+	type KvRow = { id: string; key: string; value: string };
+	type HistoryRow = { id: string; year: number; result: string };
+
+	let rowIdCounter = 0;
+	function nextRowId(): string {
+		rowIdCounter += 1;
+		return `row-${rowIdCounter}`;
+	}
+
+	function toKvRows(entries: [string, string][]): KvRow[] {
+		return entries.map(([key, value]) => ({ id: nextRowId(), key, value }));
+	}
+
+	function toHistoryRows(entries: SiteHistoryEntry[]): HistoryRow[] {
+		return entries.map((h) => ({ id: nextRowId(), year: h.year, result: h.result }));
+	}
+
+	function kvRowsToRecord(rows: KvRow[]): Record<string, string> {
+		return Object.fromEntries(rows.filter((r) => r.key.trim()).map((r) => [r.key, r.value]));
+	}
+
 	// Config tab state
 	let configName = $state('');
 	let configShortName = $state('');
 	let configAboutBlurb = $state('');
 	let configNewsMaxAgeDays = $state(30);
 	let configNewsMinItems = $state(3);
-	let configExecutives = $state<[string, string][]>([]);
-	let configSocials = $state<[string, string][]>([]);
-	let configLinks = $state<[string, string][]>([]);
-	let configInformation = $state<[string, string][]>([]);
-	let configHistory = $state<SiteHistoryEntry[]>([]);
+	let configExecutives = $state<KvRow[]>([]);
+	let configSocials = $state<KvRow[]>([]);
+	let configLinks = $state<KvRow[]>([]);
+	let configInformation = $state<KvRow[]>([]);
+	let configHistory = $state<HistoryRow[]>([]);
 	let configFilesOnDisk = $state<Set<string>>(new Set());
 	let configSaving = $state(false);
 	let configSaved = $state(false);
+
+	// About Blurb Markdown editor. The editor is created in onMount once
+	// config data has loaded. When the user switches tabs the textarea is
+	// torn out of the DOM, so we also react to activeTab to rebuild it.
+	let aboutEditorEl: HTMLTextAreaElement | null = $state(null);
+	let aboutEditor: EasyMDE | null = null;
+	let configLoaded = $state(false);
+
+	function createAboutEditor(): void {
+		if (!aboutEditorEl || aboutEditor) return;
+		// Read the current blurb without subscribing, so editor edits don't
+		// feed back into a re-render loop.
+		const initial = untrack(() => configAboutBlurb);
+		aboutEditor = new EasyMDE({
+			element: aboutEditorEl,
+			initialValue: initial,
+			toolbar: [
+				'bold', 'italic', 'strikethrough', '|',
+				'quote', 'unordered-list', 'ordered-list', '|',
+				'link', 'image', '|',
+				'undo', 'redo', '|',
+				'guide'
+			]
+		});
+	}
+
+	function destroyAboutEditor(): void {
+		if (!aboutEditor) return;
+		// Persist the in-progress value back to the reactive state so it
+		// survives tab switches and is picked up by saveConfig.
+		configAboutBlurb = aboutEditor.value();
+		aboutEditor.toTextArea();
+		aboutEditor.cleanup();
+		aboutEditor = null;
+	}
+
+	$effect(() => {
+		// Wait until initConfigForm has populated configAboutBlurb before
+		// creating the editor, so it picks up the real initial value.
+		if (!configLoaded) return;
+		if (aboutEditorEl) {
+			createAboutEditor();
+		} else {
+			destroyAboutEditor();
+		}
+	});
 
 	function initConfigForm(cfg: SiteConfigEdit) {
 		configName = cfg.name;
@@ -55,11 +132,11 @@
 		configAboutBlurb = cfg.home.aboutBlurb;
 		configNewsMaxAgeDays = cfg.home.newsMaxAgeDays;
 		configNewsMinItems = cfg.home.newsMinItems;
-		configExecutives = Object.entries(cfg.home.executives);
-		configSocials = Object.entries(cfg.home.socials);
-		configLinks = Object.entries(cfg.home.links);
-		configInformation = Object.entries(cfg.home.information);
-		configHistory = [...cfg.history];
+		configExecutives = toKvRows(Object.entries(cfg.home.executives));
+		configSocials = toKvRows(Object.entries(cfg.home.socials));
+		configLinks = toKvRows(Object.entries(cfg.home.links));
+		configInformation = toKvRows(Object.entries(cfg.home.information));
+		configHistory = toHistoryRows(cfg.history);
 		configFilesOnDisk = new Set(cfg.files);
 
 		// Append ghost rows for any files on disk not already linked in
@@ -67,13 +144,13 @@
 		// or deleted.
 		const linkedFiles = new Set(
 			configInformation
-				.map(([, url]) => url)
+				.map((r) => r.value)
 				.filter((url) => url.startsWith('/files/'))
 				.map((url) => url.slice('/files/'.length))
 		);
 		for (const filename of cfg.files) {
 			if (!linkedFiles.has(filename)) {
-				configInformation = [...configInformation, ['', '/files/' + filename]];
+				configInformation = [...configInformation, { id: nextRowId(), key: '', value: '/files/' + filename }];
 			}
 		}
 	}
@@ -110,22 +187,26 @@
 
 		if (rowIndex !== null) {
 			// Replace an existing empty row with the uploaded file
-			const label = configInformation[rowIndex][0] || prettifyFilename(result.filename);
-			configInformation[rowIndex] = [label, result.path];
+			const existing = configInformation[rowIndex];
+			const label = existing.key || prettifyFilename(result.filename);
+			configInformation[rowIndex] = { ...existing, key: label, value: result.path };
 			configInformation = [...configInformation];
 		} else {
 			// Append a fresh row
-			configInformation = [...configInformation, [prettifyFilename(result.filename), result.path]];
+			configInformation = [
+				...configInformation,
+				{ id: nextRowId(), key: prettifyFilename(result.filename), value: result.path }
+			];
 		}
 
 		fileInput.value = '';
 	}
 
 	async function deleteInfoFile(index: number): Promise<void> {
-		const url = configInformation[index][1];
+		const url = configInformation[index].value;
 		if (!url.startsWith('/files/')) {
 			// Not a file-backed row; just remove it locally
-			removeRow(configInformation, index, (v) => configInformation = v);
+			configInformation = configInformation.filter((_, i) => i !== index);
 			return;
 		}
 
@@ -134,7 +215,7 @@
 
 		if (fileMissing) {
 			// File is already gone — just remove the stale entry
-			removeRow(configInformation, index, (v) => configInformation = v);
+			configInformation = configInformation.filter((_, i) => i !== index);
 			return;
 		}
 
@@ -150,23 +231,38 @@
 		}
 
 		configFilesOnDisk = new Set([...configFilesOnDisk].filter(f => f !== filename));
-		removeRow(configInformation, index, (v) => configInformation = v);
+		configInformation = configInformation.filter((_, i) => i !== index);
 	}
 
-	function addRow(list: [string, string][], setter: (v: [string, string][]) => void) {
-		setter([...list, ['', '']]);
+	function addKvRow(list: KvRow[], setter: (v: KvRow[]) => void) {
+		setter([...list, { id: nextRowId(), key: '', value: '' }]);
 	}
 
-	function removeRow(list: [string, string][], index: number, setter: (v: [string, string][]) => void) {
+	function removeKvRow(list: KvRow[], index: number, setter: (v: KvRow[]) => void) {
 		setter(list.filter((_, i) => i !== index));
 	}
 
 	function addHistoryRow() {
-		configHistory = [...configHistory, { year: new Date().getFullYear(), result: '' }];
+		configHistory = [
+			...configHistory,
+			{ id: nextRowId(), year: new Date().getFullYear(), result: '' }
+		];
 	}
 
 	function removeHistoryRow(index: number) {
 		configHistory = configHistory.filter((_, i) => i !== index);
+	}
+
+	// dnd-action event helpers. The library hands us a reordered array
+	// (including a transient placeholder during drag) via e.detail.items.
+	// We write it back to state on both `consider` (while dragging) and
+	// `finalize` (on drop).
+	function handleKvDnd(e: CustomEvent<DndEvent<KvRow>>, setter: (v: KvRow[]) => void) {
+		setter(e.detail.items);
+	}
+
+	function handleHistoryDnd(e: CustomEvent<DndEvent<HistoryRow>>) {
+		configHistory = e.detail.items;
 	}
 
 	async function saveConfig(): Promise<void> {
@@ -179,21 +275,25 @@
 		configSaving = true;
 		configSaved = false;
 
+		const aboutBlurb = aboutEditor?.value() ?? configAboutBlurb;
+
 		const home: SiteHomeConfigEdit = {
-			aboutBlurb: configAboutBlurb,
+			aboutBlurb,
 			newsMaxAgeDays: configNewsMaxAgeDays,
 			newsMinItems: configNewsMinItems,
-			executives: Object.fromEntries(configExecutives.filter(([k]) => k.trim())),
-			socials: Object.fromEntries(configSocials.filter(([k]) => k.trim())),
-			links: Object.fromEntries(configLinks.filter(([k]) => k.trim())),
-			information: Object.fromEntries(configInformation.filter(([k]) => k.trim()))
+			executives: kvRowsToRecord(configExecutives),
+			socials: kvRowsToRecord(configSocials),
+			links: kvRowsToRecord(configLinks),
+			information: kvRowsToRecord(configInformation)
 		};
 
 		const body = {
 			name: configName.trim(),
 			shortName: configShortName.trim(),
 			home,
-			history: configHistory.filter(h => h.result.trim())
+			history: configHistory
+				.filter((h) => h.result.trim())
+				.map(({ year, result }) => ({ year, result }))
 		};
 
 		const response = await fetch('/api/Site/Config', {
@@ -230,6 +330,7 @@
 		}
 		if (data.configEdit) {
 			initConfigForm(data.configEdit);
+			configLoaded = true;
 		}
 	});
 </script>
@@ -399,8 +500,8 @@
 				<div class="section webmaster-section">
 					<h1>Homepage Content</h1>
 					<div class="config-field">
-						<label for="config-blurb">About Blurb (HTML supported)</label>
-						<textarea id="config-blurb" bind:value={configAboutBlurb} disabled={configSaving} rows="4"></textarea>
+						<label for="config-blurb">About Blurb (Markdown)</label>
+						<textarea id="config-blurb" bind:this={aboutEditorEl}></textarea>
 					</div>
 					<div class="config-field-row">
 						<div class="config-field">
@@ -418,110 +519,143 @@
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>Executives</h1>
-					<p class="config-explanation">Displayed on the homepage sidebar.</p>
-					{#each configExecutives as [key, value], i}
-						<div class="config-kv-row">
-							<input type="text" placeholder="Title" bind:value={configExecutives[i][0]} disabled={configSaving} />
-							<input type="text" placeholder="Name" bind:value={configExecutives[i][1]} disabled={configSaving} />
-							<button type="button" class="config-remove" onclick={() => removeRow(configExecutives, i, v => configExecutives = v)} title="Remove">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</div>
-					{/each}
-					<button type="button" class="config-add" onclick={() => addRow(configExecutives, v => configExecutives = v)}>+ Add executive</button>
+					<p class="config-explanation">Displayed on the homepage sidebar. Drag rows to reorder.</p>
+					<div
+						class="config-dnd-list"
+						use:dndzone={{ items: configExecutives, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
+						onconsider={(e) => handleKvDnd(e, (v) => (configExecutives = v))}
+						onfinalize={(e) => handleKvDnd(e, (v) => (configExecutives = v))}
+					>
+						{#each configExecutives as row, i (row.id)}
+							<div class="config-kv-row" animate:flip={{ duration: flipDurationMs }}>
+								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+								<input type="text" placeholder="Title" bind:value={configExecutives[i].key} disabled={configSaving} />
+								<input type="text" placeholder="Name" bind:value={configExecutives[i].value} disabled={configSaving} />
+								<button type="button" class="config-remove" onclick={() => removeKvRow(configExecutives, i, (v) => (configExecutives = v))} title="Remove">
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
+					<button type="button" class="config-add" onclick={() => addKvRow(configExecutives, (v) => (configExecutives = v))}>+ Add executive</button>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>Social Links</h1>
-					<p class="config-explanation">Empty URLs are hidden from the homepage.</p>
-					{#each configSocials as [key, value], i}
-						<div class="config-kv-row">
-							<input type="text" placeholder="Platform" bind:value={configSocials[i][0]} disabled={configSaving} />
-							<input type="text" placeholder="URL" bind:value={configSocials[i][1]} disabled={configSaving} />
-							<button type="button" class="config-remove" onclick={() => removeRow(configSocials, i, v => configSocials = v)} title="Remove">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</div>
-					{/each}
-					<button type="button" class="config-add" onclick={() => addRow(configSocials, v => configSocials = v)}>+ Add social</button>
+					<p class="config-explanation">Empty URLs are hidden from the homepage. Drag rows to reorder.</p>
+					<div
+						class="config-dnd-list"
+						use:dndzone={{ items: configSocials, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
+						onconsider={(e) => handleKvDnd(e, (v) => (configSocials = v))}
+						onfinalize={(e) => handleKvDnd(e, (v) => (configSocials = v))}
+					>
+						{#each configSocials as row, i (row.id)}
+							<div class="config-kv-row" animate:flip={{ duration: flipDurationMs }}>
+								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+								<input type="text" placeholder="Platform" bind:value={configSocials[i].key} disabled={configSaving} />
+								<input type="text" placeholder="URL" bind:value={configSocials[i].value} disabled={configSaving} />
+								<button type="button" class="config-remove" onclick={() => removeKvRow(configSocials, i, (v) => (configSocials = v))} title="Remove">
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
+					<button type="button" class="config-add" onclick={() => addKvRow(configSocials, (v) => (configSocials = v))}>+ Add social</button>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>External Links</h1>
-					{#each configLinks as [key, value], i}
-						<div class="config-kv-row">
-							<input type="text" placeholder="Label" bind:value={configLinks[i][0]} disabled={configSaving} />
-							<input type="text" placeholder="URL" bind:value={configLinks[i][1]} disabled={configSaving} />
-							<button type="button" class="config-remove" onclick={() => removeRow(configLinks, i, v => configLinks = v)} title="Remove">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</div>
-					{/each}
-					<button type="button" class="config-add" onclick={() => addRow(configLinks, v => configLinks = v)}>+ Add link</button>
+					<p class="config-explanation">Drag rows to reorder.</p>
+					<div
+						class="config-dnd-list"
+						use:dndzone={{ items: configLinks, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
+						onconsider={(e) => handleKvDnd(e, (v) => (configLinks = v))}
+						onfinalize={(e) => handleKvDnd(e, (v) => (configLinks = v))}
+					>
+						{#each configLinks as row, i (row.id)}
+							<div class="config-kv-row" animate:flip={{ duration: flipDurationMs }}>
+								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+								<input type="text" placeholder="Label" bind:value={configLinks[i].key} disabled={configSaving} />
+								<input type="text" placeholder="URL" bind:value={configLinks[i].value} disabled={configSaving} />
+								<button type="button" class="config-remove" onclick={() => removeKvRow(configLinks, i, (v) => (configLinks = v))} title="Remove">
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
+					<button type="button" class="config-add" onclick={() => addKvRow(configLinks, (v) => (configLinks = v))}>+ Add link</button>
 				</div>
 			</div>
 
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>Information Links</h1>
-					<p class="config-explanation">Links to rules, forms, and other documents. Upload a file or enter an external URL. Uploaded files are available at /files/&lt;name&gt;.</p>
-					{#each configInformation as row, i}
-						{@const isFileRow = row[1].startsWith('/files/')}
-						{@const filename = isFileRow ? row[1].slice('/files/'.length) : ''}
-						{@const fileMissing = isFileRow && !configFilesOnDisk.has(filename)}
-						<div class="config-kv-row" class:config-row-missing={fileMissing}>
-							<input
-								type="text"
-								placeholder={isFileRow ? 'Label (blank = unlinked)' : 'Label'}
-								bind:value={configInformation[i][0]}
-								disabled={configSaving}
-							/>
-							{#if isFileRow}
-								{#if fileMissing}
-									<span class="config-file-pill config-file-missing" title="File not found on server">
-										<i class="fa-solid fa-triangle-exclamation"></i>
-										{filename} (missing)
-									</span>
-								{:else}
-									<a class="config-file-pill" href={row[1]} target="_blank" rel="noopener" title="Open in new tab">
-										<i class="fa-regular fa-file"></i>
-										{filename}
-									</a>
-								{/if}
-								<button
-									type="button"
-									class="config-remove"
-									onclick={() => deleteInfoFile(i)}
-									title={fileMissing ? 'Remove entry' : 'Delete file'}
-									disabled={configSaving}
-								>
-									<i class="fa-regular fa-trash-can"></i>
-								</button>
-							{:else}
+					<p class="config-explanation">Links to rules, forms, and other documents. Upload a file or enter an external URL. Uploaded files are available at /files/&lt;name&gt;. Drag rows to reorder.</p>
+					<div
+						class="config-dnd-list"
+						use:dndzone={{ items: configInformation, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
+						onconsider={(e) => handleKvDnd(e, (v) => (configInformation = v))}
+						onfinalize={(e) => handleKvDnd(e, (v) => (configInformation = v))}
+					>
+						{#each configInformation as row, i (row.id)}
+							{@const isFileRow = row.value.startsWith('/files/')}
+							{@const filename = isFileRow ? row.value.slice('/files/'.length) : ''}
+							{@const fileMissing = isFileRow && !configFilesOnDisk.has(filename)}
+							<div class="config-kv-row" class:config-row-missing={fileMissing} animate:flip={{ duration: flipDurationMs }}>
+								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
 								<input
 									type="text"
-									placeholder="URL or path"
-									bind:value={configInformation[i][1]}
+									placeholder={isFileRow ? 'Label (blank = unlinked)' : 'Label'}
+									bind:value={configInformation[i].key}
 									disabled={configSaving}
 								/>
-								<button
-									type="button"
-									class="config-remove"
-									onclick={() => removeRow(configInformation, i, v => configInformation = v)}
-									title="Remove"
-									disabled={configSaving}
-								>
-									<i class="fa-regular fa-trash-can"></i>
-								</button>
-							{/if}
-						</div>
-					{/each}
+								{#if isFileRow}
+									{#if fileMissing}
+										<span class="config-file-pill config-file-missing" title="File not found on server">
+											<i class="fa-solid fa-triangle-exclamation"></i>
+											{filename} (missing)
+										</span>
+									{:else}
+										<a class="config-file-pill" href={row.value} target="_blank" rel="noopener" title="Open in new tab">
+											<i class="fa-regular fa-file"></i>
+											{filename}
+										</a>
+									{/if}
+									<button
+										type="button"
+										class="config-remove"
+										onclick={() => deleteInfoFile(i)}
+										title={fileMissing ? 'Remove entry' : 'Delete file'}
+										disabled={configSaving}
+									>
+										<i class="fa-regular fa-trash-can"></i>
+									</button>
+								{:else}
+									<input
+										type="text"
+										placeholder="URL or path"
+										bind:value={configInformation[i].value}
+										disabled={configSaving}
+									/>
+									<button
+										type="button"
+										class="config-remove"
+										onclick={() => removeKvRow(configInformation, i, (v) => (configInformation = v))}
+										title="Remove"
+										disabled={configSaving}
+									>
+										<i class="fa-regular fa-trash-can"></i>
+									</button>
+								{/if}
+							</div>
+						{/each}
+					</div>
 					<div class="config-info-add-row">
-						<button type="button" class="config-add" onclick={() => addRow(configInformation, v => configInformation = v)} disabled={configSaving}>
+						<button type="button" class="config-add" onclick={() => addKvRow(configInformation, (v) => (configInformation = v))} disabled={configSaving}>
 							+ Add external link
 						</button>
 						<label class="config-add config-upload-label" class:disabled={configSaving}>
@@ -539,16 +673,24 @@
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>History Overrides</h1>
-					<p class="config-explanation">Override or supplement the auto-generated history. Use for years without a DB season (e.g. cancelled years) or pre-database champions.</p>
-					{#each configHistory as entry, i}
-						<div class="config-kv-row">
-							<input type="number" placeholder="Year" bind:value={configHistory[i].year} disabled={configSaving} class="config-input-short" />
-							<input type="text" placeholder="Result (e.g. team name or 'No season')" bind:value={configHistory[i].result} disabled={configSaving} />
-							<button type="button" class="config-remove" onclick={() => removeHistoryRow(i)} title="Remove">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
-						</div>
-					{/each}
+					<p class="config-explanation">Override or supplement the auto-generated history. Use for years without a DB season (e.g. cancelled years) or pre-database champions. Drag rows to reorder.</p>
+					<div
+						class="config-dnd-list"
+						use:dndzone={{ items: configHistory, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
+						onconsider={handleHistoryDnd}
+						onfinalize={handleHistoryDnd}
+					>
+						{#each configHistory as entry, i (entry.id)}
+							<div class="config-kv-row" animate:flip={{ duration: flipDurationMs }}>
+								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
+								<input type="number" placeholder="Year" bind:value={configHistory[i].year} disabled={configSaving} class="config-input-short" />
+								<input type="text" placeholder="Result (e.g. team name or 'No season')" bind:value={configHistory[i].result} disabled={configSaving} />
+								<button type="button" class="config-remove" onclick={() => removeHistoryRow(i)} title="Remove">
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						{/each}
+					</div>
 					<button type="button" class="config-add" onclick={addHistoryRow}>+ Add year</button>
 				</div>
 			</div>
