@@ -517,6 +517,7 @@
 				{/if}
 				<div class="status-actions">
 					<a href="/api/Database/Export" class="config-save" download>Export League DB</a>
+					<a href="/api/Static/Export" class="config-save" download>Export Static Files</a>
 				</div>
 			</div>
 		</div>

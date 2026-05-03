@@ -460,6 +460,9 @@ label.config-icon-btn {
 
 /* Status actions */
 .status-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-3);
 	padding: var(--space-3);
 }
 
