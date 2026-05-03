@@ -64,19 +64,24 @@
 			{#if isWebmaster}
 				<div class="subsection user-role">
 					<h2><i title="Webmaster" class="fas fa-tools header-icon"></i>Webmaster</h2>
-					<ul>
-						<li><a href="/Webmaster">Site Administration</a></li>
-						<li><a href="/Executive">League Administration</a></li>
-					</ul>
+					<a class="user-nav-link" href="/Webmaster">
+						<i class="fas fa-cog"></i>
+						<span>Site Administration</span>
+					</a>
+					<a class="user-nav-link" href="/Executive">
+						<i class="fas fa-user-tie"></i>
+						<span>League Administration</span>
+					</a>
 				</div>
 			{/if}
 
 			{#if isExecutive && !isWebmaster}
 				<div class="subsection user-role">
 					<h2><i title="League Executive" class="fas fa-user-tie header-icon"></i>League Executive</h2>
-					<ul>
-						<li><a href="/Executive">League Administration</a></li>
-					</ul>
+					<a class="user-nav-link" href="/Executive">
+						<i class="fas fa-user-tie"></i>
+						<span>League Administration</span>
+					</a>
 				</div>
 			{/if}
 
@@ -114,9 +119,10 @@
 			{#if profile.hasDeletedNews}
 				<div class="subsection">
 					<h2>News</h2>
-					<ul>
-						<li><a href="/RecycleBin/News">View/restore deleted News posts</a></li>
-					</ul>
+					<a class="user-nav-link" href="/RecycleBin/News">
+						<i class="fas fa-trash-restore"></i>
+						<span>View/restore deleted News posts</span>
+					</a>
 				</div>
 			{/if}
 		</div>
@@ -161,9 +167,10 @@
 			{/if}
 			<div class="subsection">
 				<h2>Log Out</h2>
-				<ul>
-					<li><a href="/Logout">Click here to log out!</a></li>
-				</ul>
+				<a class="user-nav-link" href="/Logout">
+					<i class="fas fa-sign-out-alt"></i>
+					<span>Click here to log out!</span>
+				</a>
 			</div>
 		</div>
 	</div>

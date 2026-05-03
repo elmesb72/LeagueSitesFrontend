@@ -107,7 +107,6 @@
 }
 
 .oauth-provider-text {
-	font-weight: 700;
 	line-height: var(--space-7);
 	padding: 0 var(--space-1);
 }
@@ -132,4 +131,29 @@
 		white-space: nowrap;
 		overflow: scroll;
 	}
+}
+
+/* Nav link blocks — same visual pattern as team invitation rows */
+.user-nav-link {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	height: var(--space-7);
+	padding: var(--space-2);
+	border: var(--game-border);
+	margin-bottom: var(--space-1);
+}
+
+.user-nav-link:hover {
+	background-color: var(--game-hover-bg);
+}
+
+.user-nav-link i {
+	width: 20px;
+	text-align: center;
+}
+
+.user-nav-link span {
+	font-weight: 700;
+	line-height: var(--space-7);
 }
