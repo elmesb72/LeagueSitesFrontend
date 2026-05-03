@@ -50,6 +50,8 @@ export interface SiteConfigEdit {
 	history: SiteHistoryEntry[];
 	files: string[];
 	socialImages: string[];
+	hasLogo: boolean;
+	hasFavicon: boolean;
 }
 
 export const load = async ({ fetch, parent }) => {

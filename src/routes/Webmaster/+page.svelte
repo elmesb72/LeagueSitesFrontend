@@ -78,6 +78,8 @@
 	let configHistory = $state<HistoryRow[]>([]);
 	let configFilesOnDisk = $state<Set<string>>(new Set());
 	let configSocialImagesOnDisk = $state<Set<string>>(new Set());
+	let configHasLogo = $state(false);
+	let configHasFavicon = $state(false);
 	let configSaving = $state(false);
 	let configSaved = $state(false);
 
@@ -140,6 +142,8 @@
 		configHistory = toHistoryRows(cfg.history);
 		configFilesOnDisk = new Set(cfg.files);
 		configSocialImagesOnDisk = new Set(cfg.socialImages);
+		configHasLogo = cfg.hasLogo;
+		configHasFavicon = cfg.hasFavicon;
 
 		// Append ghost rows for any files on disk not already linked in
 		// Information Links. These surface orphans so they can be labeled
@@ -304,6 +308,58 @@
 			[...configSocialImagesOnDisk].filter((k) => k !== platformKey)
 		);
 		socialImageVersion += 1;
+	}
+
+	// Brand image (league logo + favicon) upload/delete. Cache-busted via
+	// brandImageVersion so the thumbnail refreshes after an upload.
+	let brandImageVersion = $state(0);
+
+	function brandImageUrl(path: string): string {
+		return `${path}?v=${brandImageVersion}`;
+	}
+
+	async function uploadBrandImage(
+		fileInput: HTMLInputElement,
+		endpoint: 'Logo' | 'Favicon'
+	): Promise<void> {
+		const file = fileInput.files?.[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		const response = await fetch(`/api/Site/${endpoint}`, {
+			method: 'POST',
+			body: formData
+		});
+
+		if (!response.ok) {
+			alert(await response.text());
+			fileInput.value = '';
+			return;
+		}
+
+		if (endpoint === 'Logo') configHasLogo = true;
+		else configHasFavicon = true;
+
+		brandImageVersion += 1;
+		fileInput.value = '';
+	}
+
+	async function deleteBrandImage(endpoint: 'Logo' | 'Favicon'): Promise<void> {
+		const label = endpoint === 'Logo' ? 'league logo' : 'favicon';
+		if (!confirm(`Delete the uploaded ${label}? This cannot be undone.`)) return;
+
+		const response = await fetch(`/api/Site/${endpoint}`, { method: 'DELETE' });
+		if (!response.ok && response.status !== 404) {
+			alert(await response.text());
+			return;
+		}
+
+		if (endpoint === 'Logo') configHasLogo = false;
+		else configHasFavicon = false;
+
+		brandImageVersion += 1;
 	}
 
 	function addKvRow(list: KvRow[], setter: (v: KvRow[]) => void) {
@@ -565,6 +621,88 @@
 						<label for="config-shortname">Short Name</label>
 						<input id="config-shortname" type="text" bind:value={configShortName} disabled={configSaving} class="config-input-short" />
 					</div>
+					<div class="config-field">
+						<label for="config-logo-input">League Logo</label>
+						<div class="config-brand-field">
+							<div class="config-brand-preview config-brand-preview-logo">
+								{#if configHasLogo}
+									<img src={brandImageUrl('/images/logo.webp')} alt="League logo" />
+								{:else}
+									<span class="config-social-icon-missing" title="No logo uploaded">
+										<i class="fa-regular fa-image"></i>
+									</span>
+								{/if}
+							</div>
+							<div class="config-icon-group" role="group" aria-label="League logo">
+								<label
+									class="config-icon-btn"
+									class:disabled={configSaving}
+									title={configHasLogo ? 'Replace logo' : 'Upload logo'}
+								>
+									<i class="fa-solid fa-arrow-up-from-bracket"></i>
+									<input
+										id="config-logo-input"
+										type="file"
+										accept="image/png,image/jpeg,image/webp"
+										disabled={configSaving}
+										onchange={(e) => uploadBrandImage(e.currentTarget as HTMLInputElement, 'Logo')}
+									/>
+								</label>
+								<button
+									type="button"
+									class="config-icon-btn"
+									onclick={() => deleteBrandImage('Logo')}
+									disabled={configSaving || !configHasLogo}
+									title={configHasLogo ? 'Delete logo' : 'No logo to delete'}
+									aria-label="Delete logo"
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						</div>
+						<p class="config-field-hint">PNG/JPG/WebP, auto-converted to WebP at up to 256×256.</p>
+					</div>
+					<div class="config-field">
+						<label for="config-favicon-input">Favicon</label>
+						<div class="config-brand-field">
+							<div class="config-brand-preview config-brand-preview-favicon">
+								{#if configHasFavicon}
+									<img src={brandImageUrl('/favicon.png')} alt="Favicon" />
+								{:else}
+									<span class="config-social-icon-missing" title="No favicon uploaded">
+										<i class="fa-regular fa-image"></i>
+									</span>
+								{/if}
+							</div>
+							<div class="config-icon-group" role="group" aria-label="Favicon">
+								<label
+									class="config-icon-btn"
+									class:disabled={configSaving}
+									title={configHasFavicon ? 'Replace favicon' : 'Upload favicon'}
+								>
+									<i class="fa-solid fa-arrow-up-from-bracket"></i>
+									<input
+										id="config-favicon-input"
+										type="file"
+										accept="image/png,image/jpeg,image/webp"
+										disabled={configSaving}
+										onchange={(e) => uploadBrandImage(e.currentTarget as HTMLInputElement, 'Favicon')}
+									/>
+								</label>
+								<button
+									type="button"
+									class="config-icon-btn"
+									onclick={() => deleteBrandImage('Favicon')}
+									disabled={configSaving || !configHasFavicon}
+									title={configHasFavicon ? 'Delete favicon' : 'No favicon to delete'}
+									aria-label="Delete favicon"
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							</div>
+						</div>
+						<p class="config-field-hint">PNG/JPG/WebP, auto-converted to PNG at up to 64×64.</p>
+					</div>
 				</div>
 			</div>
 
@@ -646,7 +784,7 @@
 										class:disabled={configSaving || !keyIsValid}
 										title={hasIcon ? 'Replace icon' : 'Upload icon'}
 									>
-										<i class="fa-solid fa-upload"></i>
+										<i class="fa-solid fa-arrow-up-from-bracket"></i>
 										<input
 											type="file"
 											accept="image/png,image/jpeg,image/webp"

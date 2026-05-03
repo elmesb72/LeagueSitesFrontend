@@ -332,8 +332,11 @@
 	opacity: 0.5;
 }
 
-/* Icon buttons (upload / delete for images) */
-.config-icon-btn {
+/* Icon buttons (upload / delete for images). Doubled class-selector is
+   intentional: .config-field label { display: block } would otherwise
+   clobber the flex layout on labels rendered inside Site Identity. */
+.config-icon-btn,
+label.config-icon-btn {
 	flex: 0 0 auto;
 	display: inline-flex;
 	align-items: center;
@@ -346,6 +349,7 @@
 	color: var(--text-soft-contrast);
 	cursor: pointer;
 	padding: 0;
+	margin-bottom: 0;
 	font-size: var(--text-sm);
 }
 
@@ -362,6 +366,46 @@
 
 .config-icon-btn input[type='file'] {
 	display: none;
+}
+
+/* Brand image (logo, favicon) rows on Site Identity */
+.config-brand-field {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+}
+
+.config-brand-preview {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid #e0e0e0;
+	border-radius: var(--radius-sm);
+	background-color: var(--surface-page);
+	overflow: hidden;
+}
+
+.config-brand-preview img {
+	max-width: 100%;
+	max-height: 100%;
+	display: block;
+}
+
+.config-brand-preview-logo {
+	width: 75px;
+	height: 75px;
+}
+
+.config-brand-preview-favicon {
+	width: 24px;
+	height: 24px;
+}
+
+.config-field-hint {
+	color: var(--text-soft-contrast);
+	font-size: var(--text-xs);
+	margin-top: var(--space-1);
 }
 
 .config-add {
