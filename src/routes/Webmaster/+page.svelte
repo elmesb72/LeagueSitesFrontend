@@ -909,6 +909,7 @@
 							<i class="fa-solid fa-upload"></i> Upload file
 							<input
 								type="file"
+								accept=".pdf,.docx,.xlsx,.pptx,.doc,.xls,.ppt,.txt,.csv,.md,.png,.jpg,.jpeg,.webp,.gif"
 								disabled={configSaving}
 								onchange={(e) => uploadInfoFile(e.currentTarget as HTMLInputElement, null)}
 							/>
