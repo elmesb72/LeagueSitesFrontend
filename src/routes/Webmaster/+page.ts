@@ -49,6 +49,7 @@ export interface SiteConfigEdit {
 	home: SiteHomeConfigEdit;
 	history: SiteHistoryEntry[];
 	files: string[];
+	socialImages: string[];
 }
 
 export const load = async ({ fetch, parent }) => {

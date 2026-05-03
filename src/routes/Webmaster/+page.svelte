@@ -77,6 +77,7 @@
 	let configInformation = $state<KvRow[]>([]);
 	let configHistory = $state<HistoryRow[]>([]);
 	let configFilesOnDisk = $state<Set<string>>(new Set());
+	let configSocialImagesOnDisk = $state<Set<string>>(new Set());
 	let configSaving = $state(false);
 	let configSaved = $state(false);
 
@@ -138,6 +139,7 @@
 		configInformation = toKvRows(Object.entries(cfg.home.information));
 		configHistory = toHistoryRows(cfg.history);
 		configFilesOnDisk = new Set(cfg.files);
+		configSocialImagesOnDisk = new Set(cfg.socialImages);
 
 		// Append ghost rows for any files on disk not already linked in
 		// Information Links. These surface orphans so they can be labeled
@@ -232,6 +234,76 @@
 
 		configFilesOnDisk = new Set([...configFilesOnDisk].filter(f => f !== filename));
 		configInformation = configInformation.filter((_, i) => i !== index);
+	}
+
+	// Platform keys must be safe for use as filenames and in URLs. This
+	// regex matches the server-side validation in SiteSocialImages.cs.
+	const VALID_PLATFORM_KEY = /^[A-Za-z0-9_-]+$/;
+
+	function socialImageUrl(platformKey: string): string {
+		// Cache-bust after upload by appending a timestamp, so the <img>
+		// re-fetches instead of showing the stale cached version.
+		return `/images/social/${platformKey}.webp?v=${socialImageVersion}`;
+	}
+
+	// Bump to invalidate <img> caches after an upload or delete.
+	let socialImageVersion = $state(0);
+
+	async function uploadSocialImage(fileInput: HTMLInputElement, rowIndex: number): Promise<void> {
+		const file = fileInput.files?.[0];
+		if (!file) return;
+
+		const platformKey = configSocials[rowIndex].key.trim();
+		if (!platformKey) {
+			alert('Enter a platform name before uploading an icon.');
+			fileInput.value = '';
+			return;
+		}
+		if (!VALID_PLATFORM_KEY.test(platformKey)) {
+			alert('Platform name may only contain letters, numbers, hyphens, and underscores.');
+			fileInput.value = '';
+			return;
+		}
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		const response = await fetch(
+			`/api/Site/SocialImages/${encodeURIComponent(platformKey)}`,
+			{ method: 'POST', body: formData }
+		);
+
+		if (!response.ok) {
+			alert(await response.text());
+			fileInput.value = '';
+			return;
+		}
+
+		configSocialImagesOnDisk = new Set([...configSocialImagesOnDisk, platformKey]);
+		socialImageVersion += 1;
+		fileInput.value = '';
+	}
+
+	async function deleteSocialImage(rowIndex: number): Promise<void> {
+		const platformKey = configSocials[rowIndex].key.trim();
+		if (!platformKey || !configSocialImagesOnDisk.has(platformKey)) return;
+
+		if (!confirm(`Delete the uploaded icon for '${platformKey}'? This cannot be undone.`)) return;
+
+		const response = await fetch(
+			`/api/Site/SocialImages/${encodeURIComponent(platformKey)}`,
+			{ method: 'DELETE' }
+		);
+
+		if (!response.ok && response.status !== 404) {
+			alert(await response.text());
+			return;
+		}
+
+		configSocialImagesOnDisk = new Set(
+			[...configSocialImagesOnDisk].filter((k) => k !== platformKey)
+		);
+		socialImageVersion += 1;
 	}
 
 	function addKvRow(list: KvRow[], setter: (v: KvRow[]) => void) {
@@ -544,7 +616,7 @@
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>Social Links</h1>
-					<p class="config-explanation">Empty URLs are hidden from the homepage. Drag rows to reorder.</p>
+					<p class="config-explanation">Empty URLs are hidden from the homepage. Drag rows to reorder. Upload an icon image (PNG/JPG/WebP; auto-converted to WebP at 128×128).</p>
 					<div
 						class="config-dnd-list"
 						use:dndzone={{ items: configSocials, flipDurationMs, dragDisabled: configSaving, dropTargetStyle: {} }}
@@ -552,11 +624,48 @@
 						onfinalize={(e) => handleKvDnd(e, (v) => (configSocials = v))}
 					>
 						{#each configSocials as row, i (row.id)}
+							{@const platformKey = configSocials[i].key.trim()}
+							{@const keyIsValid = platformKey.length > 0 && VALID_PLATFORM_KEY.test(platformKey)}
+							{@const hasIcon = keyIsValid && configSocialImagesOnDisk.has(platformKey)}
 							<div class="config-kv-row" animate:flip={{ duration: flipDurationMs }}>
 								<span class="config-drag-handle" aria-hidden="true"><i class="fa-solid fa-grip-vertical"></i></span>
 								<input type="text" placeholder="Platform" bind:value={configSocials[i].key} disabled={configSaving} />
 								<input type="text" placeholder="URL" bind:value={configSocials[i].value} disabled={configSaving} />
-								<button type="button" class="config-remove" onclick={() => removeKvRow(configSocials, i, (v) => (configSocials = v))} title="Remove">
+								<div class="config-icon-group" role="group" aria-label="Platform icon">
+									<div class="config-social-icon">
+										{#if hasIcon}
+											<img src={socialImageUrl(platformKey)} alt="{platformKey} icon" />
+										{:else}
+											<span class="config-social-icon-missing" title={keyIsValid ? 'No icon uploaded' : 'Enter a platform name to enable icon upload'}>
+												<i class="fa-regular fa-image"></i>
+											</span>
+										{/if}
+									</div>
+									<label
+										class="config-icon-btn"
+										class:disabled={configSaving || !keyIsValid}
+										title={hasIcon ? 'Replace icon' : 'Upload icon'}
+									>
+										<i class="fa-solid fa-upload"></i>
+										<input
+											type="file"
+											accept="image/png,image/jpeg,image/webp"
+											disabled={configSaving || !keyIsValid}
+											onchange={(e) => uploadSocialImage(e.currentTarget as HTMLInputElement, i)}
+										/>
+									</label>
+									<button
+										type="button"
+										class="config-icon-btn"
+										onclick={() => deleteSocialImage(i)}
+										disabled={configSaving || !hasIcon}
+										title={hasIcon ? 'Delete icon' : 'No icon to delete'}
+										aria-label="Delete icon"
+									>
+										<i class="fa-regular fa-trash-can"></i>
+									</button>
+								</div>
+								<button type="button" class="config-remove" onclick={() => removeKvRow(configSocials, i, (v) => (configSocials = v))} title="Remove row">
 									<i class="fa-regular fa-trash-can"></i>
 								</button>
 							</div>
@@ -659,7 +768,7 @@
 							+ Add external link
 						</button>
 						<label class="config-add config-upload-label" class:disabled={configSaving}>
-							<i class="fa-regular fa-file-arrow-up"></i> Upload file
+							<i class="fa-solid fa-upload"></i> Upload file
 							<input
 								type="file"
 								disabled={configSaving}
