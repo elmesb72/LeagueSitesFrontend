@@ -59,6 +59,86 @@
 		configLinks = Object.entries(cfg.home.links);
 		configInformation = Object.entries(cfg.home.information);
 		configHistory = [...cfg.history];
+
+		// Append ghost rows for any files on disk not already linked in
+		// Information Links. These surface orphans so they can be labeled
+		// or deleted.
+		const linkedFiles = new Set(
+			configInformation
+				.map(([, url]) => url)
+				.filter((url) => url.startsWith('/files/'))
+				.map((url) => url.slice('/files/'.length))
+		);
+		for (const filename of cfg.files) {
+			if (!linkedFiles.has(filename)) {
+				configInformation = [...configInformation, ['', '/files/' + filename]];
+			}
+		}
+	}
+
+	function prettifyFilename(filename: string): string {
+		// Strip extension, replace _/- with spaces, title-case words.
+		const withoutExt = filename.replace(/\.[^.]+$/, '');
+		return withoutExt
+			.replace(/[_-]+/g, ' ')
+			.replace(/\b\w/g, (c) => c.toUpperCase())
+			.trim();
+	}
+
+	async function uploadInfoFile(fileInput: HTMLInputElement, rowIndex: number | null): Promise<void> {
+		const file = fileInput.files?.[0];
+		if (!file) return;
+
+		const formData = new FormData();
+		formData.append('file', file);
+
+		const response = await fetch('/api/Site/Files', {
+			method: 'POST',
+			body: formData
+		});
+
+		if (!response.ok) {
+			alert(await response.text());
+			fileInput.value = '';
+			return;
+		}
+
+		const result = (await response.json()) as { filename: string; path: string };
+
+		if (rowIndex !== null) {
+			// Replace an existing empty row with the uploaded file
+			const label = configInformation[rowIndex][0] || prettifyFilename(result.filename);
+			configInformation[rowIndex] = [label, result.path];
+			configInformation = [...configInformation];
+		} else {
+			// Append a fresh row
+			configInformation = [...configInformation, [prettifyFilename(result.filename), result.path]];
+		}
+
+		fileInput.value = '';
+	}
+
+	async function deleteInfoFile(index: number): Promise<void> {
+		const url = configInformation[index][1];
+		if (!url.startsWith('/files/')) {
+			// Not a file-backed row; just remove it locally
+			removeRow(configInformation, index, (v) => configInformation = v);
+			return;
+		}
+
+		const filename = url.slice('/files/'.length);
+		if (!confirm(`Delete file '${filename}'? This cannot be undone.`)) return;
+
+		const response = await fetch(`/api/Site/Files/${encodeURIComponent(filename)}`, {
+			method: 'DELETE'
+		});
+
+		if (!response.ok && response.status !== 404) {
+			alert(await response.text());
+			return;
+		}
+
+		removeRow(configInformation, index, (v) => configInformation = v);
 	}
 
 	function addRow(list: [string, string][], setter: (v: [string, string][]) => void) {
@@ -376,17 +456,63 @@
 			<div class="row">
 				<div class="section webmaster-section">
 					<h1>Information Links</h1>
-					<p class="config-explanation">Links to rules, forms, and other documents. Use /files/filename.pdf for files on the server.</p>
-					{#each configInformation as [key, value], i}
+					<p class="config-explanation">Links to rules, forms, and other documents. Upload a file or enter an external URL. Uploaded files are available at /files/&lt;name&gt;.</p>
+					{#each configInformation as row, i}
+						{@const isFileRow = row[1].startsWith('/files/')}
+						{@const filename = isFileRow ? row[1].slice('/files/'.length) : ''}
 						<div class="config-kv-row">
-							<input type="text" placeholder="Label" bind:value={configInformation[i][0]} disabled={configSaving} />
-							<input type="text" placeholder="URL or path" bind:value={configInformation[i][1]} disabled={configSaving} />
-							<button type="button" class="config-remove" onclick={() => removeRow(configInformation, i, v => configInformation = v)} title="Remove">
-								<i class="fa-regular fa-trash-can"></i>
-							</button>
+							<input
+								type="text"
+								placeholder={isFileRow ? 'Label (blank = unlinked)' : 'Label'}
+								bind:value={configInformation[i][0]}
+								disabled={configSaving}
+							/>
+							{#if isFileRow}
+								<a class="config-file-pill" href={row[1]} target="_blank" rel="noopener" title="Open in new tab">
+									<i class="fa-regular fa-file"></i>
+									{filename}
+								</a>
+								<button
+									type="button"
+									class="config-remove"
+									onclick={() => deleteInfoFile(i)}
+									title="Delete file"
+									disabled={configSaving}
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							{:else}
+								<input
+									type="text"
+									placeholder="URL or path"
+									bind:value={configInformation[i][1]}
+									disabled={configSaving}
+								/>
+								<button
+									type="button"
+									class="config-remove"
+									onclick={() => removeRow(configInformation, i, v => configInformation = v)}
+									title="Remove"
+									disabled={configSaving}
+								>
+									<i class="fa-regular fa-trash-can"></i>
+								</button>
+							{/if}
 						</div>
 					{/each}
-					<button type="button" class="config-add" onclick={() => addRow(configInformation, v => configInformation = v)}>+ Add item</button>
+					<div class="config-info-add-row">
+						<button type="button" class="config-add" onclick={() => addRow(configInformation, v => configInformation = v)} disabled={configSaving}>
+							+ Add external link
+						</button>
+						<label class="config-add config-upload-label" class:disabled={configSaving}>
+							<i class="fa-regular fa-file-arrow-up"></i> Upload file
+							<input
+								type="file"
+								disabled={configSaving}
+								onchange={(e) => uploadInfoFile(e.currentTarget as HTMLInputElement, null)}
+							/>
+						</label>
+					</div>
 				</div>
 			</div>
 

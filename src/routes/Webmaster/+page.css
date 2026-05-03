@@ -333,3 +333,49 @@
 	text-decoration: none;
 	color: white;
 }
+
+/* File pill for linked uploads */
+.config-file-pill {
+	flex: 1;
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	height: 32px;
+	padding: 0 var(--space-3);
+	border: var(--game-border);
+	border-radius: var(--radius-sm);
+	background-color: var(--surface-page);
+	font-family: monospace;
+	font-size: var(--text-sm);
+	text-decoration: none;
+	box-sizing: border-box;
+}
+
+.config-file-pill:hover {
+	background-color: var(--game-hover-bg);
+}
+
+/* Inline add + upload toolbar */
+.config-info-add-row {
+	display: flex;
+	gap: var(--space-2);
+	margin-top: var(--space-2);
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.config-upload-label {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	cursor: pointer;
+}
+
+.config-upload-label.disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.config-upload-label input[type='file'] {
+	display: none;
+}

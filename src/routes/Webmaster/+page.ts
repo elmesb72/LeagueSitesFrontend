@@ -48,6 +48,7 @@ export interface SiteConfigEdit {
 	shortName: string;
 	home: SiteHomeConfigEdit;
 	history: SiteHistoryEntry[];
+	files: string[];
 }
 
 export const load = async ({ fetch, parent }) => {
