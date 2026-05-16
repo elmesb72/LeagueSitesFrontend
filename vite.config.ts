@@ -2,7 +2,7 @@ import devtoolsJson from 'vite-plugin-devtools-json';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { enhancedImages } from '@sveltejs/enhanced-img';
 import { defineConfig, type ViteDevServer, type Plugin } from 'vite';
-import { existsSync } from 'fs';
+import { existsSync, createReadStream, statSync } from 'fs';
 import { join } from 'path';
 import type { IncomingMessage, ServerResponse } from 'http';
 
@@ -13,10 +13,9 @@ import type { IncomingMessage, ServerResponse } from 'http';
  * routes and returns the SvelteKit SPA HTML with a 200, which the
  * browser doesn't treat as an image error and the fallback never runs.
  *
- * Scoped narrowly to team-logo paths on purpose. Other tenant images
- * (social icons, league logo, favicon) live on the per-VM volume and
- * are served by the backend in dev via the proxy below — this
- * middleware must not intercept them.
+ * Checks the backend's static volume path so that uploaded logos
+ * (written to /var/db/static/images/teams/) are served correctly in
+ * dev while still returning 404 for teams without a logo.
  *
  * In production this isn't needed — the webserver returns a real 404
  * for missing files directly.
@@ -26,12 +25,24 @@ function teamLogoFallback404(): Plugin {
 		name: 'team-logo-fallback-404',
 		configureServer(server: ViteDevServer) {
 			server.middlewares.use((req: IncomingMessage, res: ServerResponse, next: () => void) => {
-				if (req.url?.startsWith('/images/teams/') && req.url?.endsWith('.webp')) {
-					const filePath = join('static', req.url);
-					if (!existsSync(filePath)) {
+				const rawUrl = req.url ?? '';
+				const urlPath = rawUrl.split('?')[0];
+				if (urlPath.startsWith('/images/teams/') && urlPath.endsWith('.webp')) {
+					const localPath = join('static', urlPath);
+					const volumePath = join('/var/db/static', urlPath);
+					if (!existsSync(localPath) && !existsSync(volumePath)) {
 						res.statusCode = 404;
 						res.setHeader('Content-Length', '0');
 						return res.end();
+					}
+					// If the file exists on the volume, serve it
+					if (!existsSync(localPath) && existsSync(volumePath)) {
+						const stat = statSync(volumePath);
+						res.statusCode = 200;
+						res.setHeader('Content-Type', 'image/webp');
+						res.setHeader('Content-Length', stat.size.toString());
+						createReadStream(volumePath).pipe(res);
+						return;
 					}
 				}
 				next();
