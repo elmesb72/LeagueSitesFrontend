@@ -255,3 +255,8 @@
 	margin-top: 0;
 	height: 32px;
 }
+
+.executive-summary {
+	color: var(--text-soft-contrast);
+	font-size: var(--text-sm);
+}

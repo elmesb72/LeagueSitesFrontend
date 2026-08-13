@@ -276,27 +276,20 @@
 				</ul>
 
 				<h2>Tournaments</h2>
+				{#if season.tournaments && season.tournaments.length > 0}
+					<ul>
+						{#each season.tournaments as tournament}
+							<li><a href="/Executive/Edit/Tournament/{tournament.id}">Manage mid-season tournament</a>
+								{#if tournament.brackets.length > 0 || tournament.roundRobins.length > 0}
+									<span class="executive-summary">({[...tournament.brackets, ...tournament.roundRobins].map((t) => t.name).join(', ')})</span>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
 				<ul>
 					<li><a href="/Executive/Create/Tournament/{season.season.id}">Add mid-season tournament</a></li>
 				</ul>
-				{#if season.tournaments && season.tournaments.length > 0}
-					{#each season.tournaments as tournament}
-						<ul>
-							<li>Season Tournament {tournament.id}:
-								<ul>
-									{#each tournament.brackets as bracket}
-										<li><a href="/Executive/Edit/TournamentBracket/{bracket.id}">Update Bracket <i>{bracket.name}</i></a></li>
-									{/each}
-									{#each tournament.roundRobins as rr}
-										<li><a href="/Executive/Edit/TournamentRoundRobin/{rr.id}">Update Round Robin <i>{rr.name}</i></a></li>
-									{/each}
-								</ul>
-							</li>
-							<li><a href="/Executive/Create/TournamentBracket/{tournament.id}">Add Bracket</a></li>
-							<li><a href="/Executive/Create/TournamentRoundRobin/{tournament.id}">Add Round Robin</a></li>
-						</ul>
-					{/each}
-				{/if}
 
 				{#if !playoffs}
 					<ul>
@@ -310,22 +303,18 @@
 
 			{#if playoffs}
 				<h2>Playoffs</h2>
-				{#each playoffs.tournaments as tournament}
-					<ul>
-						<li>Playoffs Tournament {tournament.id}:
-							<ul>
-								{#each tournament.brackets as bracket}
-									<li><a href="/Executive/Edit/TournamentBracket/{bracket.id}">Update Bracket <i>{bracket.name}</i></a></li>
-								{/each}
-								{#each tournament.roundRobins as rr}
-									<li><a href="/Executive/Edit/TournamentRoundRobin/{rr.id}">Update Round Robin <i>{rr.name}</i></a></li>
-								{/each}
-							</ul>
+				<p class="executive-explanation">Set up the brackets, then schedule each round as the matchups become known.</p>
+				<ul>
+					{#each playoffs.tournaments as tournament}
+						<li><a href="/Executive/Edit/Tournament/{tournament.id}">Manage {playoffs.season.year} playoffs</a>
+							{#if tournament.brackets.length > 0 || tournament.roundRobins.length > 0}
+								<span class="executive-summary">({[...tournament.brackets, ...tournament.roundRobins].map((t) => t.name).join(', ')})</span>
+							{:else}
+								<span class="executive-summary">(no brackets yet)</span>
+							{/if}
 						</li>
-						<li><a href="/Executive/Create/TournamentBracket/{tournament.id}">Add Bracket</a></li>
-						<li><a href="/Executive/Create/TournamentRoundRobin/{tournament.id}">Add Round Robin</a></li>
-					</ul>
-				{/each}
+					{/each}
+				</ul>
 			{/if}
 		</div>
 	</div>

@@ -31,6 +31,7 @@ const mockDashboard: ExecutiveDashboard = {
 const baseData = {
 	redirect: null,
 	dashboard: mockDashboard,
+	teams: [],
 	siteConfig: { siteName: 'Test League', shortName: 'TL', home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} }, apiKeys: { googleMaps: '' } },
 	user: { isAuthenticated: true, name: 'Admin', claims: [] }
 };
@@ -62,14 +63,19 @@ describe('Executive Page', () => {
 		expect(screen.getByText('Edit schedule')).toBeInTheDocument();
 	});
 
-	test('renders tournament bracket links', () => {
+	test('links each mid-season tournament to its management page', () => {
 		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getAllByText(/Update Bracket/).length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText('Manage mid-season tournament')).toHaveAttribute('href', '/Executive/Edit/Tournament/1');
 	});
 
-	test('renders tournament round robin links', () => {
+	test('lists what a tournament already contains', () => {
 		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getAllByText(/Update Round Robin/).length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText('(Championship, Pool A)')).toBeInTheDocument();
+	});
+
+	test('links the playoffs to its management page', () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		expect(screen.getByText(/Manage 2026 playoffs/)).toHaveAttribute('href', '/Executive/Edit/Tournament/2');
 	});
 
 	test('renders playoffs section', () => {
