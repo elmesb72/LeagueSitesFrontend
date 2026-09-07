@@ -1,5 +1,4 @@
 import type { UserProfileData } from '$lib/models/UserProfile';
-import type { StandingsConfigEdit, StandingsComparatorOption } from '$lib/models/StandingsConfig';
 
 export interface SiteEvent {
 	id: number;
@@ -49,8 +48,6 @@ export interface SiteConfigEdit {
 	shortName: string;
 	home: SiteHomeConfigEdit;
 	history: SiteHistoryEntry[];
-	standings: StandingsConfigEdit;
-	standingsComparators: StandingsComparatorOption[];
 	files: string[];
 	socialImages: string[];
 	hasLogo: boolean;

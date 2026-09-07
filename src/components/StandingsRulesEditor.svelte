@@ -20,7 +20,7 @@
 	const flipDurationMs = 150;
 
 	// Initial values are captured once on purpose (matching the other admin
-	// forms): later prop changes must not overwrite what the webmaster has
+	// forms): later prop changes must not overwrite what the executive has
 	// typed. The parent reads the current state via currentConfig() at save.
 	type TiebreakerRow = { id: string; name: string };
 	let winsValue = $state(0);
@@ -58,7 +58,7 @@
 		};
 	}
 
-	/** The webmaster's current (possibly unsaved) standings rules. */
+	/** The executive's current (possibly unsaved) standings rules. */
 	export function currentConfig(): StandingsConfigEdit {
 		return buildConfig();
 	}
@@ -224,6 +224,109 @@
 </div>
 
 <style>
+	/* Form styles matching the admin pages' config sections. Defined here
+	   (scoped) so the editor is self-contained and renders identically on
+	   whichever admin page hosts it. */
+	.config-field {
+		margin-bottom: var(--space-4);
+	}
+
+	.config-field label {
+		display: block;
+		font-size: var(--text-sm);
+		color: var(--text-soft-contrast);
+		margin-bottom: 2px;
+	}
+
+	.config-field input[type='number'] {
+		width: 100%;
+		height: 32px;
+		border: 1px solid #d0d0d0;
+		border-radius: var(--radius-sm);
+		padding: var(--space-2);
+		font-family: inherit;
+		font-size: var(--text-base);
+		box-sizing: border-box;
+	}
+
+	.config-input-short {
+		max-width: 200px;
+	}
+
+	.config-field-row {
+		display: flex;
+		gap: var(--space-4);
+	}
+
+	.config-explanation {
+		color: var(--text-soft-contrast);
+		font-size: var(--text-sm);
+		margin-bottom: var(--space-3);
+		padding: 0 var(--space-1);
+	}
+
+	.config-field-hint {
+		color: var(--text-soft-contrast);
+		font-size: var(--text-xs);
+		margin-top: var(--space-1);
+	}
+
+	.config-dnd-list {
+		outline: none;
+	}
+
+	.config-kv-row {
+		display: flex;
+		gap: var(--space-2);
+		margin-bottom: var(--space-2);
+		align-items: center;
+	}
+
+	.config-drag-handle {
+		flex: 0 0 auto;
+		color: var(--text-soft-contrast);
+		cursor: grab;
+		padding: 0 var(--space-1);
+		font-size: var(--text-sm);
+	}
+
+	.config-drag-handle:hover {
+		color: var(--text-default);
+	}
+
+	.config-kv-row:active .config-drag-handle {
+		cursor: grabbing;
+	}
+
+	.config-remove {
+		background: none;
+		border: none;
+		color: var(--text-soft-contrast);
+		cursor: pointer;
+		padding: 2px var(--space-2);
+		font-size: var(--text-base);
+	}
+
+	.config-remove:hover {
+		color: var(--color-loss);
+	}
+
+	.config-add {
+		background: none;
+		border: 1px dashed var(--text-soft-contrast);
+		border-radius: var(--radius-sm);
+		color: var(--text-soft-contrast);
+		cursor: pointer;
+		padding: var(--space-2) var(--space-4);
+		font-size: var(--text-sm);
+		margin-top: var(--space-2);
+	}
+
+	.config-add:hover {
+		color: var(--link-hover);
+		border-color: var(--link-hover);
+	}
+
 	.standings-rules-subhead {
 		background: unset;
 		color: var(--text-default);

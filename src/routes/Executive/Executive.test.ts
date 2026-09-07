@@ -28,9 +28,26 @@ const mockDashboard: ExecutiveDashboard = {
 	}
 };
 
+const mockStandingsRules = {
+	standings: {
+		winsValue: 2,
+		tiesValue: 1,
+		lossesValue: 0,
+		forfeitWinnerScore: 7,
+		forfeitLoserScore: 0,
+		tiebreakers: ['Points', 'Wins', 'RunDifferential']
+	},
+	comparators: [
+		{ name: 'Points', description: 'Points, using the configured win/tie/loss values', groupRestricted: false },
+		{ name: 'Wins', description: 'Most wins', groupRestricted: false },
+		{ name: 'RunDifferential', description: 'Run differential: runs scored minus runs allowed', groupRestricted: false },
+		{ name: 'HeadToHeadPoints', description: 'Points in games between the tied teams, using the configured values', groupRestricted: true }
+	]
+};
 const baseData = {
 	redirect: null,
 	dashboard: mockDashboard,
+	standingsRules: mockStandingsRules,
 	teams: [],
 	siteConfig: { siteName: 'Test League', shortName: 'TL', home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} }, apiKeys: { googleMaps: '' } },
 	user: { isAuthenticated: true, name: 'Admin', claims: [] }
@@ -133,7 +150,7 @@ describe('Executive Page', () => {
 	});
 
 	test('renders nothing when dashboard is null', () => {
-		const noData = { ...baseData, dashboard: null };
+		const noData = { ...baseData, dashboard: null, standingsRules: null };
 		const { container } = render(ExecutivePage, { props: { data: noData } });
 		expect(container.querySelector('.executive-section')).toBeNull();
 	});
@@ -148,5 +165,18 @@ describe('Executive Page', () => {
 		};
 		render(ExecutivePage, { props: { data: completed } });
 		expect(screen.getByText('20/20 GP')).toBeInTheDocument();
+	});
+	test('renders standings rules editor under League Settings', () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		expect(screen.getByText('Standings Rules')).toBeInTheDocument();
+		expect(screen.getByLabelText('Win points')).toHaveValue(2);
+		expect(screen.getByLabelText('Tiebreaker to add')).toBeInTheDocument();
+		expect(screen.getByText('Save standings rules')).toBeInTheDocument();
+	});
+	test('hides standings rules when the rules fetch failed', () => {
+		const noRules = { ...baseData, standingsRules: null };
+		render(ExecutivePage, { props: { data: noRules } });
+		expect(screen.queryByText('Standings Rules')).toBeNull();
+		expect(screen.getByText('Miscellaneous')).toBeInTheDocument();
 	});
 });

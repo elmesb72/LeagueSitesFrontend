@@ -2,6 +2,7 @@
 	import './+page.css';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import StandingsRulesEditor from '../../components/StandingsRulesEditor.svelte';
 	import Datepicker from 'vanillajs-datepicker/Datepicker';
 	import 'vanillajs-datepicker/css/datepicker.css';
 	import { scheduleImportPreview, type ImportPreview } from '$lib/stores/scheduleImport';
@@ -10,6 +11,7 @@
 	const dashboard = $derived(data.dashboard);
 	const season = $derived(dashboard?.currentSeason);
 	const playoffs = $derived(dashboard?.currentPlayoffs);
+	const standingsRules = $derived(data.standingsRules);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
 	const progressPct = $derived(
@@ -75,6 +77,36 @@
 		const response = await fetch(`/api/Teams/${id}`, { method: 'DELETE' });
 		if (response.ok) {
 			goto('/Executive', { invalidateAll: true });
+		} else {
+			alert(await response.text());
+		}
+	}
+
+	// Standings rules. The editor captures its initial values once and
+	// exposes the current state via currentConfig()/validationProblems().
+	let standingsEditor = $state<StandingsRulesEditor | null>(null);
+	let savingRules = $state(false);
+	let rulesSaved = $state(false);
+
+	async function saveStandingsRules(): Promise<void> {
+		if (!standingsEditor || savingRules) return;
+		const problems = standingsEditor.validationProblems();
+		if (problems.length > 0) {
+			alert('Standings rules need attention:\n' + problems.join('\n'));
+			return;
+		}
+
+		savingRules = true;
+		rulesSaved = false;
+		const response = await fetch('/api/Executive/StandingsRules', {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(standingsEditor.currentConfig())
+		});
+		savingRules = false;
+		if (response.ok) {
+			rulesSaved = true;
+			setTimeout(() => { rulesSaved = false; }, 3000);
 		} else {
 			alert(await response.text());
 		}
@@ -423,6 +455,27 @@
 					<button type="submit" class="executive-action" disabled={creatingLocation}>Add location</button>
 				</div>
 			</form>
+
+			{#if standingsRules}
+				<h2>Standings Rules</h2>
+				<p class="executive-explanation">
+					How teams are ranked. Changes apply everywhere a ranking is shown or
+					used — the standings page, homepage, team records, and playoff
+					seeding.
+				</p>
+				<StandingsRulesEditor
+					bind:this={standingsEditor}
+					initial={standingsRules.standings}
+					comparators={standingsRules.comparators}
+					disabled={savingRules}
+				/>
+				<button type="button" class="executive-action" onclick={saveStandingsRules} disabled={savingRules}>
+					{savingRules ? 'Saving...' : 'Save standings rules'}
+				</button>
+				{#if rulesSaved}
+					<span class="executive-saved-message">Saved!</span>
+				{/if}
+			{/if}
 
 			<h2>Miscellaneous</h2>
 			<ul>

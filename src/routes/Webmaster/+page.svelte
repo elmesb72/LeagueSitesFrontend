@@ -7,12 +7,6 @@
 	import EasyMDE from 'easymde';
 	import 'easymde/dist/easymde.min.css';
 	import type { SiteEvent, SiteConfigEdit, SiteHomeConfigEdit, SiteHistoryEntry } from './+page';
-	import {
-		defaultStandingsConfig,
-		type StandingsComparatorOption,
-		type StandingsConfigEdit
-	} from '$lib/models/StandingsConfig';
-	import StandingsRulesEditor from '../../components/StandingsRulesEditor.svelte';
 	import ErrorsOverTimeChart from '../../components/ErrorsOverTimeChart.svelte';
 	import EventsPerDayChart from '../../components/EventsPerDayChart.svelte';
 	import TopErrorSourcesChart from '../../components/TopErrorSourcesChart.svelte';
@@ -89,12 +83,6 @@
 	let configSaving = $state(false);
 	let configSaved = $state(false);
 
-	// Standings rules. The editor captures these once on mount and exposes
-	// the current values via currentConfig()/validationProblems().
-	let configStandings = $state<StandingsConfigEdit>(defaultStandingsConfig());
-	let standingsComparators = $state<StandingsComparatorOption[]>([]);
-	let standingsEditor = $state<StandingsRulesEditor | null>(null);
-
 	// About Blurb Markdown editor. The editor is created in onMount once
 	// config data has loaded. When the user switches tabs the textarea is
 	// torn out of the DOM, so we also react to activeTab to rebuild it.
@@ -152,10 +140,6 @@
 		configLinks = toKvRows(Object.entries(cfg.home.links));
 		configInformation = toKvRows(Object.entries(cfg.home.information));
 		configHistory = toHistoryRows(cfg.history);
-		// Older backends may not send standings config yet; fall back to the
-		// defaults so the section still renders (and saves) sensibly.
-		configStandings = cfg.standings ?? defaultStandingsConfig();
-		standingsComparators = cfg.standingsComparators ?? [];
 		configFilesOnDisk = new Set(cfg.files);
 		configSocialImagesOnDisk = new Set(cfg.socialImages);
 		configHasLogo = cfg.hasLogo;
@@ -416,12 +400,6 @@
 			return;
 		}
 
-		const standingsProblems = standingsEditor?.validationProblems() ?? [];
-		if (standingsProblems.length > 0) {
-			alert('Standings rules need attention:\n' + standingsProblems.join('\n'));
-			return;
-		}
-
 		configSaving = true;
 		configSaved = false;
 
@@ -443,8 +421,7 @@
 			home,
 			history: configHistory
 				.filter((h) => h.result.trim())
-				.map(({ year, result }) => ({ year, result })),
-			standings: standingsEditor?.currentConfig() ?? configStandings
+				.map(({ year, result }) => ({ year, result }))
 		};
 
 		const response = await fetch('/api/Site/Config', {
@@ -964,25 +941,6 @@
 						{/each}
 					</div>
 					<button type="button" class="config-add" onclick={addHistoryRow}>+ Add year</button>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="section webmaster-section">
-					<h1>Standings Rules</h1>
-					<p class="config-explanation">
-						How teams are ranked in the standings. Changes apply everywhere a
-						ranking is shown or used — the standings page, homepage, team
-						records, and playoff seeding.
-					</p>
-					{#key configLoaded}
-						<StandingsRulesEditor
-							bind:this={standingsEditor}
-							initial={configStandings}
-							comparators={standingsComparators}
-							disabled={configSaving}
-						/>
-					{/key}
 				</div>
 			</div>
 
