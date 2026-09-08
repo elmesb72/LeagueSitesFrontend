@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/svelte';
-import { describe, test, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/svelte';
+import { describe, test, expect, beforeEach } from 'vitest';
 import ExecutivePage from './+page.svelte';
 import type { ExecutiveDashboard } from '$lib/models/Executive';
 
@@ -53,11 +53,55 @@ const baseData = {
 	user: { isAuthenticated: true, name: 'Admin', claims: [] }
 };
 
+async function openTab(name: string): Promise<void> {
+	await fireEvent.click(screen.getByRole('button', { name }));
+}
+
 describe('Executive Page', () => {
-	test('renders season heading', () => {
+	beforeEach(() => {
+		// Tab state initializes from ?tab=; keep tests independent.
+		window.history.replaceState({}, '', '/Executive');
+	});
+
+	// --- Tab bar ---
+
+	test('defaults to the Season tab with league settings hidden', () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		expect(screen.getByText(`${new Date().getFullYear()} Season`)).toBeInTheDocument();
+		expect(screen.queryByText('Springfield Isotopes')).toBeNull();
+		expect(screen.queryByText('Diamond Park')).toBeNull();
+		expect(screen.queryByText('Recover deleted games')).toBeNull();
+	});
+
+	test('renders all five tabs', () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		for (const label of ['Season', 'Teams', 'Parks', 'Standings', 'Miscellaneous']) {
+			expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+		}
+	});
+
+	test('opens the tab named in the URL', () => {
+		window.history.replaceState({}, '', '/Executive?tab=parks');
+		render(ExecutivePage, { props: { data: baseData } });
+		expect(screen.getByText('Diamond Park')).toBeInTheDocument();
+		expect(screen.queryByText(`${new Date().getFullYear()} Season`)).toBeNull();
+	});
+
+	test('falls back to Season for an unknown tab parameter', () => {
+		window.history.replaceState({}, '', '/Executive?tab=bogus');
 		render(ExecutivePage, { props: { data: baseData } });
 		expect(screen.getByText(`${new Date().getFullYear()} Season`)).toBeInTheDocument();
 	});
+
+	test('switching tabs updates the URL', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Standings');
+		expect(window.location.search).toBe('?tab=standings');
+		await openTab('Season');
+		expect(window.location.search).toBe('');
+	});
+
+	// --- Season tab ---
 
 	test('renders regular season section', () => {
 		render(ExecutivePage, { props: { data: baseData } });
@@ -112,49 +156,6 @@ describe('Executive Page', () => {
 		expect(screen.getByText(/Set up year-end playoffs/)).toBeInTheDocument();
 	});
 
-	test('renders teams table', () => {
-		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getByText('Springfield Isotopes')).toBeInTheDocument();
-		expect(screen.getByText('Shelbyville Sharks')).toBeInTheDocument();
-	});
-
-	test('shows active/inactive checkboxes for teams', () => {
-		const { container } = render(ExecutivePage, { props: { data: baseData } });
-		const checkboxes = container.querySelectorAll('.executive-toggle input[type="checkbox"]');
-		expect(checkboxes.length).toBe(4); // 2 teams + 2 locations
-	});
-
-	test('active team has checked checkbox', () => {
-		const { container } = render(ExecutivePage, { props: { data: baseData } });
-		const checkboxes = container.querySelectorAll('.executive-toggle input[type="checkbox"]');
-		// First checkbox is for the active team
-		expect((checkboxes[0] as HTMLInputElement).checked).toBe(true);
-	});
-
-	test('inactive team has unchecked checkbox', () => {
-		const { container } = render(ExecutivePage, { props: { data: baseData } });
-		const checkboxes = container.querySelectorAll('.executive-toggle input[type="checkbox"]');
-		// Second checkbox is for the inactive team
-		expect((checkboxes[1] as HTMLInputElement).checked).toBe(false);
-	});
-
-	test('renders locations table', () => {
-		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getByText('Diamond Park')).toBeInTheDocument();
-		expect(screen.getByText('Shark Field')).toBeInTheDocument();
-	});
-
-	test('renders deleted games recovery link', () => {
-		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getByText('Recover deleted games')).toBeInTheDocument();
-	});
-
-	test('renders nothing when dashboard is null', () => {
-		const noData = { ...baseData, dashboard: null, standingsRules: null };
-		const { container } = render(ExecutivePage, { props: { data: noData } });
-		expect(container.querySelector('.executive-section')).toBeNull();
-	});
-
 	test('completed season shows full progress bar', () => {
 		const completed = {
 			...baseData,
@@ -166,17 +167,101 @@ describe('Executive Page', () => {
 		render(ExecutivePage, { props: { data: completed } });
 		expect(screen.getByText('20/20 GP')).toBeInTheDocument();
 	});
-	test('renders standings rules editor under League Settings', () => {
+
+	// --- Teams tab ---
+
+	test('teams tab shows active teams with inactive collapsed', async () => {
 		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Teams');
+		expect(screen.getByText('Teams (1 active)')).toBeInTheDocument();
+		expect(screen.getByText('Springfield Isotopes')).toBeInTheDocument();
+		expect(screen.queryByText('Shelbyville Sharks')).toBeNull();
+	});
+
+	test('expander reveals and re-hides inactive teams', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Teams');
+		await fireEvent.click(screen.getByText('Show 1 inactive team'));
+		expect(screen.getByText('Shelbyville Sharks')).toBeInTheDocument();
+		await fireEvent.click(screen.getByText('Hide 1 inactive team'));
+		expect(screen.queryByText('Shelbyville Sharks')).toBeNull();
+	});
+
+	test('no expander when every team is active', async () => {
+		const allActive = {
+			...baseData,
+			dashboard: {
+				...mockDashboard,
+				teams: [mockDashboard.teams[0]]
+			}
+		};
+		render(ExecutivePage, { props: { data: allActive } });
+		await openTab('Teams');
+		expect(screen.queryByText(/inactive team/)).toBeNull();
+	});
+
+	test('active team has checked checkbox; revealed inactive team is unchecked', async () => {
+		const { container } = render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Teams');
+		let checkboxes = container.querySelectorAll('.executive-toggle input[type="checkbox"]');
+		expect(checkboxes.length).toBe(1);
+		expect((checkboxes[0] as HTMLInputElement).checked).toBe(true);
+
+		await fireEvent.click(screen.getByText('Show 1 inactive team'));
+		checkboxes = container.querySelectorAll('.executive-toggle input[type="checkbox"]');
+		expect(checkboxes.length).toBe(2);
+		expect((checkboxes[1] as HTMLInputElement).checked).toBe(false);
+	});
+
+	// --- Parks tab ---
+
+	test('parks tab shows active parks with inactive collapsed', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Parks');
+		expect(screen.getByText('Parks (1 active)')).toBeInTheDocument();
+		expect(screen.getByText('Diamond Park')).toBeInTheDocument();
+		expect(screen.queryByText('Shark Field')).toBeNull();
+	});
+
+	test('expander reveals inactive parks', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Parks');
+		await fireEvent.click(screen.getByText('Show 1 inactive park'));
+		expect(screen.getByText('Shark Field')).toBeInTheDocument();
+	});
+
+	// --- Standings tab ---
+
+	test('standings tab renders the rules editor', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Standings');
 		expect(screen.getByText('Standings Rules')).toBeInTheDocument();
 		expect(screen.getByLabelText('Win points')).toHaveValue(2);
 		expect(screen.getByLabelText('Tiebreaker to add')).toBeInTheDocument();
 		expect(screen.getByText('Save standings rules')).toBeInTheDocument();
 	});
-	test('hides standings rules when the rules fetch failed', () => {
+
+	test('standings tab explains when the rules fetch failed', async () => {
 		const noRules = { ...baseData, standingsRules: null };
 		render(ExecutivePage, { props: { data: noRules } });
-		expect(screen.queryByText('Standings Rules')).toBeNull();
-		expect(screen.getByText('Miscellaneous')).toBeInTheDocument();
+		await openTab('Standings');
+		expect(screen.getByText(/Could not load the standings rules/)).toBeInTheDocument();
+		expect(screen.queryByLabelText('Win points')).toBeNull();
+	});
+
+	// --- Miscellaneous tab ---
+
+	test('miscellaneous tab holds the deleted games recovery link', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Miscellaneous');
+		expect(screen.getByText('Recover deleted games')).toBeInTheDocument();
+	});
+
+	// --- Degenerate states ---
+
+	test('renders nothing when dashboard is null', () => {
+		const noData = { ...baseData, dashboard: null, standingsRules: null };
+		const { container } = render(ExecutivePage, { props: { data: noData } });
+		expect(container.querySelector('.executive-section')).toBeNull();
 	});
 });

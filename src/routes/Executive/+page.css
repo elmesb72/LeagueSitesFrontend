@@ -260,3 +260,55 @@
 	color: var(--text-soft-contrast);
 	font-size: var(--text-sm);
 }
+
+/* Tabs (mirrors the Webmaster page's tab bar) */
+.executive-tabs {
+	display: flex;
+	gap: 0;
+	border-bottom: 3px solid var(--surface-heading-primary);
+	flex-wrap: wrap;
+}
+
+.executive-tab {
+	padding: var(--space-3) var(--space-6);
+	background: none;
+	border: none;
+	border-bottom: 4px solid transparent;
+	margin-bottom: -3px;
+	cursor: pointer;
+	font-family: var(--font-condensed);
+	font-weight: 700;
+	font-size: var(--text-base);
+	color: var(--text-soft-contrast);
+	transition: color 0.15s, border-color 0.15s;
+}
+
+.executive-tab:hover {
+	color: var(--text-default);
+}
+
+.executive-tab.active {
+	color: var(--text-default);
+	border-bottom-color: var(--surface-heading-primary);
+}
+
+@media (max-width: 768px) {
+	.executive-tab {
+		padding: var(--space-2) var(--space-3);
+	}
+}
+
+/* Expander for inactive rows in the Teams/Parks tables */
+.executive-show-inactive {
+	background: none;
+	border: none;
+	color: var(--text-soft-contrast);
+	cursor: pointer;
+	padding: var(--space-2) var(--space-1);
+	font-size: var(--text-sm);
+	text-decoration: underline;
+}
+
+.executive-show-inactive:hover {
+	color: var(--link-hover);
+}
