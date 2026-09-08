@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import StandingsRulesEditor from '../../components/StandingsRulesEditor.svelte';
+	import type { StandingsRulesData } from './+page';
 	import Datepicker from 'vanillajs-datepicker/Datepicker';
 	import 'vanillajs-datepicker/css/datepicker.css';
 	import { scheduleImportPreview, type ImportPreview } from '$lib/stores/scheduleImport';
@@ -11,8 +12,27 @@
 	const dashboard = $derived(data.dashboard);
 	const season = $derived(dashboard?.currentSeason);
 	const playoffs = $derived(dashboard?.currentPlayoffs);
-	const standingsRules = $derived(data.standingsRules);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
+
+	// Standings rules are per-season, edited by year. Seeded once from the
+	// page load (deliberate one-time capture, like the editor itself);
+	// picking another year fetches that year's rules client-side.
+	// svelte-ignore state_referenced_locally -- deliberate one-time capture
+	let rulesData = $state<StandingsRulesData | null>(data.standingsRules);
+	let rulesLoading = $state(false);
+
+	async function loadRulesYear(year: number): Promise<void> {
+		if (rulesLoading) return;
+		rulesLoading = true;
+		const response = await fetch(`/api/Executive/StandingsRules?year=${year}`);
+		rulesLoading = false;
+		if (response.ok) {
+			rulesData = await response.json();
+			rulesSaved = false;
+		} else {
+			alert(await response.text());
+		}
+	}
 
 	// Tabs. The active tab is mirrored into ?tab= so views are shareable and
 	// survive refresh; switching replaces the history entry rather than
@@ -138,7 +158,7 @@
 	let rulesSaved = $state(false);
 
 	async function saveStandingsRules(): Promise<void> {
-		if (!standingsEditor || savingRules) return;
+		if (!standingsEditor || !rulesData || savingRules) return;
 		const problems = standingsEditor.validationProblems();
 		if (problems.length > 0) {
 			alert('Standings rules need attention:\n' + problems.join('\n'));
@@ -150,7 +170,7 @@
 		const response = await fetch('/api/Executive/StandingsRules', {
 			method: 'PUT',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(standingsEditor.currentConfig())
+			body: JSON.stringify({ year: rulesData.year, standings: standingsEditor.currentConfig() })
 		});
 		savingRules = false;
 		if (response.ok) {
@@ -545,24 +565,48 @@
 		<div class="row">
 			<div class="section executive-section executive-league">
 				<h1>Standings Rules</h1>
-				{#if standingsRules}
+				{#if rulesData && rulesData.years.length > 0}
 					<p class="executive-explanation">
-						How teams are ranked. Changes apply everywhere a ranking is shown or
-						used — the standings page, homepage, team records, and playoff
-						seeding.
+						How teams are ranked. Rules are stored per season, so a change to
+						one year never re-ranks another; they apply everywhere that
+						year's rankings are shown — the standings page, homepage, team
+						records, and playoff seeding.
 					</p>
-					<StandingsRulesEditor
-						bind:this={standingsEditor}
-						initial={standingsRules.standings}
-						comparators={standingsRules.comparators}
-						disabled={savingRules}
-					/>
-					<button type="button" class="executive-action" onclick={saveStandingsRules} disabled={savingRules}>
-						{savingRules ? 'Saving...' : 'Save standings rules'}
+					<label class="executive-rules-year">
+						Season:
+						<select
+							value={rulesData.year}
+							onchange={(e) => loadRulesYear(Number(e.currentTarget.value))}
+							disabled={rulesLoading || savingRules}
+							aria-label="Season year"
+						>
+							{#each rulesData.years as y (y)}
+								<option value={y}>{y}</option>
+							{/each}
+						</select>
+						{#if rulesLoading}
+							<span class="executive-summary">Loading…</span>
+						{/if}
+					</label>
+					{#key rulesData}
+						<StandingsRulesEditor
+							bind:this={standingsEditor}
+							initial={rulesData.standings}
+							comparators={rulesData.comparators}
+							disabled={savingRules || rulesLoading}
+						/>
+					{/key}
+					<button type="button" class="executive-action" onclick={saveStandingsRules} disabled={savingRules || rulesLoading}>
+						{savingRules ? 'Saving...' : `Save ${rulesData.year} standings rules`}
 					</button>
 					{#if rulesSaved}
 						<span class="executive-saved-message">Saved!</span>
 					{/if}
+				{:else if rulesData}
+					<p>
+						No seasons exist yet — standings rules live on seasons. Create the
+						season on the Season tab first, then set its rules here.
+					</p>
 				{:else}
 					<p>Could not load the standings rules. Refresh the page to try again.</p>
 				{/if}

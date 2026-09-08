@@ -1,5 +1,5 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
-import { describe, test, expect, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { describe, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import ExecutivePage from './+page.svelte';
 import type { ExecutiveDashboard } from '$lib/models/Executive';
 
@@ -29,6 +29,8 @@ const mockDashboard: ExecutiveDashboard = {
 };
 
 const mockStandingsRules = {
+	years: [2026, 2025],
+	year: 2026,
 	standings: {
 		winsValue: 2,
 		tiesValue: 1,
@@ -61,6 +63,10 @@ describe('Executive Page', () => {
 	beforeEach(() => {
 		// Tab state initializes from ?tab=; keep tests independent.
 		window.history.replaceState({}, '', '/Executive');
+	});
+
+	afterEach(() => {
+		vi.restoreAllMocks();
 	});
 
 	// --- Tab bar ---
@@ -238,7 +244,49 @@ describe('Executive Page', () => {
 		expect(screen.getByText('Standings Rules')).toBeInTheDocument();
 		expect(screen.getByLabelText('Win points')).toHaveValue(2);
 		expect(screen.getByLabelText('Tiebreaker to add')).toBeInTheDocument();
-		expect(screen.getByText('Save standings rules')).toBeInTheDocument();
+		expect(screen.getByText('Save 2026 standings rules')).toBeInTheDocument();
+	});
+
+	test('standings tab offers every season year, current selected', async () => {
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Standings');
+		const select = screen.getByLabelText('Season year') as HTMLSelectElement;
+		expect([...select.options].map((o) => o.value)).toEqual(['2026', '2025']);
+		expect(select.value).toBe('2026');
+		expect(screen.getByText('Save 2026 standings rules')).toBeInTheDocument();
+	});
+
+	test('choosing another year fetches and shows that year\'s rules', async () => {
+		const rules2025 = {
+			...mockStandingsRules,
+			year: 2025,
+			standings: { ...mockStandingsRules.standings, winsValue: 3 }
+		};
+		const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+			new Response(JSON.stringify(rules2025), {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' }
+			})
+		);
+
+		render(ExecutivePage, { props: { data: baseData } });
+		await openTab('Standings');
+		await fireEvent.change(screen.getByLabelText('Season year'), { target: { value: '2025' } });
+
+		expect(fetchSpy).toHaveBeenCalledWith('/api/Executive/StandingsRules?year=2025');
+		await waitFor(() => expect(screen.getByLabelText('Win points')).toHaveValue(3));
+		expect(screen.getByText('Save 2025 standings rules')).toBeInTheDocument();
+	});
+
+	test('standings tab explains when no seasons exist yet', async () => {
+		const noSeasons = {
+			...baseData,
+			standingsRules: { ...mockStandingsRules, years: [] }
+		};
+		render(ExecutivePage, { props: { data: noSeasons } });
+		await openTab('Standings');
+		expect(screen.getByText(/standings rules live on seasons/)).toBeInTheDocument();
+		expect(screen.queryByLabelText('Win points')).toBeNull();
 	});
 
 	test('standings tab explains when the rules fetch failed', async () => {

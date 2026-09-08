@@ -3,6 +3,10 @@ import type { UserProfileData } from '$lib/models/UserProfile';
 import type { StandingsConfigEdit, StandingsComparatorOption } from '$lib/models/StandingsConfig';
 
 export interface StandingsRulesData {
+	/** Years that have seasons, newest first. */
+	years: number[];
+	/** The year whose rules are in `standings`. */
+	year: number;
 	standings: StandingsConfigEdit;
 	comparators: StandingsComparatorOption[];
 }
