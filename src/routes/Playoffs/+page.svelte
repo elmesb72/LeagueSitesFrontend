@@ -16,12 +16,14 @@
 <div class="row">
 	<div class="section playoff-section">
 		<h1>{playoffs?.season?.year ?? ''} Playoffs</h1>
-		{#if playoffs && playoffs.brackets.length > 0}
-			<div class="tournament">
-				{#each playoffs.brackets as bracket}
-					<PlayoffBracket {bracket} />
-				{/each}
-			</div>
+		{#if playoffs && (playoffs.brackets.length > 0 || playoffs.roundRobins.length > 0)}
+			{#if playoffs.brackets.length > 0}
+				<div class="tournament">
+					{#each playoffs.brackets as bracket}
+						<PlayoffBracket {bracket} />
+					{/each}
+				</div>
+			{/if}
 
 			{#each playoffs.roundRobins as roundRobin}
 				<PlayoffRoundRobin {roundRobin} />

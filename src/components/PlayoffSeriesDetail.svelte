@@ -1,29 +1,60 @@
 <script lang="ts">
-	import type { Series } from '$lib/models/Playoffs';
+	import type { Series, SeriesSpot } from '$lib/models/Playoffs';
 	import type { Team } from '$lib/models/Team';
 	import type { Game } from '$lib/models/Game';
 	import { formatDate, formatTime } from '$lib/utils/date';
 
 	let { series }: { series: Series } = $props();
 
+	function isForfeit(game: Game): boolean {
+		// Backend status names are 'Forfeit (Home)' / 'Forfeit (Away)',
+		// naming the team that forfeited.
+		return game.status.name.startsWith('Forfeit');
+	}
+
+	// A game with a definite winner: a forfeit, or a played game with
+	// unequal scores.
+	function isDecided(game: Game): boolean {
+		if (isForfeit(game)) return true;
+		return game.status.name === 'Played' && game.scoreHost !== game.scoreVisitor;
+	}
+
+	// A played game that ended level (e.g. called for darkness).
+	function isTied(game: Game): boolean {
+		return game.status.name === 'Played' && game.scoreHost === game.scoreVisitor;
+	}
+
 	function getWinner(game: Game): Team {
+		if (isForfeit(game)) {
+			return game.status.name === 'Forfeit (Home)' ? game.visitingTeam : game.hostTeam;
+		}
 		return (game.scoreHost ?? 0) > (game.scoreVisitor ?? 0) ? game.hostTeam : game.visitingTeam;
 	}
 
 	function getLoser(game: Game): Team {
-		return (game.scoreHost ?? 0) < (game.scoreVisitor ?? 0) ? game.hostTeam : game.visitingTeam;
+		return getWinner(game).id === game.hostTeam.id ? game.visitingTeam : game.hostTeam;
 	}
 
-	const spot1Label = $derived(
-		series.spot1?.team
-			? `#${series.spot1.initialSeed} ${series.spot1.team.name}`
-			: 'TBD'
-	);
-	const spot2Label = $derived(
-		series.spot2?.team
-			? `#${series.spot2.initialSeed} ${series.spot2.team.name}`
-			: 'TBD'
-	);
+	// Forfeit scores in the database may be null (standings substitute the
+	// league's configured forfeit score), so show FW/FL markers instead of
+	// inventing numbers.
+	function scoreText(game: Game, side: 'winner' | 'loser'): string {
+		if (isForfeit(game)) return side === 'winner' ? 'FW' : 'FL';
+		const host = game.scoreHost ?? 0;
+		const visitor = game.scoreVisitor ?? 0;
+		return String(side === 'winner' ? Math.max(host, visitor) : Math.min(host, visitor));
+	}
+
+	// initialSeed is null for a team that is not in this bracket's seed list —
+	// one that crossed over from another bracket, for instance. Drop the seed
+	// prefix rather than printing '#null'. PlayoffSeriesSpot guards the same way.
+	function spotLabel(spot: SeriesSpot | null): string {
+		if (!spot?.team) return 'TBD';
+		return spot.initialSeed !== null ? `#${spot.initialSeed} ${spot.team.name}` : spot.team.name;
+	}
+
+	const spot1Label = $derived(spotLabel(series.spot1));
+	const spot2Label = $derived(spotLabel(series.spot2));
 </script>
 
 <div class="tournament-items-series">
@@ -55,30 +86,32 @@
 					{/if}
 				</div>
 				<div class="tournament-items-game-team">
-					{#if sg.game && sg.game.status.name === 'Played'}
+					{#if sg.game && isDecided(sg.game)}
 						{@const winner = getWinner(sg.game)}
 						{@const isHome = winner.id === sg.game.hostTeam.id}
 						<a class="tournament-items-game-winner" href="/Team/{winner.abbreviation}">
 							{isHome ? '@' : ''}{winner.location}
-							{Math.max(sg.game.scoreHost ?? 0, sg.game.scoreVisitor ?? 0)}
+							{scoreText(sg.game, 'winner')}
 						</a>
 					{:else if sg.game}
 						<a href="/Team/{sg.game.visitingTeam.abbreviation}">
 							{sg.game.visitingTeam.location}
+							{#if isTied(sg.game)}{sg.game.scoreVisitor}{/if}
 						</a>
 					{/if}
 				</div>
 				<div class="tournament-items-game-team">
-					{#if sg.game && sg.game.status.name === 'Played'}
+					{#if sg.game && isDecided(sg.game)}
 						{@const loser = getLoser(sg.game)}
 						{@const isHome = loser.id === sg.game.hostTeam.id}
 						<a class="tournament-items-game-loser" href="/Team/{loser.abbreviation}">
 							{isHome ? '@' : ''}{loser.location}
-							{Math.min(sg.game.scoreHost ?? 0, sg.game.scoreVisitor ?? 0)}
+							{scoreText(sg.game, 'loser')}
 						</a>
 					{:else if sg.game}
 						<a href="/Team/{sg.game.hostTeam.abbreviation}">
 							@{sg.game.hostTeam.location}
+							{#if isTied(sg.game)}{sg.game.scoreHost}{/if}
 						</a>
 					{/if}
 				</div>

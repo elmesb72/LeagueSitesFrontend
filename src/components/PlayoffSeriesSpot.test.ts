@@ -68,4 +68,23 @@ describe('PlayoffSeriesSpot', () => {
 		});
 		expect(screen.getByText('#3 remaining')).toBeInTheDocument();
 	});
+
+	test('unresolved spots use the placeholder class, not the mobile-hidden name class', () => {
+		// The name class is display:none under 768px; placeholders must not use it
+		for (const spot of [null, spotWinner, spotLoser, spotRemaining]) {
+			const { container, unmount } = render(PlayoffSeriesSpot, {
+				props: { spot, winner: null, initialSeed: null }
+			});
+			expect(container.querySelector('.tournament-series-team-placeholder')).not.toBeNull();
+			expect(container.querySelector('.tournament-series-team-name')).toBeNull();
+			unmount();
+		}
+	});
+
+	test('sourced spots provide short mobile labels', () => {
+		render(PlayoffSeriesSpot, {
+			props: { spot: spotWinner, winner: null, initialSeed: null }
+		});
+		expect(screen.getByText('W1')).toBeInTheDocument();
+	});
 });

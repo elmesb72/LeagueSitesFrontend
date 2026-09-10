@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, test, expect } from 'vitest';
 import PlayoffsPage from './+page.svelte';
-import { mockPlayoffsData, emptyPlayoffsData } from '../../tests/playoffMocks';
+import { mockPlayoffsData, emptyPlayoffsData, roundRobinOnlyPlayoffsData } from '../../tests/playoffMocks';
 
 describe('Playoffs Page', () => {
 	test('renders year in heading', () => {
@@ -37,6 +37,16 @@ describe('Playoffs Page', () => {
 	test('shows no-playoffs message when brackets are empty', () => {
 		render(PlayoffsPage, { props: { data: { playoffs: emptyPlayoffsData } } });
 		expect(screen.getByText(/playoffs have not yet started/)).toBeInTheDocument();
+	});
+
+	test('round-robin-only playoffs render the round robin, not the empty state', () => {
+		const { container } = render(PlayoffsPage, {
+			props: { data: { playoffs: roundRobinOnlyPlayoffsData } }
+		});
+		expect(screen.getByText('Pool A Round Robin Standings')).toBeInTheDocument();
+		expect(screen.queryByText(/playoffs have not yet started/)).toBeNull();
+		// No empty bracket container should render either
+		expect(container.querySelector('.tournament')).toBeNull();
 	});
 
 	test('shows no-playoffs message when data is null', () => {

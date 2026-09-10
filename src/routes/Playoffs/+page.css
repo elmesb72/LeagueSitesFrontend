@@ -51,6 +51,9 @@
 	align-items: center;
 }
 
+/* Each round's series must center on the pair feeding it from the previous
+   round: pad(n) = 2 * pad(n-1) + 42px (half the 84px series height), starting
+   from pad(1) = --space-3 (8px). */
 .round-1 .tournament-series {
 	padding: var(--space-3) 0;
 }
@@ -61,6 +64,14 @@
 
 .round-3 .tournament-series {
 	padding: 158px 0;
+}
+
+.round-4 .tournament-series {
+	padding: 358px 0;
+}
+
+.round-5 .tournament-series {
+	padding: 758px 0;
 }
 
 .tournament-series-number {
@@ -102,10 +113,15 @@
 	outline: var(--tournament-winner-outline);
 }
 
-.tournament-series-team-name {
+.tournament-series-team-name,
+.tournament-series-team-placeholder {
 	display: inline-block;
 	height: var(--space-7);
 	line-height: var(--space-7);
+}
+
+.tournament-series-team-placeholder {
+	color: var(--text-soft);
 }
 
 /* Series detail items */

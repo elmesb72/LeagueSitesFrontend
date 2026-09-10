@@ -14,9 +14,11 @@
 	);
 </script>
 
+<!-- Unresolved spots use -placeholder, not -team-name: the name class is
+     display:none on mobile, which used to leave these boxes blank. -->
 {#if spot === null}
 	<div class="tournament-series-team">
-		<span class="tournament-series-team-name">TBD</span>
+		<span class="tournament-series-team-placeholder">TBD</span>
 	</div>
 {:else if spot.team !== null}
 	<div class="tournament-series-team" class:tournament-series-winner={isWinner}>
@@ -28,14 +30,23 @@
 	</div>
 {:else if spot.source === 'w'}
 	<div class="tournament-series-team">
-		<span class="tournament-series-team-name">Winner of {spot.seed}</span>
+		<span class="tournament-series-team-placeholder">
+			<span class="desktop-only">Winner of {spot.seed}</span>
+			<span class="mobile-only">W{spot.seed}</span>
+		</span>
 	</div>
 {:else if spot.source === 'l'}
 	<div class="tournament-series-team">
-		<span class="tournament-series-team-name">Loser of {spot.seed}</span>
+		<span class="tournament-series-team-placeholder">
+			<span class="desktop-only">Loser of {spot.seed}</span>
+			<span class="mobile-only">L{spot.seed}</span>
+		</span>
 	</div>
 {:else if spot.source === 'r'}
 	<div class="tournament-series-team">
-		<span class="tournament-series-team-name">#{spot.seed} remaining</span>
+		<span class="tournament-series-team-placeholder">
+			<span class="desktop-only">#{spot.seed} remaining</span>
+			<span class="mobile-only">#{spot.seed}</span>
+		</span>
 	</div>
 {/if}

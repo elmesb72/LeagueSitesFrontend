@@ -32,7 +32,7 @@
 	{#if data.isPlayoffs}
 		<div class="section mobile-only">
 			<a href="/Playoffs">
-				<h1 title="Overdue (unscored), Recent (last 7 days), Upcoming (7 days)">Playoffs</h1>
+				<h1>Playoffs</h1>
 				<h2>Click here to view brackets and games</h2>
 			</a>
 		</div>
@@ -83,7 +83,7 @@
 		{#if data.isPlayoffs}
 			<div class="home-playoffs desktop-only">
 				<a href="/Playoffs">
-					<h1 title="Overdue (unscored), Recent (last 7 days), Upcoming (7 days)">Playoffs</h1>
+					<h1>Playoffs</h1>
 					Playoffs are now live! Click here to view the brackets, matchups, and games!
 				</a>
 			</div>

@@ -1,12 +1,31 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, test, expect } from 'vitest';
 import PlayoffSeriesDetail from './PlayoffSeriesDetail.svelte';
-import { completedSeries, inProgressSeries, tbdSeries } from '../tests/playoffMocks';
+import {
+	completedSeries,
+	inProgressSeries,
+	teamAlphas,
+	teamBetas,
+	makeForfeitGame,
+	makeTiedGame
+} from '../tests/playoffMocks';
 
 describe('PlayoffSeriesDetail', () => {
 	test('renders series matchup heading', () => {
 		render(PlayoffSeriesDetail, { props: { series: completedSeries } });
 		expect(screen.getByText('#1 Alphas vs #4 Betas')).toBeInTheDocument();
+	});
+
+	test('omits seed prefix for a team outside this bracket seed list', () => {
+		// initialSeed is null for a crossover team (e.g. from another bracket);
+		// heading must not render '#null'
+		const crossoverSeries = {
+			...completedSeries,
+			spot1: { ...completedSeries.spot1!, initialSeed: null }
+		};
+		render(PlayoffSeriesDetail, { props: { series: crossoverSeries } });
+		expect(screen.getByText('Alphas vs #4 Betas')).toBeInTheDocument();
+		expect(screen.queryByText(/#null/)).toBeNull();
 	});
 
 	test('renders series status text', () => {
@@ -57,13 +76,50 @@ describe('PlayoffSeriesDetail', () => {
 		expect(winnerLinks[0].textContent).toContain('5');
 	});
 
-	test('playoff games always have a winner (no ties)', () => {
-		// All played games in a series must have different scores
-		for (const sg of completedSeries.games) {
-			if (sg.game && sg.game.status.name === 'Played') {
-				expect(sg.game.scoreHost).not.toBe(sg.game.scoreVisitor);
-			}
-		}
+	test('tied game lists both teams once, with scores and no winner', () => {
+		// Alphas host, Betas visit, 4-4 tie
+		const tiedSeries = {
+			...inProgressSeries,
+			games: [{ gameNumber: 1, game: makeTiedGame(310, teamAlphas, teamBetas, 4) }]
+		};
+		const { container } = render(PlayoffSeriesDetail, { props: { series: tiedSeries } });
+		const teamCells = container.querySelectorAll('.tournament-items-game-team');
+		// Visitor listed first, host second with @ prefix — no duplicated team
+		expect(teamCells[0]?.textContent).toContain('Beta Town');
+		expect(teamCells[0]?.textContent).toContain('4');
+		expect(teamCells[1]?.textContent).toContain('@Alpha City');
+		expect(teamCells[1]?.textContent).toContain('4');
+		expect(container.querySelector('.tournament-items-game-winner')).toBeNull();
+	});
+
+	test('visitor forfeit renders host as winner with FW/FL markers', () => {
+		// 'Forfeit (Away)' = visitor (Betas) forfeited, host (Alphas) wins
+		const forfeitSeries = {
+			...inProgressSeries,
+			games: [{ gameNumber: 1, game: makeForfeitGame(311, teamAlphas, teamBetas, 'Away') }]
+		};
+		const { container } = render(PlayoffSeriesDetail, { props: { series: forfeitSeries } });
+		const winner = container.querySelector('.tournament-items-game-winner');
+		const loser = container.querySelector('.tournament-items-game-loser');
+		expect(winner?.textContent).toContain('@Alpha City');
+		expect(winner?.textContent).toContain('FW');
+		expect(loser?.textContent).toContain('Beta Town');
+		expect(loser?.textContent).toContain('FL');
+	});
+
+	test('home forfeit renders visitor as winner', () => {
+		// 'Forfeit (Home)' = host (Alphas) forfeited, visitor (Betas) wins
+		const forfeitSeries = {
+			...inProgressSeries,
+			games: [{ gameNumber: 1, game: makeForfeitGame(312, teamAlphas, teamBetas, 'Home') }]
+		};
+		const { container } = render(PlayoffSeriesDetail, { props: { series: forfeitSeries } });
+		const winner = container.querySelector('.tournament-items-game-winner');
+		const loser = container.querySelector('.tournament-items-game-loser');
+		expect(winner?.textContent).toContain('Beta Town');
+		expect(winner?.textContent).toContain('FW');
+		expect(loser?.textContent).toContain('@Alpha City');
+		expect(loser?.textContent).toContain('FL');
 	});
 
 	test('upcoming game shows @ prefix for host team', () => {

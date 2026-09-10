@@ -53,6 +53,28 @@ export function makeUpcomingGame(id: number, host: Team, visitor: Team): Game {
 	};
 }
 
+// Real backend status names: 'Forfeit (Home)' / 'Forfeit (Away)', naming the
+// team that forfeited. Scores stay null in the database for forfeits.
+export function makeForfeitGame(id: number, host: Team, visitor: Team, forfeitedBy: 'Home' | 'Away'): Game {
+	return {
+		id, date: '2026-09-03T19:00:00',
+		hostTeam: host, visitingTeam: visitor,
+		scoreHost: null, scoreVisitor: null,
+		status: { id: forfeitedBy === 'Home' ? 6 : 7, name: `Forfeit (${forfeitedBy})` },
+		location: mockLocation, season: mockSeason
+	};
+}
+
+export function makeTiedGame(id: number, host: Team, visitor: Team, score: number): Game {
+	return {
+		id, date: '2026-09-02T19:00:00',
+		hostTeam: host, visitingTeam: visitor,
+		scoreHost: score, scoreVisitor: score,
+		status: { id: 5, name: 'Played' },
+		location: mockLocation, season: mockSeason
+	};
+}
+
 export const spot1Alphas: SeriesSpot = { source: 's', seed: 1, team: teamAlphas, initialSeed: 1 };
 export const spot2Betas: SeriesSpot = { source: 's', seed: 2, team: teamBetas, initialSeed: 4 };
 export const spotWinner: SeriesSpot = { source: 'w', seed: 1, team: null, initialSeed: null };
@@ -159,4 +181,10 @@ export const emptyPlayoffsData: PlayoffsData = {
 	season: { id: 10, year: 2026, subseason: 'Playoffs', name: '2026 Playoffs', startDate: '2026-09-01' },
 	brackets: [],
 	roundRobins: []
+};
+
+export const roundRobinOnlyPlayoffsData: PlayoffsData = {
+	season: { id: 10, year: 2026, subseason: 'Playoffs', name: '2026 Playoffs', startDate: '2026-09-01' },
+	brackets: [],
+	roundRobins: [mockRoundRobin]
 };
