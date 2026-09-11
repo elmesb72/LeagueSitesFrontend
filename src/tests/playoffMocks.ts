@@ -33,9 +33,11 @@ export const teamDeltas: Team = {
 const mockLocation = { id: 1, name: 'Playoff Park' };
 const mockSeason = { id: 10, year: 2026, subseason: 'Playoffs' };
 
-export function makePlayedGame(id: number, host: Team, visitor: Team, scoreHost: number, scoreVisitor: number): Game {
+export function makePlayedGame(
+	id: number, host: Team, visitor: Team, scoreHost: number, scoreVisitor: number, date = '2026-09-01T19:00:00'
+): Game {
 	return {
-		id, date: '2026-09-01T19:00:00',
+		id, date,
 		hostTeam: host, visitingTeam: visitor,
 		scoreHost, scoreVisitor,
 		status: { id: 2, name: 'Played' },
@@ -43,9 +45,9 @@ export function makePlayedGame(id: number, host: Team, visitor: Team, scoreHost:
 	};
 }
 
-export function makeUpcomingGame(id: number, host: Team, visitor: Team): Game {
+export function makeUpcomingGame(id: number, host: Team, visitor: Team, date = '2026-09-15T19:00:00'): Game {
 	return {
-		id, date: '2026-09-15T19:00:00',
+		id, date,
 		hostTeam: host, visitingTeam: visitor,
 		scoreHost: null, scoreVisitor: null,
 		status: { id: 1, name: 'Upcoming' },
@@ -148,8 +150,207 @@ export const mockRound2: BracketRound = {
 export const mockBracket: Bracket = {
 	name: 'Championship',
 	format: 'Best of',
+	historical: true,
+	winner: null,
 	rounds: [mockRound1, mockRound2]
 };
+
+// ------------------------------------------------------------------ four-team bracket
+//
+// A realistic small bracket for the public bracket tests: distinct teams,
+// w/l/r spots, a scripted upset with a forfeit, and a play-state switch.
+//
+//   Semi-finals (best of 3):  S1  #1 Alphas v #4 Deltas     S2  #2 Betas v #3 Gammas
+//   Finals:                   S3  w1-w2 (Fixed) or r1-r2 (Re-seed)
+//   3rd place (optional):     S4  l1-l2, single game
+//
+// With `upset` (default) the Deltas beat the Alphas 2-1, game two going to the
+// Alphas by a Deltas forfeit; the Betas beat the Gammas 2-0. Finals and the
+// 3rd-place game go to the better seed 2-0 / in one game when `played: 'all'`.
+
+export interface FourTeamOptions {
+	format?: 'Fixed' | 'Re-seed';
+	thirdPlace?: boolean;
+	played?: 'none' | 'semis' | 'all';
+	upset?: boolean;
+	historical?: boolean;
+	name?: string;
+}
+
+const seedOf = new Map<number, number>([[teamAlphas.id, 1], [teamBetas.id, 2], [teamGammas.id, 3], [teamDeltas.id, 4]]);
+
+function seededSpot(team: Team): SeriesSpot {
+	return { source: '#', seed: seedOf.get(team.id)!, team, initialSeed: seedOf.get(team.id)! };
+}
+
+function results(winner: Team | null, a: Team, b: Team, wa: number, wb: number) {
+	const statusText = winner
+		? `${winner.fullName} win ${Math.max(wa, wb)}-${Math.min(wa, wb)}`
+		: wa === wb
+			? `Series tied ${wa}-${wb}`
+			: `${(wa > wb ? a : b).fullName} lead ${Math.max(wa, wb)}-${Math.min(wa, wb)}`;
+	return {
+		teamResults: [
+			{ team: a, wins: wa, losses: wb },
+			{ team: b, wins: wb, losses: wa }
+		],
+		statusText
+	};
+}
+
+export function makeFourTeamBracket(options: FourTeamOptions = {}): Bracket {
+	const { format = 'Re-seed', thirdPlace = false, played = 'semis', upset = true, historical = true, name = 'Main' } = options;
+	const semisPlayed = played !== 'none';
+	const allPlayed = played === 'all';
+
+	// S1: #1 Alphas v #4 Deltas
+	const s1: Series = {
+		number: 1, format: 'Best of', hostOrder: '121',
+		spot1: seededSpot(teamAlphas), spot2: seededSpot(teamDeltas),
+		winner: null, loser: null, results: null, games: []
+	};
+	if (!semisPlayed) {
+		s1.games = [
+			{ gameNumber: 1, game: makeUpcomingGame(501, teamAlphas, teamDeltas, '2026-09-20T19:00:00') },
+			{ gameNumber: 2, game: makeUpcomingGame(502, teamDeltas, teamAlphas, '2026-09-21T19:00:00') },
+			{ gameNumber: 3, game: null }
+		];
+		s1.results = results(null, teamAlphas, teamDeltas, 0, 0);
+	} else if (upset) {
+		s1.games = [
+			{ gameNumber: 1, game: makePlayedGame(501, teamAlphas, teamDeltas, 3, 5, '2026-09-01T19:00:00') },
+			{ gameNumber: 2, game: makeForfeitGame(502, teamDeltas, teamAlphas, 'Home') }, // Deltas forfeit at home; Alphas win
+			{ gameNumber: 3, game: makePlayedGame(503, teamAlphas, teamDeltas, 2, 4, '2026-09-03T19:00:00') }
+		];
+		s1.winner = teamDeltas; s1.loser = teamAlphas;
+		s1.results = results(teamDeltas, teamAlphas, teamDeltas, 1, 2);
+	} else {
+		s1.games = [
+			{ gameNumber: 1, game: makePlayedGame(501, teamAlphas, teamDeltas, 5, 3, '2026-09-01T19:00:00') },
+			{ gameNumber: 2, game: makePlayedGame(502, teamDeltas, teamAlphas, 2, 4, '2026-09-02T19:00:00') },
+			{ gameNumber: 3, game: null }
+		];
+		s1.winner = teamAlphas; s1.loser = teamDeltas;
+		s1.results = results(teamAlphas, teamAlphas, teamDeltas, 2, 0);
+	}
+
+	// S2: #2 Betas v #3 Gammas — Betas 2-0
+	const s2: Series = {
+		number: 2, format: 'Best of', hostOrder: '121',
+		spot1: seededSpot(teamBetas), spot2: seededSpot(teamGammas),
+		winner: null, loser: null, results: null, games: []
+	};
+	if (!semisPlayed) {
+		s2.games = [
+			{ gameNumber: 1, game: makeUpcomingGame(511, teamBetas, teamGammas, '2026-09-20T21:00:00') },
+			{ gameNumber: 2, game: null },
+			{ gameNumber: 3, game: null }
+		];
+		s2.results = results(null, teamBetas, teamGammas, 0, 0);
+	} else {
+		s2.games = [
+			{ gameNumber: 1, game: makePlayedGame(511, teamBetas, teamGammas, 6, 1, '2026-09-01T21:00:00') },
+			{ gameNumber: 2, game: makePlayedGame(512, teamGammas, teamBetas, 2, 3, '2026-09-02T21:00:00') },
+			{ gameNumber: 3, game: null }
+		];
+		s2.winner = teamBetas; s2.loser = teamGammas;
+		s2.results = results(teamBetas, teamBetas, teamGammas, 2, 0);
+	}
+
+	// Finals: the two semi-final winners, better seed as spot 1 (as the server orders them)
+	const w1 = s1.winner, w2 = s2.winner;
+	let finalSpots: [SeriesSpot, SeriesSpot];
+	if (!w1 || !w2) {
+		finalSpots = format === 'Fixed'
+			? [{ source: 'w', seed: 1, team: null, initialSeed: null }, { source: 'w', seed: 2, team: null, initialSeed: null }]
+			: [{ source: 'r', seed: 1, team: null, initialSeed: null }, { source: 'r', seed: 2, team: null, initialSeed: null }];
+	} else if (format === 'Fixed') {
+		const a: SeriesSpot = { source: 'w', seed: 1, team: w1, initialSeed: seedOf.get(w1.id)! };
+		const b: SeriesSpot = { source: 'w', seed: 2, team: w2, initialSeed: seedOf.get(w2.id)! };
+		finalSpots = a.initialSeed! <= b.initialSeed! ? [a, b] : [b, a];
+	} else {
+		const [best, next] = [w1, w2].sort((x, y) => seedOf.get(x.id)! - seedOf.get(y.id)!);
+		finalSpots = [
+			{ source: 'r', seed: 1, team: best, initialSeed: seedOf.get(best.id)! },
+			{ source: 'r', seed: 2, team: next, initialSeed: seedOf.get(next.id)! }
+		];
+	}
+	const final: Series = {
+		number: 3, format: 'Best of', hostOrder: '121',
+		spot1: finalSpots[0], spot2: finalSpots[1],
+		winner: null, loser: null, results: null,
+		games: [{ gameNumber: 1, game: null }, { gameNumber: 2, game: null }, { gameNumber: 3, game: null }]
+	};
+	const f1 = finalSpots[0].team, f2 = finalSpots[1].team;
+	if (f1 && f2) {
+		if (allPlayed) {
+			final.games = [
+				{ gameNumber: 1, game: makePlayedGame(521, f1, f2, 4, 1, '2026-09-10T19:00:00') },
+				{ gameNumber: 2, game: makePlayedGame(522, f2, f1, 2, 5, '2026-09-12T19:00:00') },
+				{ gameNumber: 3, game: null }
+			];
+			final.winner = f1; final.loser = f2;
+			final.results = results(f1, f1, f2, 2, 0);
+		} else {
+			final.games = [
+				{ gameNumber: 1, game: makeUpcomingGame(521, f1, f2, '2026-09-10T19:00:00') },
+				{ gameNumber: 2, game: makeUpcomingGame(522, f2, f1, '2026-09-12T19:00:00') },
+				{ gameNumber: 3, game: null }
+			];
+			final.results = results(null, f1, f2, 0, 0);
+		}
+	}
+
+	const finals: Series[] = [final];
+	if (thirdPlace) {
+		const l1 = s1.loser, l2 = s2.loser;
+		let spots: [SeriesSpot, SeriesSpot];
+		if (!l1 || !l2) {
+			spots = [{ source: 'l', seed: 1, team: null, initialSeed: null }, { source: 'l', seed: 2, team: null, initialSeed: null }];
+		} else {
+			const a: SeriesSpot = { source: 'l', seed: 1, team: l1, initialSeed: seedOf.get(l1.id)! };
+			const b: SeriesSpot = { source: 'l', seed: 2, team: l2, initialSeed: seedOf.get(l2.id)! };
+			spots = a.initialSeed! <= b.initialSeed! ? [a, b] : [b, a];
+		}
+		const third: Series = {
+			number: 4, format: 'Best of', hostOrder: '1',
+			spot1: spots[0], spot2: spots[1],
+			winner: null, loser: null, results: null,
+			games: [{ gameNumber: 1, game: null }]
+		};
+		const t1 = spots[0].team, t2 = spots[1].team;
+		if (t1 && t2) {
+			if (allPlayed) {
+				third.games = [{ gameNumber: 1, game: makePlayedGame(531, t1, t2, 7, 4, '2026-09-11T19:00:00') }];
+				third.winner = t1; third.loser = t2;
+				third.results = results(t1, t1, t2, 1, 0);
+			} else {
+				third.games = [{ gameNumber: 1, game: makeUpcomingGame(531, t1, t2, '2026-09-11T19:00:00') }];
+				third.results = results(null, t1, t2, 0, 0);
+			}
+		}
+		finals.push(third);
+	}
+
+	return {
+		name,
+		format,
+		historical,
+		winner: allPlayed ? final.winner : null,
+		rounds: [
+			{ name: 'Semi-finals', series: [s1, s2] },
+			{ name: 'Finals', series: finals }
+		]
+	};
+}
+
+export function makePlayoffs(brackets: Bracket[], roundRobins: RoundRobin[] = []): PlayoffsData {
+	return {
+		season: { id: 10, year: 2026, subseason: 'Playoffs', name: '2026 Playoffs', startDate: '2026-09-01' },
+		brackets,
+		roundRobins
+	};
+}
 
 export const mockRoundRobin: RoundRobin = {
 	name: 'Pool A',

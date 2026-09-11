@@ -1,50 +1,19 @@
 <script lang="ts">
-	import type { Series, SeriesSpot } from '$lib/models/Playoffs';
-	import type { Team } from '$lib/models/Team';
-	import type { Game } from '$lib/models/Game';
-	import { formatDate, formatTime } from '$lib/utils/date';
+	import type { Bracket, Series, SeriesSpot } from '$lib/models/Playoffs';
+	import { bracketAnchor, seriesAnchor } from '$lib/playoffs/anchors';
+	import { getLoser, getWinner, isDecided, isTied, scoreText } from '$lib/playoffs/gameResult';
+	import { leadAfterEachGame } from '$lib/playoffs/seriesLead';
 	import { seriesFormatLabel } from '$lib/utils/bracketBuilder';
+	import { formatDate, formatTime } from '$lib/utils/date';
 
-	let { series }: { series: Series } = $props();
-
-	function isForfeit(game: Game): boolean {
-		// Backend status names are 'Forfeit (Home)' / 'Forfeit (Away)',
-		// naming the team that forfeited.
-		return game.status.name.startsWith('Forfeit');
-	}
-
-	// A game with a definite winner: a forfeit, or a played game with
-	// unequal scores.
-	function isDecided(game: Game): boolean {
-		if (isForfeit(game)) return true;
-		return game.status.name === 'Played' && game.scoreHost !== game.scoreVisitor;
-	}
-
-	// A played game that ended level (e.g. called for darkness).
-	function isTied(game: Game): boolean {
-		return game.status.name === 'Played' && game.scoreHost === game.scoreVisitor;
-	}
-
-	function getWinner(game: Game): Team {
-		if (isForfeit(game)) {
-			return game.status.name === 'Forfeit (Home)' ? game.visitingTeam : game.hostTeam;
-		}
-		return (game.scoreHost ?? 0) > (game.scoreVisitor ?? 0) ? game.hostTeam : game.visitingTeam;
-	}
-
-	function getLoser(game: Game): Team {
-		return getWinner(game).id === game.hostTeam.id ? game.visitingTeam : game.hostTeam;
-	}
-
-	// Forfeit scores in the database may be null (standings substitute the
-	// league's configured forfeit score), so show FW/FL markers instead of
-	// inventing numbers.
-	function scoreText(game: Game, side: 'winner' | 'loser'): string {
-		if (isForfeit(game)) return side === 'winner' ? 'FW' : 'FL';
-		const host = game.scoreHost ?? 0;
-		const visitor = game.scoreVisitor ?? 0;
-		return String(side === 'winner' ? Math.max(host, visitor) : Math.min(host, visitor));
-	}
+	let {
+		series,
+		bracket = null
+	}: {
+		series: Series;
+		/** When given, the section gets a stable id the bracket links to, and a link back. */
+		bracket?: Bracket | null;
+	} = $props();
 
 	// initialSeed is null for a team that is not in this bracket's seed list —
 	// one that crossed over from another bracket, for instance. Drop the seed
@@ -57,20 +26,27 @@
 	const spot1Label = $derived(spotLabel(series.spot1));
 	const spot2Label = $derived(spotLabel(series.spot2));
 	const formatLabel = $derived(seriesFormatLabel(series.format, series.hostOrder.length));
+	const leads = $derived(leadAfterEachGame(series));
+	const id = $derived(bracket ? seriesAnchor(bracket, series) : undefined);
 </script>
 
-<div class="tournament-items-series">
-	<h2>{spot1Label} vs {spot2Label}</h2>
-	<h3>
+<article class="tournament-items-series" {id}>
+	<div class="tournament-items-series-heading">
+		<h3>{spot1Label} vs {spot2Label}</h3>
+		{#if bracket}
+			<a class="tournament-items-series-back" href="#{bracketAnchor(bracket)}">&uarr; bracket</a>
+		{/if}
+	</div>
+	<p class="tournament-items-series-status-line">
 		<!-- "Series tied 1-1" is ambiguous without the length, so the format leads. -->
 		<span class="tournament-items-series-format">{formatLabel}</span>
 		{#if series.results}
 			<span class="tournament-items-series-separator" aria-hidden="true">&middot;</span>
 			<span class="tournament-items-series-status">{series.results.statusText}</span>
 		{/if}
-	</h3>
+	</p>
 	<div class="tournament-items-games">
-		{#each series.games as sg}
+		{#each series.games as sg, i (sg.gameNumber)}
 			<div class="tournament-items-game">
 				<div class="tournament-items-game-number">
 					{#if sg.game}
@@ -122,7 +98,14 @@
 						</a>
 					{/if}
 				</div>
+				<!-- Series score after this game; the clinching game is emphasised. -->
+				<div
+					class="tournament-items-game-lead"
+					class:tournament-items-game-lead-final={leads[i]?.includes(' win ')}
+				>
+					{leads[i] ?? ''}
+				</div>
 			</div>
 		{/each}
 	</div>
-</div>
+</article>

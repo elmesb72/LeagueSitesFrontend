@@ -12,6 +12,10 @@ export interface PlayoffsData {
 export interface Bracket {
 	name: string;
 	format: string;
+	/** The league shows this bracket's winner as a champion on the History page. */
+	historical: boolean;
+	/** Set once every series in the bracket has a winner. */
+	winner: Team | null;
 	rounds: BracketRound[];
 }
 

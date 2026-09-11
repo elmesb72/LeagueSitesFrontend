@@ -1,13 +1,32 @@
 <script lang="ts">
 	import './+page.css';
 	import { goto } from '$app/navigation';
+	import type { Bracket, Series } from '$lib/models/Playoffs';
+	import { comingUp } from '$lib/playoffs/nextGames';
 	import PlayoffBracket from '../../components/PlayoffBracket.svelte';
-	import PlayoffSeriesDetail from '../../components/PlayoffSeriesDetail.svelte';
+	import PlayoffChampion from '../../components/PlayoffChampion.svelte';
+	import PlayoffComingUp from '../../components/PlayoffComingUp.svelte';
 	import PlayoffRoundRobin from '../../components/PlayoffRoundRobin.svelte';
+	import PlayoffSeriesDetail from '../../components/PlayoffSeriesDetail.svelte';
 
 	let { data } = $props();
 	const playoffs = $derived(data.playoffs);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
+
+	/**
+	 * Older pages passed only `playoffs`; derive the state when the loader did not.
+	 * (Tests still render the page with a bare `{ playoffs }`.)
+	 */
+	const state = $derived<'ok' | 'empty' | 'notFound' | 'unavailable'>(
+		data.state ??
+			(playoffs === null
+				? data.year
+					? 'notFound'
+					: 'empty'
+				: playoffs.brackets.length > 0 || playoffs.roundRobins.length > 0
+					? 'ok'
+					: 'empty')
+	);
 
 	/** The year being shown: the season's own year, else the one asked for in the URL. */
 	const year = $derived<number | null>(playoffs?.season?.year ?? data.year ?? null);
@@ -18,9 +37,16 @@
 	const newer = $derived(index > 0 ? years[index - 1] : null);
 	const older = $derived(index >= 0 && index < years.length - 1 ? years[index + 1] : null);
 
+	const upcoming = $derived(playoffs ? comingUp(playoffs) : []);
+
 	function pickYear(event: Event): void {
 		const chosen = (event.currentTarget as HTMLSelectElement).value;
 		goto(`/Playoffs?year=${chosen}`);
+	}
+
+	/** Detail sections exist for series whose teams are both known. */
+	function detailed(bracket: Bracket): Series[] {
+		return bracket.rounds.flatMap((r) => r.series).filter((s) => s.spot1?.team && s.spot2?.team);
 	}
 </script>
 
@@ -62,32 +88,45 @@
 			</nav>
 		{/if}
 
-		{#if playoffs && (playoffs.brackets.length > 0 || playoffs.roundRobins.length > 0)}
+		{#if state === 'ok' && playoffs}
+			<PlayoffComingUp entries={upcoming} />
+
 			{#if playoffs.brackets.length > 0}
 				<div class="tournament">
-					{#each playoffs.brackets as bracket}
+					{#each playoffs.brackets as bracket (bracket.name)}
+						{#if bracket.winner && bracket.historical}
+							<PlayoffChampion team={bracket.winner} {year} bracketName={bracket.name} />
+						{:else if bracket.winner}
+							<p class="playoff-won-by">
+								{bracket.name} bracket won by <strong>{bracket.winner.fullName}</strong>.
+							</p>
+						{/if}
 						<PlayoffBracket {bracket} />
 					{/each}
 				</div>
 			{/if}
 
-			{#each playoffs.roundRobins as roundRobin}
+			{#each playoffs.roundRobins as roundRobin (roundRobin.name)}
 				<PlayoffRoundRobin {roundRobin} />
 			{/each}
 
-			{#each playoffs.brackets as bracket}
-				{#each bracket.rounds as round}
-					{#each round.series as series}
-						{#if series.spot1?.team && series.spot2?.team}
-							<PlayoffSeriesDetail {series} />
-						{/if}
-					{/each}
-				{/each}
+			{#each playoffs.brackets as bracket (bracket.name)}
+				{@const series = detailed(bracket)}
+				{#if series.length > 0}
+					<section class="tournament-items-bracket" aria-label="{bracket.name} bracket series">
+						<h2>{bracket.name} Bracket &middot; Series</h2>
+						{#each series as s (s.number)}
+							<PlayoffSeriesDetail series={s} {bracket} />
+						{/each}
+					</section>
+				{/if}
 			{/each}
 		{:else}
 			<div class="subsection no-playoffs">
 				<p>
-					{#if playoffs === null && year}
+					{#if state === 'unavailable'}
+						The playoffs page is temporarily unavailable. Please try again in a few minutes.
+					{:else if state === 'notFound' && year}
 						There are no playoffs recorded for {year}.
 					{:else}
 						The playoffs have not yet started for this season.

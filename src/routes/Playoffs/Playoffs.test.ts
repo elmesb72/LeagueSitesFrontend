@@ -1,7 +1,13 @@
 import { render, screen } from '@testing-library/svelte';
-import { describe, test, expect } from 'vitest';
+import { describe, test, expect, vi } from 'vitest';
 import PlayoffsPage from './+page.svelte';
-import { mockPlayoffsData, emptyPlayoffsData, roundRobinOnlyPlayoffsData } from '../../tests/playoffMocks';
+import {
+	mockPlayoffsData,
+	emptyPlayoffsData,
+	roundRobinOnlyPlayoffsData,
+	makeFourTeamBracket,
+	makePlayoffs
+} from '../../tests/playoffMocks';
 
 describe('Playoffs Page', () => {
 	test('renders year in heading', () => {
@@ -29,8 +35,8 @@ describe('Playoffs Page', () => {
 		render(PlayoffsPage, { props: { data: { playoffs: mockPlayoffsData } } });
 		// The TBD series (spot1=winner, spot2=null) should not render a detail section
 		const seriesDetails = screen.queryAllByText(/vs/);
-		// Only the two resolved series should have "vs" headings
-		const detailHeadings = seriesDetails.filter((el) => el.tagName === 'H2');
+		// Only the two resolved series should have "vs" headings (h3 under the bracket's h2)
+		const detailHeadings = seriesDetails.filter((el) => el.tagName === 'H3');
 		expect(detailHeadings.length).toBe(2);
 	});
 
@@ -94,5 +100,78 @@ describe('Playoffs Page (year navigation)', () => {
 	test('with nothing loaded at all the heading has no dangling year', () => {
 		render(PlayoffsPage, { props: { data: { playoffs: null } } });
 		expect(screen.getByRole('heading', { level: 1 }).textContent).toBe('Playoffs');
+	});
+});
+
+describe('Playoffs Page (bracket overhaul)', () => {
+	test('shows a champion banner for a decided historical bracket, naming the same team History would', () => {
+		const bracket = makeFourTeamBracket({ played: 'all', historical: true });
+		const { container } = render(PlayoffsPage, { props: { data: { playoffs: makePlayoffs([bracket]), state: 'ok' } } });
+		const banner = container.querySelector('.playoff-champion')!;
+		expect(banner).not.toBeNull();
+		expect(banner.textContent).toContain('2026 Main Bracket Champions');
+		expect(banner.textContent).toContain(bracket.winner!.fullName);
+		expect(container.querySelector('.playoff-won-by')).toBeNull();
+	});
+
+	test('a decided bracket the league does not treat as a championship gets the quiet "won by" line', () => {
+		const bracket = makeFourTeamBracket({ played: 'all', historical: false, name: 'Consolation' });
+		const { container } = render(PlayoffsPage, { props: { data: { playoffs: makePlayoffs([bracket]), state: 'ok' } } });
+		expect(container.querySelector('.playoff-champion')).toBeNull();
+		expect(container.querySelector('.playoff-won-by')!.textContent).toContain('Consolation bracket won by');
+	});
+
+	test('no champion treatment while the bracket is undecided', () => {
+		const { container } = render(PlayoffsPage, { props: { data: { playoffs: makePlayoffs([makeFourTeamBracket({ played: 'semis' })]), state: 'ok' } } });
+		expect(container.querySelector('.playoff-champion')).toBeNull();
+		expect(container.querySelector('.playoff-won-by')).toBeNull();
+	});
+
+	test('lists the next game of every live series under "Coming up", soonest first', () => {
+		// The page uses the real clock; pin it before the fixture's games.
+		vi.useFakeTimers({ toFake: ['Date'] });
+		vi.setSystemTime(new Date('2026-09-05T12:00:00'));
+		const playoffs = makePlayoffs([makeFourTeamBracket({ played: 'semis', thirdPlace: true })]);
+		render(PlayoffsPage, { props: { data: { playoffs, state: 'ok' } } });
+		vi.useRealTimers();
+		expect(screen.getByRole('heading', { name: 'Coming up' })).toBeInTheDocument();
+		const items = screen.getAllByRole('listitem').filter((li) => li.closest('.playoff-coming-up'));
+		expect(items).toHaveLength(2);
+		expect(items[0].textContent).toContain('Finals, series 3');
+		expect(items[0].textContent).toContain('Deltas at Betas');
+		expect(items[1].textContent).toContain('Finals, series 4');
+		expect(screen.getByRole('link', { name: 'Finals, series 3' })).toHaveAttribute('href', '#main-series-3');
+	});
+
+	test('omits "Coming up" when nothing is live', () => {
+		render(PlayoffsPage, { props: { data: { playoffs: makePlayoffs([makeFourTeamBracket({ played: 'all' })]), state: 'ok' } } });
+		expect(screen.queryByRole('heading', { name: 'Coming up' })).toBeNull();
+	});
+
+	test('groups series details under a heading per bracket, with ids the bracket links to', () => {
+		const main = makeFourTeamBracket({ played: 'semis' });
+		const b = makeFourTeamBracket({ played: 'semis', name: 'B Side', historical: false });
+		const { container } = render(PlayoffsPage, { props: { data: { playoffs: makePlayoffs([main, b]), state: 'ok' } } });
+		const groups = [...container.querySelectorAll('.tournament-items-bracket h2')].map((h) => h.textContent);
+		expect(groups).toEqual(['Main Bracket · Series', 'B Side Bracket · Series']);
+		expect(container.querySelector('#main-series-1')).not.toBeNull();
+		expect(container.querySelector('#b-side-series-1')).not.toBeNull();
+		// the bracket's series-number link points at the section
+		expect(container.querySelector('#main-bracket a[href="#main-series-1"]')).not.toBeNull();
+	});
+
+	test('tells the difference between a failed backend, an unknown year, and an empty season', () => {
+		render(PlayoffsPage, { props: { data: { playoffs: null, state: 'unavailable', years: [], year: null } } });
+		expect(screen.getByText(/temporarily unavailable/)).toBeInTheDocument();
+	});
+
+	test('a requested year with no playoffs says so', () => {
+		render(PlayoffsPage, { props: { data: { playoffs: null, state: 'notFound', years: [2026, 2019], year: 2019 } } });
+		expect(screen.getByText('There are no playoffs recorded for 2019.')).toBeInTheDocument();
+	});
+
+	test('an empty season still says "not yet started"', () => {
+		render(PlayoffsPage, { props: { data: { playoffs: emptyPlayoffsData, state: 'empty' } } });
+		expect(screen.getByText(/playoffs have not yet started/)).toBeInTheDocument();
 	});
 });

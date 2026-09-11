@@ -7,6 +7,7 @@ import {
 	teamAlphas,
 	teamBetas,
 	makeForfeitGame,
+	makeFourTeamBracket,
 	makeTiedGame
 } from '../tests/playoffMocks';
 
@@ -140,18 +141,18 @@ describe('PlayoffSeriesDetail', () => {
 	test('empty games array renders heading but no game items', () => {
 		const emptySeries = { ...completedSeries, games: [] };
 		const { container } = render(PlayoffSeriesDetail, { props: { series: emptySeries } });
-		expect(container.querySelector('.tournament-items-series h2')).not.toBeNull();
+		expect(container.querySelector('.tournament-items-series h3')).not.toBeNull();
 		expect(container.querySelectorAll('.tournament-items-game').length).toBe(0);
 	});
 });
 
 describe('PlayoffSeriesDetail (series format)', () => {
 	test('leads the status line with the series length, so "tied 1-1" is unambiguous', () => {
-		render(PlayoffSeriesDetail, { props: { series: inProgressSeries } });
-		const heading = screen.getByRole('heading', { level: 3 });
-		expect(heading).toHaveTextContent('Best of 5');
-		expect(heading).toHaveTextContent('Series tied 1-1');
-		expect(heading.textContent!.indexOf('Best of 5')).toBeLessThan(heading.textContent!.indexOf('Series tied'));
+		const { container } = render(PlayoffSeriesDetail, { props: { series: inProgressSeries } });
+		const status = container.querySelector('.tournament-items-series-status-line')!;
+		expect(status).toHaveTextContent('Best of 5');
+		expect(status).toHaveTextContent('Series tied 1-1');
+		expect(status.textContent!.indexOf('Best of 5')).toBeLessThan(status.textContent!.indexOf('Series tied'));
 	});
 
 	test('names the aggregate format with its game count', () => {
@@ -162,5 +163,35 @@ describe('PlayoffSeriesDetail (series format)', () => {
 	test('a one-game series is a "Single game"', () => {
 		render(PlayoffSeriesDetail, { props: { series: { ...completedSeries, hostOrder: '1' } } });
 		expect(screen.getByText('Single game')).toBeInTheDocument();
+	});
+});
+
+describe('PlayoffSeriesDetail (anchors and series lead)', () => {
+	test('gets a stable id and a link back to the bracket when told which bracket it belongs to', () => {
+		const bracket = makeFourTeamBracket({ played: 'semis' });
+		const { container } = render(PlayoffSeriesDetail, { props: { series: bracket.rounds[0].series[0], bracket } });
+		expect(container.querySelector('article.tournament-items-series')!.id).toBe('main-series-1');
+		expect(screen.getByRole('link', { name: /bracket/ })).toHaveAttribute('href', '#main-bracket');
+	});
+
+	test('has no id or back link without a bracket', () => {
+		const { container } = render(PlayoffSeriesDetail, { props: { series: completedSeries } });
+		expect(container.querySelector('article')!.hasAttribute('id')).toBe(false);
+		expect(screen.queryByRole('link', { name: /bracket/ })).toBeNull();
+	});
+
+	test('shows the series score after each decided game, emphasising the clinch', () => {
+		const bracket = makeFourTeamBracket({ played: 'semis' });
+		const { container } = render(PlayoffSeriesDetail, { props: { series: bracket.rounds[0].series[0], bracket } });
+		const leads = [...container.querySelectorAll('.tournament-items-game-lead')];
+		expect(leads.map((l) => l.textContent!.trim())).toEqual(['Deltas lead 1-0', 'Tied 1-1', 'Deltas win 2-1']);
+		expect(leads[2].classList.contains('tournament-items-game-lead-final')).toBe(true);
+		expect(leads[0].classList.contains('tournament-items-game-lead-final')).toBe(false);
+	});
+
+	test('leaves the lead cell empty for unplayed games', () => {
+		const bracket = makeFourTeamBracket({ played: 'semis' });
+		const { container } = render(PlayoffSeriesDetail, { props: { series: bracket.rounds[1].series[0], bracket } });
+		expect([...container.querySelectorAll('.tournament-items-game-lead')].map((l) => l.textContent!.trim())).toEqual(['', '', '']);
 	});
 });
