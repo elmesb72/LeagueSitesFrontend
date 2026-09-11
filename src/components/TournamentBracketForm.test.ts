@@ -1,7 +1,14 @@
-import { render, screen, fireEvent } from '@testing-library/svelte';
-import { describe, test, expect } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/svelte';
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import TournamentBracketForm from './TournamentBracketForm.svelte';
-import { makeBracket, mockReferenceData } from '../tests/tournamentMocks';
+import {
+	makeBracket,
+	makeDecidedQuarterFinals,
+	makeTournamentDetail,
+	mockBoardSources,
+	mockReferenceData,
+	mockStandingsResponse
+} from '../tests/tournamentMocks';
 
 function renderCreate(
 	defaultSeeding = {
@@ -145,5 +152,100 @@ describe('TournamentBracketForm (editing)', () => {
 			props: { tournamentId: 6, referenceData: mockReferenceData, existing: makeBracket() }
 		});
 		expect(screen.getByRole('button', { name: 'Delete bracket' })).toBeDisabled();
+	});
+});
+
+describe('TournamentBracketForm (seeding board)', () => {
+	const standingsFetch = () =>
+		vi.fn(async () => ({
+			ok: true,
+			json: async () => mockStandingsResponse
+		})) as unknown as typeof fetch;
+
+	beforeEach(() => vi.stubGlobal('fetch', standingsFetch()));
+	afterEach(() => vi.unstubAllGlobals());
+
+	test('shows the seeding board with team names when given the tournament', async () => {
+		render(TournamentBracketForm, {
+			props: {
+				tournamentId: 6,
+				referenceData: { ...mockReferenceData, seedingSources: mockBoardSources },
+				defaultSeeding: {
+					outputStart: 1,
+					outputEnd: 8,
+					result: 'Standings',
+					sourceType: 'Season',
+					sourceID: 15,
+					rankStart: 1,
+					rankEnd: 8
+				},
+				tournament: makeTournamentDetail()
+			}
+		});
+		expect(screen.getByText('Bracket seeds')).toBeInTheDocument();
+		await waitFor(() =>
+			expect(screen.getByRole('button', { name: /Rank 1, Alphas/ })).toBeInTheDocument()
+		);
+		expect(screen.getByLabelText('Number of seeds')).toBeInTheDocument();
+	});
+
+	test('blocks saving while the seeding has a problem, and says why', async () => {
+		render(TournamentBracketForm, {
+			props: {
+				tournamentId: 6,
+				referenceData: { ...mockReferenceData, seedingSources: mockBoardSources },
+				defaultSeeding: {
+					outputStart: 1,
+					outputEnd: 4,
+					result: 'Standings',
+					sourceType: 'Season',
+					sourceID: 15,
+					rankStart: 1,
+					rankEnd: 4
+				},
+				tournament: makeTournamentDetail()
+			}
+		});
+		await fireEvent.click(screen.getByRole('button', { name: 'Build the rounds' }));
+		expect(screen.getByRole('button', { name: 'Create bracket' })).toBeEnabled();
+
+		await fireEvent.click(screen.getByRole('button', { name: 'Clear seed 3' }));
+
+		const save = screen.getByRole('button', { name: 'Create bracket' });
+		expect(save).toBeDisabled();
+		expect(save).toHaveAttribute('title', 'Fix the seeding problems first');
+		expect(screen.getByText('Seed 3 has no team.')).toBeInTheDocument();
+	});
+
+	test('an existing bracket keeps its seed count fixed by its rounds', () => {
+		render(TournamentBracketForm, {
+			props: {
+				tournamentId: 6,
+				referenceData: { ...mockReferenceData, seedingSources: mockBoardSources },
+				existing: makeBracket(),
+				tournament: makeTournamentDetail()
+			}
+		});
+		expect(screen.queryByLabelText('Number of seeds')).toBeNull();
+		expect(screen.getAllByRole('button', { name: /^Seed \d:/ })).toHaveLength(4);
+	});
+
+	test('does not offer the bracket its own rounds as a source', () => {
+		render(TournamentBracketForm, {
+			props: {
+				tournamentId: 6,
+				referenceData: { ...mockReferenceData, seedingSources: mockBoardSources },
+				existing: makeBracket({ rounds: [makeDecidedQuarterFinals()] }),
+				tournament: makeTournamentDetail()
+			}
+		});
+		expect(screen.queryByRole('region', { name: /knocked out in the Quarter-finals/ })).toBeNull();
+	});
+
+	test('works without the tournament: ranks show as numbers', () => {
+		render(TournamentBracketForm, {
+			props: { tournamentId: 6, referenceData: mockReferenceData, existing: makeBracket() }
+		});
+		expect(screen.getByRole('button', { name: /Rank 1, team not yet known/ })).toBeInTheDocument();
 	});
 });

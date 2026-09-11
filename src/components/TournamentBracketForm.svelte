@@ -6,9 +6,11 @@
 		RoundUpsert,
 		SeedGroup,
 		SpotRef,
+		TournamentDetail,
 		TournamentReferenceData
 	} from '$lib/models/Tournament';
 	import type { Team } from '$lib/models/Team';
+	import { seedingProblems } from '$lib/seeding/problems';
 	import {
 		SERIES_LENGTHS,
 		SUPPORTED_TEAM_COUNTS,
@@ -18,18 +20,21 @@
 		hostOrderSummary,
 		seriesLengthLabel
 	} from '$lib/utils/bracketBuilder';
-	import TournamentSeedingEditor from './TournamentSeedingEditor.svelte';
+	import TournamentSeedingBoard from './TournamentSeedingBoard.svelte';
 
 	let {
 		tournamentId,
 		referenceData,
 		existing = null,
-		defaultSeeding = null
+		defaultSeeding = null,
+		tournament = null
 	}: {
 		tournamentId: number;
 		referenceData: TournamentReferenceData;
 		existing?: BracketStructure | null;
 		defaultSeeding?: SeedGroup | null;
+		/** The whole tournament, so the seeding board can show team names. Optional: without it, ranks show as numbers. */
+		tournament?: TournamentDetail | null;
 	} = $props();
 
 	const isEdit = $derived(existing !== null);
@@ -115,6 +120,25 @@
 
 	const hasRounds = $derived(rounds.length > 0);
 
+	/** Seed numbers the rounds' matchups actually use (`#n` spots); empty until rounds exist. */
+	function seedsUsedBy(list: RoundUpsert[]): number[] {
+		const numbers = list
+			.flatMap((r) => r.series)
+			.flatMap((s) => [s.matchup.spot1, s.matchup.spot2])
+			.filter((spot) => spot.type === 'Seed')
+			.map((spot) => spot.number);
+		return [...new Set(numbers)].sort((a, b) => a - b);
+	}
+
+	/** For an existing bracket the seeds are fixed by its rounds; a new bracket lets the board choose. */
+	const existingSeeds = $derived(existing ? seedsUsedBy(initial.rounds) : null);
+
+	// Judged against the rounds as they stand, so a seeding that no longer fills
+	// every matchup (or fills seeds no matchup uses) is caught before save.
+	const seedingIssues = $derived(
+		seedingProblems(seeding, referenceData.seedingSources, 'bracket', seedsUsedBy(rounds))
+	);
+
 	function buildRounds(): void {
 		error = '';
 		if (!canLayOut) {
@@ -159,6 +183,10 @@
 		}
 		if (!hasRounds) {
 			error = 'Set up the rounds before saving.';
+			return;
+		}
+		if (seedingIssues.length > 0) {
+			error = 'Fix the seeding problems above before saving.';
 			return;
 		}
 
@@ -219,7 +247,15 @@
 	</label>
 
 	<h2>Who plays in it?</h2>
-	<TournamentSeedingEditor bind:seeding sources={referenceData.seedingSources} subject="bracket" />
+	<TournamentSeedingBoard
+		bind:seeding
+		sources={referenceData.seedingSources}
+		subject="bracket"
+		{tournament}
+		resolvedSeeds={existing?.resolvedSeeds ?? []}
+		seeds={existingSeeds}
+		ownRoundIds={existing?.rounds.map((r) => r.id) ?? []}
+	/>
 
 	<h2>How does it progress?</h2>
 	<div class="bracket-choices">
@@ -341,7 +377,13 @@
 	{/if}
 
 	<div class="bracket-actions">
-		<button type="button" class="executive-action" disabled={saving || !hasRounds} onclick={save}>
+		<button
+			type="button"
+			class="executive-action"
+			disabled={saving || !hasRounds || seedingIssues.length > 0}
+			title={seedingIssues.length > 0 ? 'Fix the seeding problems first' : undefined}
+			onclick={save}
+		>
 			{saving ? 'Saving...' : isEdit ? 'Save changes' : 'Create bracket'}
 		</button>
 		<a class="bracket-link" href="/Executive/Edit/Tournament/{tournamentId}">Cancel</a>

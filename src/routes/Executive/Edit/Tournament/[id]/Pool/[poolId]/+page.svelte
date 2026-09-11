@@ -255,6 +255,7 @@
 					tournamentId={tournament.id}
 					referenceData={tournament.referenceData}
 					existing={pool}
+					{tournament}
 				/>
 			{:else}
 				<button type="button" class="executive-action" onclick={() => (showSettings = true)}>

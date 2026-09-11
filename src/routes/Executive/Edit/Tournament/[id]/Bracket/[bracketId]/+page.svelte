@@ -60,6 +60,7 @@
 					tournamentId={tournament.id}
 					referenceData={tournament.referenceData}
 					existing={bracket}
+					{tournament}
 				/>
 			{:else}
 				<p class="executive-explanation">

@@ -3,40 +3,33 @@
 	import type {
 		RoundRobinStructure,
 		SeedGroup,
+		TournamentDetail,
 		TournamentReferenceData
 	} from '$lib/models/Tournament';
-	import TournamentSeedingEditor from './TournamentSeedingEditor.svelte';
+	import { seedingProblems } from '$lib/seeding/problems';
+	import TournamentSeedingBoard from './TournamentSeedingBoard.svelte';
 
 	let {
 		tournamentId,
 		referenceData,
 		existing = null,
-		defaultSeeding = null
+		tournament = null
 	}: {
 		tournamentId: number;
 		referenceData: TournamentReferenceData;
 		existing?: RoundRobinStructure | null;
-		defaultSeeding?: SeedGroup | null;
+		/** The whole tournament, so the seeding board can show team names. Optional: without it, ranks show as numbers. */
+		tournament?: TournamentDetail | null;
 	} = $props();
 
 	const isEdit = $derived(existing !== null);
 
+	// A new pool starts empty: pools are picked by membership, and "Add all" on a
+	// source fills the common cases (everyone knocked out in a round; everyone in
+	// the league) in one tap. Starting from the regular-season default would mean
+	// removing ten teams to build a four-team consolation pool.
 	function initialSeeding(): SeedGroup[] {
-		if (existing) return existing.seeding.map((rule) => ({ ...rule }));
-		if (defaultSeeding) return [{ ...defaultSeeding }];
-
-		const source = referenceData.seedingSources[0];
-		return [
-			{
-				outputStart: 1,
-				outputEnd: source?.availableTeams || 1,
-				result: source?.result ?? 'Standings',
-				sourceType: source?.sourceType ?? 'Season',
-				sourceID: source?.sourceID ?? 0,
-				rankStart: 1,
-				rankEnd: source?.availableTeams || 1
-			}
-		];
+		return existing ? existing.seeding.map((rule) => ({ ...rule })) : [];
 	}
 
 	// Captured once, on purpose: this is a form, so later prop changes must not
@@ -56,10 +49,16 @@
 	let saving = $state(false);
 	let error = $state('');
 
+	const seedingIssues = $derived(seedingProblems(seeding, referenceData.seedingSources, 'pool'));
+
 	async function save(): Promise<void> {
 		error = '';
 		if (!name.trim()) {
 			error = 'Give the pool a name.';
+			return;
+		}
+		if (seedingIssues.length > 0) {
+			error = 'Fix the seeding problems above before saving.';
 			return;
 		}
 
@@ -112,17 +111,29 @@
 
 	<h2>Who plays in it?</h2>
 	<p class="executive-explanation">
-		Pools are often filled with teams knocked out of a bracket, which you can pick as the source
-		below.
+		Pools are often filled with teams knocked out of a bracket. Pick the teams; the order does not
+		matter for a pool.
 	</p>
-	<TournamentSeedingEditor bind:seeding sources={referenceData.seedingSources} subject="pool" />
+	<TournamentSeedingBoard
+		bind:seeding
+		sources={referenceData.seedingSources}
+		subject="pool"
+		{tournament}
+		resolvedSeeds={existing?.resolvedSeeds ?? []}
+	/>
 
 	{#if error}
 		<p class="pool-error">{error}</p>
 	{/if}
 
 	<div class="pool-actions">
-		<button type="button" class="executive-action" disabled={saving} onclick={save}>
+		<button
+			type="button"
+			class="executive-action"
+			disabled={saving || seedingIssues.length > 0}
+			title={seedingIssues.length > 0 ? 'Fix the seeding problems first' : undefined}
+			onclick={save}
+		>
 			{saving ? 'Saving...' : isEdit ? 'Save changes' : 'Create pool'}
 		</button>
 		<a class="pool-link" href="/Executive/Edit/Tournament/{tournamentId}">Cancel</a>

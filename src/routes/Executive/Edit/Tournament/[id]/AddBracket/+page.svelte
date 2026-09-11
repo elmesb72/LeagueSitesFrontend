@@ -27,6 +27,7 @@
 				tournamentId={tournament.id}
 				referenceData={tournament.referenceData}
 				defaultSeeding={data.defaultSeeding}
+				{tournament}
 			/>
 		</div>
 	</div>
