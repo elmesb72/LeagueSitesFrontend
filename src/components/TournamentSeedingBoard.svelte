@@ -134,7 +134,8 @@
 	}
 	function nameOf(a: Assignment): string {
 		return (
-			teamOf(a)?.name ?? `${groupOf(a.sourceKey)?.shortLabel ?? 'unknown source'} rank ${a.rank}`
+			teamOf(a)?.fullName ??
+			`${groupOf(a.sourceKey)?.shortLabel ?? 'unknown source'} rank ${a.rank}`
 		);
 	}
 	function shortLabelOf(key: string): string {

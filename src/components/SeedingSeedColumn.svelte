@@ -74,7 +74,7 @@
 	}
 
 	function slotLabel(slot: SeedSlot, state: LineState): string {
-		const who = slot.assignment ? (teamFor(slot)?.name ?? nameOf(slot.assignment)) : 'empty';
+		const who = slot.assignment ? (teamFor(slot)?.fullName ?? nameOf(slot.assignment)) : 'empty';
 		const action = selected
 			? 'Press to place the selected team here.'
 			: slot.assignment
@@ -132,7 +132,7 @@
 					{#if !slot.assignment}
 						<span class="seeding-slot-who seeding-slot-placeholder">Drop a team here</span>
 					{:else if team}
-						<span class="seeding-slot-who">{team.name}</span>
+						<span class="seeding-slot-who">{team.fullName}</span>
 					{:else}
 						<span class="seeding-slot-who seeding-slot-unresolved">
 							{nameOf(slot.assignment)}

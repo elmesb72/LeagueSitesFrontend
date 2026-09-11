@@ -184,7 +184,7 @@ describe('TournamentBracketForm (seeding board)', () => {
 		});
 		expect(screen.getByText('Bracket seeds')).toBeInTheDocument();
 		await waitFor(() =>
-			expect(screen.getByRole('button', { name: /Rank 1, Alphas/ })).toBeInTheDocument()
+			expect(screen.getByRole('button', { name: /Rank 1, Springfield Alphas/ })).toBeInTheDocument()
 		);
 		expect(screen.getByLabelText('Number of seeds')).toBeInTheDocument();
 	});

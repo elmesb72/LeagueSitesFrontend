@@ -55,7 +55,7 @@ describe('TournamentPoolForm', () => {
 		expect(screen.getByDisplayValue('Pool A')).toBeInTheDocument();
 		await waitFor(() =>
 			expect(
-				screen.getByRole('button', { name: 'Remove Kappas from the pool' })
+				screen.getByRole('button', { name: 'Remove Springfield Kappas from the pool' })
 			).toBeInTheDocument()
 		);
 		expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();

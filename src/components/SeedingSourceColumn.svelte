@@ -55,7 +55,7 @@
 
 	function chipLabel(group: SourceGroup, entry: RankEntry): string {
 		const a = { sourceKey: group.key, rank: entry.rank };
-		const who = entry.team ? entry.team.name : 'team not yet known';
+		const who = entry.team ? entry.team.fullName : 'team not yet known';
 		if (mode === 'pool') {
 			return `Rank ${entry.rank}, ${who}${isMember(a) ? ', in this pool. Press to remove it.' : '. Press to add it to the pool.'}`;
 		}
@@ -69,7 +69,7 @@
 	}
 
 	function teamName(group: SourceGroup, rank: number): string {
-		return group.ranks[rank - 1]?.team?.name ?? `${group.shortLabel} rank ${rank}`;
+		return group.ranks[rank - 1]?.team?.fullName ?? `${group.shortLabel} rank ${rank}`;
 	}
 
 	function primaryGroup(): SourceGroup | undefined {
@@ -127,7 +127,8 @@
 					>
 						<span class="seeding-chip-rank">{entry.rank}</span>
 						{#if entry.team}
-							<span class="seeding-chip-name">{entry.team.name}</span>
+							<!-- Full names on purpose: an admin list of ten teams can hold "U20" beside "Tavistock U20". -->
+							<span class="seeding-chip-name">{entry.team.fullName}</span>
 						{:else}
 							<span class="seeding-chip-name seeding-chip-unresolved">Rank {entry.rank}</span>
 						{/if}

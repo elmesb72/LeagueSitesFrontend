@@ -65,14 +65,15 @@ const slotTexts = (container: HTMLElement) =>
 	[...container.querySelectorAll('.seeding-slot-target')].map((el) =>
 		el.textContent!.replace(/\s+/g, ' ').trim()
 	);
-const slotNames = (container: HTMLElement) => slotTexts(container).map((t) => t.split(' ')[1]);
+const slotNames = (container: HTMLElement) =>
+	[...container.querySelectorAll('.seeding-slot-who')].map((el) => el.textContent!.trim());
 const slotTags = (container: HTMLElement) =>
 	[...container.querySelectorAll('.seeding-slot-tag')].map((el) => el.textContent!.trim());
 /** The visible status line (the same text is also mirrored into an aria-live region). */
 const statusText = () => screen.getByRole('status').textContent!.replace(/\s+/g, ' ').trim();
 
 async function namesLoaded() {
-	await waitFor(() => expect(screen.getAllByText('Alphas').length).toBeGreaterThan(0));
+	await waitFor(() => expect(screen.getAllByText('Springfield Alphas').length).toBeGreaterThan(0));
 }
 
 describe('TournamentSeedingBoard (bracket)', () => {
@@ -80,13 +81,13 @@ describe('TournamentSeedingBoard (bracket)', () => {
 		renderBoard([season(1, 8, 1, 8)]);
 		await namesLoaded();
 		expect(screen.getByText(/as of today/)).toBeInTheDocument();
-		expect(screen.getByRole('button', { name: /Rank 10, Kappas/ })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /Rank 10, Springfield Kappas/ })).toBeInTheDocument();
 	});
 
 	test('starts from the loaded rules with every seed in default state, without rewriting the rules', async () => {
 		const { container } = renderBoard([season(1, 8, 1, 8)]);
 		await namesLoaded();
-		expect(slotTexts(container)[0]).toBe('1 Alphas default');
+		expect(slotTexts(container)[0]).toBe('1 Springfield Alphas default');
 		expect(slotTags(container)).toEqual(Array(8).fill('default'));
 		expect(writes()).toBe(0);
 	});
@@ -94,20 +95,22 @@ describe('TournamentSeedingBoard (bracket)', () => {
 	test('reads sitting-out teams off a skip-a-rank configuration and tags the rest "moved up"', async () => {
 		const { container } = renderBoard([season(1, 7, 2, 8), season(8, 8, 10, 10)]);
 		await namesLoaded();
-		expect(screen.getByText('1. Alphas')).toBeInTheDocument();
-		expect(screen.getByText('9. Iotas')).toBeInTheDocument();
+		expect(screen.getByText('1. Springfield Alphas')).toBeInTheDocument();
+		expect(screen.getByText('9. Springfield Iotas')).toBeInTheDocument();
 		expect(slotTags(container)).toEqual(Array(8).fill('moved up'));
 	});
 
 	test('tap a team, then a seed: places it, announces it, and compiles the rules', async () => {
 		const { container } = renderBoard([season(1, 4, 1, 4)]);
 		await namesLoaded();
-		await fireEvent.click(screen.getByRole('button', { name: /Rank 7, Etas/ }));
-		expect(screen.getByText(/Selected: Etas/)).toBeInTheDocument();
+		await fireEvent.click(screen.getByRole('button', { name: /Rank 7, Springfield Etas/ }));
+		expect(screen.getByText(/Selected: Springfield Etas/)).toBeInTheDocument();
 		await fireEvent.click(screen.getByRole('button', { name: /^Seed 2:/ }));
 
-		expect(slotTexts(container)[1]).toBe('2 Etas changed');
-		expect(statusText()).toContain('Etas placed at seed 2; Betas is no longer seeded.');
+		expect(slotTexts(container)[1]).toBe('2 Springfield Etas changed');
+		expect(statusText()).toContain(
+			'Springfield Etas placed at seed 2; Springfield Betas is no longer seeded.'
+		);
 		expect(rules()).toEqual([season(1, 1, 1, 1), season(2, 2, 7, 7), season(3, 4, 3, 4)]);
 	});
 
@@ -116,29 +119,45 @@ describe('TournamentSeedingBoard (bracket)', () => {
 		await namesLoaded();
 		await fireEvent.click(screen.getByRole('button', { name: /^Seed 1:/ }));
 		await fireEvent.click(screen.getByRole('button', { name: /^Seed 4:/ }));
-		expect(slotNames(container)).toEqual(['Deltas', 'Betas', 'Gammas', 'Alphas']);
+		expect(slotNames(container)).toEqual([
+			'Springfield Deltas',
+			'Springfield Betas',
+			'Springfield Gammas',
+			'Springfield Alphas'
+		]);
 		expect(slotTags(container)).toEqual(['changed', 'default', 'default', 'changed']);
 	});
 
 	test('sitting a seeded team out moves everyone below up and pulls in the next team', async () => {
 		const { container } = renderBoard([season(1, 4, 1, 4)]);
 		await namesLoaded();
-		await fireEvent.click(screen.getByRole('button', { name: /Rank 2, Betas/ }));
+		await fireEvent.click(screen.getByRole('button', { name: /Rank 2, Springfield Betas/ }));
 		await fireEvent.click(
-			screen.getByRole('button', { name: /Put Betas on the sitting-out list/ })
+			screen.getByRole('button', { name: /Put Springfield Betas on the sitting-out list/ })
 		);
 
-		expect(slotNames(container)).toEqual(['Alphas', 'Gammas', 'Deltas', 'Epsilons']);
+		expect(slotNames(container)).toEqual([
+			'Springfield Alphas',
+			'Springfield Gammas',
+			'Springfield Deltas',
+			'Springfield Epsilons'
+		]);
 		expect(slotTags(container)).toEqual(['default', 'moved up', 'moved up', 'moved up']);
 		expect(rules()).toEqual([season(1, 1, 1, 1), season(2, 4, 3, 5)]);
-		expect(screen.getByRole('button', { name: 'Bring Betas back in' })).toBeInTheDocument();
+		expect(
+			screen.getByRole('button', { name: 'Bring Springfield Betas back in' })
+		).toBeInTheDocument();
 	});
 
 	test('restore undoes the shift', async () => {
 		const { container } = renderBoard([season(1, 3, 2, 4)]);
 		await namesLoaded();
-		await fireEvent.click(screen.getByRole('button', { name: 'Bring Alphas back in' }));
-		expect(slotNames(container)).toEqual(['Alphas', 'Betas', 'Gammas']);
+		await fireEvent.click(screen.getByRole('button', { name: 'Bring Springfield Alphas back in' }));
+		expect(slotNames(container)).toEqual([
+			'Springfield Alphas',
+			'Springfield Betas',
+			'Springfield Gammas'
+		]);
 		expect(slotTags(container)).toEqual(['default', 'default', 'default']);
 		expect(rules()).toEqual([season(1, 3, 1, 3)]);
 	});
@@ -168,7 +187,7 @@ describe('TournamentSeedingBoard (bracket)', () => {
 		await namesLoaded();
 		await fireEvent.click(screen.getByRole('button', { name: 'Clear seed 3' }));
 		await fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
-		expect(slotTexts(container)[2]).toBe('3 Gammas default');
+		expect(slotTexts(container)[2]).toBe('3 Springfield Gammas default');
 		expect(rules()).toEqual([season(1, 4, 1, 4)]);
 		expect(statusText()).toContain('Undone.');
 	});
@@ -187,14 +206,18 @@ describe('TournamentSeedingBoard (bracket)', () => {
 			key: 'z',
 			ctrlKey: true
 		});
-		expect(slotTexts(container)[2]).toBe('3 Gammas default');
+		expect(slotTexts(container)[2]).toBe('3 Springfield Gammas default');
 	});
 
 	test('Reset to default re-derives the order but keeps sitting-out marks', async () => {
 		const { container } = renderBoard([season(1, 1, 3, 3), season(2, 2, 2, 2), season(3, 3, 4, 4)]);
 		await namesLoaded();
 		await fireEvent.click(screen.getByRole('button', { name: 'Reset to default' }));
-		expect(slotNames(container)).toEqual(['Betas', 'Gammas', 'Deltas']);
+		expect(slotNames(container)).toEqual([
+			'Springfield Betas',
+			'Springfield Gammas',
+			'Springfield Deltas'
+		]);
 		expect(rules()).toEqual([season(1, 3, 2, 4)]);
 	});
 
@@ -205,7 +228,7 @@ describe('TournamentSeedingBoard (bracket)', () => {
 			target: { value: 'Standings|TournamentRoundRobin|7' }
 		});
 		expect(statusText()).toContain('2 seeds re-filled from Pool A final standings, 1 kept');
-		expect(slotTexts(container)[0]).toBe('1 Kappas default');
+		expect(slotTexts(container)[0]).toBe('1 Springfield Kappas default');
 		expect(slotTags(container)[2]).toBe('from Quarter-finals losers');
 	});
 
@@ -251,8 +274,8 @@ describe('TournamentSeedingBoard (bracket)', () => {
 			resolvedSeeds: [{ seed: 1, team: seasonOrder[9] }]
 		});
 		await namesLoaded();
-		expect(slotTexts(container)[0]).toBe('1 Kappas default');
-		expect(slotTexts(container)[1]).toBe('2 Betas default');
+		expect(slotTexts(container)[0]).toBe('1 Springfield Kappas default');
+		expect(slotTexts(container)[1]).toBe('2 Springfield Betas default');
 	});
 
 	test('a failed standings fetch degrades to rank numbers with a notice', async () => {
@@ -277,11 +300,13 @@ describe('TournamentSeedingBoard (pool)', () => {
 	test('tapping a team toggles membership and compiles canonical rules', async () => {
 		renderBoard([losers(1, 3, 1, 3)], { subject: 'pool' });
 		await namesLoaded();
-		await fireEvent.click(screen.getByRole('button', { name: /Rank 10, Kappas/ }));
+		await fireEvent.click(screen.getByRole('button', { name: /Rank 10, Springfield Kappas/ }));
 		expect(screen.getByText('In this pool (4)')).toBeInTheDocument();
 		expect(rules()).toEqual([season(1, 1, 10, 10), losers(2, 4, 1, 3)]);
 
-		await fireEvent.click(screen.getByRole('button', { name: 'Remove Kappas from the pool' }));
+		await fireEvent.click(
+			screen.getByRole('button', { name: 'Remove Springfield Kappas from the pool' })
+		);
 		expect(rules()).toEqual([losers(1, 3, 1, 3)]);
 	});
 
@@ -298,7 +323,7 @@ describe('TournamentSeedingBoard (pool)', () => {
 		renderBoard(loaded, { subject: 'pool' });
 		await namesLoaded();
 		expect(writes()).toBe(0);
-		await fireEvent.click(screen.getByRole('button', { name: /Rank 9, Iotas/ }));
+		await fireEvent.click(screen.getByRole('button', { name: /Rank 9, Springfield Iotas/ }));
 		expect(writes()).toBe(1);
 		await fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
 		expect(rules()).toEqual(loaded);
