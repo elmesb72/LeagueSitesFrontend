@@ -144,3 +144,23 @@ describe('PlayoffSeriesDetail', () => {
 		expect(container.querySelectorAll('.tournament-items-game').length).toBe(0);
 	});
 });
+
+describe('PlayoffSeriesDetail (series format)', () => {
+	test('leads the status line with the series length, so "tied 1-1" is unambiguous', () => {
+		render(PlayoffSeriesDetail, { props: { series: inProgressSeries } });
+		const heading = screen.getByRole('heading', { level: 3 });
+		expect(heading).toHaveTextContent('Best of 5');
+		expect(heading).toHaveTextContent('Series tied 1-1');
+		expect(heading.textContent!.indexOf('Best of 5')).toBeLessThan(heading.textContent!.indexOf('Series tied'));
+	});
+
+	test('names the aggregate format with its game count', () => {
+		render(PlayoffSeriesDetail, { props: { series: { ...completedSeries, format: 'Aggregate', hostOrder: '12' } } });
+		expect(screen.getByText('Aggregate over 2 games')).toBeInTheDocument();
+	});
+
+	test('a one-game series is a "Single game"', () => {
+		render(PlayoffSeriesDetail, { props: { series: { ...completedSeries, hostOrder: '1' } } });
+		expect(screen.getByText('Single game')).toBeInTheDocument();
+	});
+});

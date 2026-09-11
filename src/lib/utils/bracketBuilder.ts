@@ -19,6 +19,12 @@ export function seriesLengthLabel(length: number): string {
 	return length === 1 ? 'Single game' : `Best of ${length}`;
 }
 
+/** "Best of 5", "Aggregate over 2 games", or "Single game"; `format` is the series' stored format. */
+export function seriesFormatLabel(format: string, length: number): string {
+	if (length === 1) return 'Single game';
+	return format === 'Aggregate' ? `Aggregate over ${length} games` : seriesLengthLabel(length);
+}
+
 /**
  * Round names counting back from the final, which is how leagues actually name them.
  */

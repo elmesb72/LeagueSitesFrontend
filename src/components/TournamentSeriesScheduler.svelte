@@ -5,7 +5,7 @@
 		SeriesStructure,
 		TournamentLocation
 	} from '$lib/models/Tournament';
-	import { hostOrderSummary } from '$lib/utils/bracketBuilder';
+	import { hostOrderSummary, seriesFormatLabel } from '$lib/utils/bracketBuilder';
 
 	let {
 		bracket,
@@ -128,7 +128,7 @@
 				{/if}
 			</div>
 			<p class="scheduler-series-detail">
-				{series.length === 1 ? 'Single game' : `Best of ${series.length}`} &middot;
+				{seriesFormatLabel(series.format, series.length)} &middot;
 				{hostOrderSummary(series.hostOrder)}
 			</p>
 

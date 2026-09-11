@@ -15,6 +15,14 @@ describe('PlayoffBracket', () => {
 		expect(screen.getByText('Finals')).toBeInTheDocument();
 	});
 
+	test('shows each round\u2019s series format under its name', () => {
+		const { container } = render(PlayoffBracket, { props: { bracket: mockBracket } });
+		const formats = [...container.querySelectorAll('.tournament-round-format')].map((el) =>
+			el.textContent!.trim()
+		);
+		expect(formats).toEqual(['Best of 5', 'Best of 5']);
+	});
+
 	test('renders series numbers', () => {
 		const { container } = render(PlayoffBracket, { props: { bracket: mockBracket } });
 		const numbers = container.querySelectorAll('.tournament-series-number');

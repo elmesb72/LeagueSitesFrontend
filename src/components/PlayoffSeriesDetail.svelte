@@ -3,6 +3,7 @@
 	import type { Team } from '$lib/models/Team';
 	import type { Game } from '$lib/models/Game';
 	import { formatDate, formatTime } from '$lib/utils/date';
+	import { seriesFormatLabel } from '$lib/utils/bracketBuilder';
 
 	let { series }: { series: Series } = $props();
 
@@ -55,13 +56,19 @@
 
 	const spot1Label = $derived(spotLabel(series.spot1));
 	const spot2Label = $derived(spotLabel(series.spot2));
+	const formatLabel = $derived(seriesFormatLabel(series.format, series.hostOrder.length));
 </script>
 
 <div class="tournament-items-series">
 	<h2>{spot1Label} vs {spot2Label}</h2>
-	{#if series.results}
-		<h3>{series.results.statusText}</h3>
-	{/if}
+	<h3>
+		<!-- "Series tied 1-1" is ambiguous without the length, so the format leads. -->
+		<span class="tournament-items-series-format">{formatLabel}</span>
+		{#if series.results}
+			<span class="tournament-items-series-separator" aria-hidden="true">&middot;</span>
+			<span class="tournament-items-series-status">{series.results.statusText}</span>
+		{/if}
+	</h3>
 	<div class="tournament-items-games">
 		{#each series.games as sg}
 			<div class="tournament-items-game">
