@@ -1,6 +1,6 @@
 // The series score as it stood after each game, for the detail rows' lead column.
 
-import type { Series } from '$lib/models/Playoffs';
+import type { Series, SeriesGame } from '$lib/models/Playoffs';
 import { getWinner, isDecided } from './gameResult';
 
 /**
@@ -12,22 +12,33 @@ import { getWinner, isDecided } from './gameResult';
  * (admins can enter two "game 1"s), so ties are broken by date and each row
  * still gets its own entry.
  */
+/**
+ * Indices of `games` in playing order: game number, then date (unscheduled
+ * last), then array position. The API returns games by database id, so a
+ * game added later can arrive first.
+ */
+export function gameOrder(games: SeriesGame[]): number[] {
+	const time = (i: number) => {
+		const date = games[i].game?.date;
+		return date ? new Date(date).getTime() : Number.POSITIVE_INFINITY;
+	};
+	return games
+		.map((_, i) => i)
+		.sort((x, y) => games[x].gameNumber - games[y].gameNumber || time(x) - time(y) || x - y);
+}
+
+/** A copy of `games` in playing order (see gameOrder). */
+export function sortGames(games: SeriesGame[]): SeriesGame[] {
+	return gameOrder(games).map((i) => games[i]);
+}
+
 export function leadAfterEachGame(series: Series): (string | null)[] {
 	const a = series.spot1?.team;
 	const b = series.spot2?.team;
 	const leads: (string | null)[] = series.games.map(() => null);
 	if (!a || !b) return leads;
 
-	const time = (i: number) => {
-		const date = series.games[i].game?.date;
-		return date ? new Date(date).getTime() : Number.POSITIVE_INFINITY;
-	};
-	const order = series.games
-		.map((_, i) => i)
-		.sort(
-			(x, y) =>
-				series.games[x].gameNumber - series.games[y].gameNumber || time(x) - time(y) || x - y
-		);
+	const order = gameOrder(series.games);
 
 	if (series.format === 'Aggregate') {
 		const runs = new Map<number, number>([

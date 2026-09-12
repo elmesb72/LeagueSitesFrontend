@@ -2,7 +2,7 @@
 	import type { Bracket, Series, SeriesSpot } from '$lib/models/Playoffs';
 	import { bracketAnchor, seriesAnchor } from '$lib/playoffs/anchors';
 	import { getLoser, getWinner, isDecided, isTied, scoreText } from '$lib/playoffs/gameResult';
-	import { leadAfterEachGame } from '$lib/playoffs/seriesLead';
+	import { leadAfterEachGame, sortGames } from '$lib/playoffs/seriesLead';
 	import { seriesFormatLabel } from '$lib/utils/bracketBuilder';
 	import { formatDate, formatTime } from '$lib/utils/date';
 
@@ -26,7 +26,10 @@
 	const spot1Label = $derived(spotLabel(series.spot1));
 	const spot2Label = $derived(spotLabel(series.spot2));
 	const formatLabel = $derived(seriesFormatLabel(series.format, series.hostOrder.length));
-	const leads = $derived(leadAfterEachGame(series));
+	// Rows in playing order (the API lists games by database id), with the lead
+	// column computed on that same order so the two stay aligned.
+	const games = $derived(sortGames(series.games));
+	const leads = $derived(leadAfterEachGame({ ...series, games }));
 	const id = $derived(bracket ? seriesAnchor(bracket, series) : undefined);
 </script>
 
@@ -47,7 +50,7 @@
 	</p>
 	<div class="tournament-items-games">
 		<!-- Keyed by position: game numbers are not unique (two "game 1"s happen). -->
-		{#each series.games as sg, i (i)}
+		{#each games as sg, i (i)}
 			<div class="tournament-items-game">
 				<div class="tournament-items-game-number">
 					{#if sg.game}

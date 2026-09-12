@@ -216,3 +216,20 @@ describe('PlayoffSeriesDetail (imperfect data)', () => {
 		]);
 	});
 });
+
+describe('PlayoffSeriesDetail (row order)', () => {
+	test('lists games in playing order even when the API sends them by id, lead column aligned', () => {
+		// Live 2026 QF1 arrived as Gm 3, Gm 1, Gm 2.
+		const bracket = makeFourTeamBracket({ played: 'semis' });
+		const s1 = bracket.rounds[0].series[0];
+		const series = { ...s1, games: [s1.games[2], s1.games[0], s1.games[1]] };
+		const { container } = render(PlayoffSeriesDetail, { props: { series, bracket } });
+		const rows = [...container.querySelectorAll('.tournament-items-game')];
+		expect(rows.map((r) => r.querySelector('b')!.textContent)).toEqual(['Gm 1', 'Gm 2', 'Gm 3']);
+		expect(rows.map((r) => r.querySelector('.tournament-items-game-lead')!.textContent!.trim())).toEqual([
+			'Deltas lead 1-0',
+			'Tied 1-1',
+			'Deltas win 2-1'
+		]);
+	});
+});

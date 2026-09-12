@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { leadAfterEachGame } from './seriesLead';
+import { leadAfterEachGame, sortGames } from './seriesLead';
 import {
 	makeFourTeamBracket,
 	makePlayedGame,
@@ -73,5 +73,34 @@ describe('leadAfterEachGame', () => {
 		const agg = { ...s1, format: 'Aggregate', hostOrder: '12' };
 		// 5-3 Alphas then Alphas 4-2 as visitors → Alphas +2, then +4
 		expect(leadAfterEachGame(agg)).toEqual(['Alphas +2', 'Alphas +4', null]);
+	});
+});
+
+describe('sortGames', () => {
+	test('puts games in playing order: number, then date, then position', () => {
+		const s1 = makeFourTeamBracket({ played: 'semis' }).rounds[0].series[0];
+		// The API lists by database id, so a late-added game 3 can come first.
+		const api = [s1.games[2], s1.games[0], s1.games[1]];
+		expect(sortGames(api).map((g) => g.gameNumber)).toEqual([1, 2, 3]);
+
+		const twice = [
+			{
+				gameNumber: 1,
+				game: makePlayedGame(491, teamDeltas, teamAlphas, 2, 6, '2025-09-17T20:30:00')
+			},
+			{ gameNumber: 2, game: null },
+			{
+				gameNumber: 1,
+				game: makePlayedGame(490, teamAlphas, teamDeltas, 5, 3, '2025-09-15T20:30:00')
+			}
+		];
+		expect(sortGames(twice).map((g) => g.game?.id ?? null)).toEqual([490, 491, null]);
+	});
+
+	test('does not mutate the input', () => {
+		const s1 = makeFourTeamBracket({ played: 'semis' }).rounds[0].series[0];
+		const api = [s1.games[2], s1.games[0], s1.games[1]];
+		sortGames(api);
+		expect(api.map((g) => g.gameNumber)).toEqual([3, 1, 2]);
 	});
 });
