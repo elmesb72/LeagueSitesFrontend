@@ -44,6 +44,30 @@ describe('leadAfterEachGame', () => {
 		expect(leadAfterEachGame(shuffled)).toEqual(['Deltas win 2-1', 'Deltas lead 1-0', 'Tied 1-1']);
 	});
 
+	test('duplicate game numbers (two "game 1"s) are ordered by date and each row keeps its own entry', () => {
+		// The 2025 CLFB final was entered as game 1 twice: Sep 15 and Sep 17.
+		const s1 = makeFourTeamBracket({ played: 'semis', upset: false }).rounds[0].series[0];
+		const twice = {
+			...s1,
+			games: [
+				{
+					gameNumber: 1,
+					game: makePlayedGame(490, teamAlphas, teamDeltas, 5, 3, '2025-09-15T20:30:00')
+				},
+				{
+					gameNumber: 1,
+					game: makePlayedGame(491, teamDeltas, teamAlphas, 2, 6, '2025-09-17T20:30:00')
+				}
+			]
+		};
+		expect(leadAfterEachGame(twice)).toEqual(['Alphas lead 1-0', 'Alphas win 2-0']);
+		// Array order does not matter; the dates decide.
+		expect(leadAfterEachGame({ ...twice, games: [twice.games[1], twice.games[0]] })).toEqual([
+			'Alphas win 2-0',
+			'Alphas lead 1-0'
+		]);
+	});
+
 	test('aggregate series show the running run differential', () => {
 		const s1 = makeFourTeamBracket({ played: 'semis', upset: false }).rounds[0].series[0];
 		const agg = { ...s1, format: 'Aggregate', hostOrder: '12' };

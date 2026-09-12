@@ -11,7 +11,7 @@
 	<section class="playoff-coming-up" aria-labelledby="playoff-coming-up-title">
 		<h2 class="playoff-coming-up-title" id="playoff-coming-up-title">Coming up</h2>
 		<ol class="playoff-coming-up-list">
-			{#each entries as entry (seriesAnchor(entry.bracket, entry.series))}
+			{#each entries as entry, i (i)}
 				<li>
 					<a class="playoff-coming-up-series" href="#{seriesAnchor(entry.bracket, entry.series)}">
 						{entry.round.name}, series {entry.series.number}

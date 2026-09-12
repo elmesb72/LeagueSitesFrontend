@@ -150,6 +150,37 @@ describe('PlayoffBracket (four-team fixture)', () => {
 		).toBe('var(--text-soft)');
 	});
 
+	test('redraws the connectors when a different bracket is passed to the same instance (year switch)', async () => {
+		// The page keeps one PlayoffBracket per position across years, so a year
+		// change arrives as a prop update, not a fresh mount.
+		const { container, rerender } = render(PlayoffBracket, {
+			props: { bracket: makeFourTeamBracket({ format: 'Re-seed', played: 'none' }), now: NOW }
+		});
+		await new Promise((r) => setTimeout(r, 20));
+		expect(container.querySelectorAll('.tournament-connectors path')).toHaveLength(0);
+
+		await rerender({
+			bracket: makeFourTeamBracket({ thirdPlace: true, played: 'semis' }),
+			now: NOW
+		});
+		await waitFor(() =>
+			expect(container.querySelectorAll('.tournament-connectors path')).toHaveLength(4)
+		);
+		const strokes = [
+			...container.querySelectorAll<SVGPathElement>('.tournament-connectors path')
+		].map((p) => p.style.stroke);
+		expect(strokes).toContain('rgb(204, 0, 0)'); // Betas, from the new data
+		expect(container.querySelector('[data-spot="3-1"]')!.textContent).toContain('Deltas'); // upset winner in the final
+
+		await rerender({
+			bracket: makeFourTeamBracket({ format: 'Re-seed', played: 'none' }),
+			now: NOW
+		});
+		await waitFor(() =>
+			expect(container.querySelectorAll('.tournament-connectors path')).toHaveLength(0)
+		);
+	});
+
 	test('marks a live series with its next game date and sets the gap width', () => {
 		const { container } = render(PlayoffBracket, {
 			props: { bracket: makeFourTeamBracket({ played: 'semis' }), now: NOW }

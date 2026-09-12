@@ -6,7 +6,8 @@ import {
 	emptyPlayoffsData,
 	roundRobinOnlyPlayoffsData,
 	makeFourTeamBracket,
-	makePlayoffs
+	makePlayoffs,
+	makePlayedGame
 } from '../../tests/playoffMocks';
 
 describe('Playoffs Page', () => {
@@ -160,6 +161,41 @@ describe('Playoffs Page (bracket overhaul)', () => {
 		expect(container.querySelector('#main-bracket a[href="#main-series-1"]')).not.toBeNull();
 	});
 
+	test('survives data the backend does not police: duplicate game numbers, bracket and pool names', () => {
+		// The 2025 season: a final entered as "game 1" twice. Bracket and pool names
+		// are only required to be present, so two "Main"s must not crash the page either.
+		const main = makeFourTeamBracket({ played: 'all', historical: false });
+		const final = main.rounds[1].series[0];
+		final.games = [
+			{ gameNumber: 1, game: makePlayedGame(490, final.spot1!.team!, final.spot2!.team!, 5, 3, '2025-09-15T20:30:00') },
+			{ gameNumber: 1, game: makePlayedGame(491, final.spot2!.team!, final.spot1!.team!, 2, 6, '2025-09-17T20:30:00') }
+		];
+		const twin = makeFourTeamBracket({ played: 'semis', historical: false });
+		const pool = { ...roundRobinOnlyPlayoffsData.roundRobins[0] };
+		const playoffs = makePlayoffs([main, twin], [pool, { ...pool }]);
+		const { container } = render(PlayoffsPage, { props: { data: { playoffs, state: 'ok', years: [2026, 2025], year: 2025 } } });
+		expect(screen.getByText('2026 Playoffs')).toBeInTheDocument(); // the fixture season's year
+		expect(container.querySelectorAll('.tournament-bracket')).toHaveLength(2);
+		expect(container.querySelectorAll('.tournament-items-bracket')).toHaveLength(2);
+		expect(container.querySelectorAll('.tournament-items-game')).toHaveLength(3 + 3 + 2 + 3 + 3 + 3);
+	});
+	test('switching years updates the same page instance', async () => {
+		const first = makePlayoffs([makeFourTeamBracket({ played: 'semis' })]);
+		const { container, rerender } = render(PlayoffsPage, {
+			props: { data: { playoffs: first, state: 'ok', years: [2026, 2025], year: 2026 } }
+		});
+		// two semi-finals and a final whose teams are known
+		expect(container.querySelectorAll('article.tournament-items-series')).toHaveLength(3);
+
+		const second = makePlayoffs([makeFourTeamBracket({ played: 'all', thirdPlace: true, name: 'Cup' })]);
+		second.season = { ...second.season, year: 2025, name: '2025 Playoffs' };
+		await rerender({ data: { playoffs: second, state: 'ok', years: [2026, 2025], year: 2025 } });
+		expect(screen.getByText('2025 Playoffs')).toBeInTheDocument();
+		expect(screen.getByText('Cup Bracket')).toBeInTheDocument();
+		expect(container.querySelectorAll('article.tournament-items-series')).toHaveLength(4);
+		expect(container.querySelector('#cup-series-4')).not.toBeNull();
+		expect(container.querySelector('#main-series-1')).toBeNull();
+	});
 	test('tells the difference between a failed backend, an unknown year, and an empty season', () => {
 		render(PlayoffsPage, { props: { data: { playoffs: null, state: 'unavailable', years: [], year: null } } });
 		expect(screen.getByText(/temporarily unavailable/)).toBeInTheDocument();

@@ -92,8 +92,9 @@
 			<PlayoffComingUp entries={upcoming} />
 
 			{#if playoffs.brackets.length > 0}
+				<!-- Brackets and pools are keyed by position: the backend requires names, not unique ones. -->
 				<div class="tournament">
-					{#each playoffs.brackets as bracket (bracket.name)}
+					{#each playoffs.brackets as bracket, i (i)}
 						{#if bracket.winner && bracket.historical}
 							<PlayoffChampion team={bracket.winner} {year} bracketName={bracket.name} />
 						{:else if bracket.winner}
@@ -106,11 +107,11 @@
 				</div>
 			{/if}
 
-			{#each playoffs.roundRobins as roundRobin (roundRobin.name)}
+			{#each playoffs.roundRobins as roundRobin, i (i)}
 				<PlayoffRoundRobin {roundRobin} />
 			{/each}
 
-			{#each playoffs.brackets as bracket (bracket.name)}
+			{#each playoffs.brackets as bracket, i (i)}
 				{@const series = detailed(bracket)}
 				{#if series.length > 0}
 					<section class="tournament-items-bracket" aria-label="{bracket.name} bracket series">

@@ -46,7 +46,8 @@
 		{/if}
 	</p>
 	<div class="tournament-items-games">
-		{#each series.games as sg, i (sg.gameNumber)}
+		<!-- Keyed by position: game numbers are not unique (two "game 1"s happen). -->
+		{#each series.games as sg, i (i)}
 			<div class="tournament-items-game">
 				<div class="tournament-items-game-number">
 					{#if sg.game}

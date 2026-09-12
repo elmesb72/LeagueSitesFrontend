@@ -8,6 +8,7 @@ import {
 	teamBetas,
 	makeForfeitGame,
 	makeFourTeamBracket,
+	makePlayedGame,
 	makeTiedGame
 } from '../tests/playoffMocks';
 
@@ -193,5 +194,25 @@ describe('PlayoffSeriesDetail (anchors and series lead)', () => {
 		const bracket = makeFourTeamBracket({ played: 'semis' });
 		const { container } = render(PlayoffSeriesDetail, { props: { series: bracket.rounds[1].series[0], bracket } });
 		expect([...container.querySelectorAll('.tournament-items-game-lead')].map((l) => l.textContent!.trim())).toEqual(['', '', '']);
+	});
+});
+
+describe('PlayoffSeriesDetail (imperfect data)', () => {
+	test('renders every game even when two share a game number, each with its own lead', () => {
+		// Seen live: the 2025 final entered as "game 1" twice. Must not throw.
+		const bracket = makeFourTeamBracket({ played: 'semis', upset: false });
+		const series = {
+			...bracket.rounds[0].series[0],
+			games: [
+				{ gameNumber: 1, game: makePlayedGame(490, teamAlphas, teamBetas, 5, 3, '2025-09-15T20:30:00') },
+				{ gameNumber: 1, game: makePlayedGame(491, teamBetas, teamAlphas, 2, 6, '2025-09-17T20:30:00') }
+			]
+		};
+		const { container } = render(PlayoffSeriesDetail, { props: { series, bracket } });
+		expect(container.querySelectorAll('.tournament-items-game')).toHaveLength(2);
+		expect([...container.querySelectorAll('.tournament-items-game-lead')].map((l) => l.textContent!.trim())).toEqual([
+			'Alphas lead 1-0',
+			'Alphas win 2-0'
+		]);
 	});
 });
