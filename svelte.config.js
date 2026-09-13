@@ -8,7 +8,13 @@ const config = {
 	kit: {
 		adapter: adapter({
 			fallback: 'index.html'
-		})
+		}),
+		// Every push to main deploys a new build. A tab left open keeps running
+		// the old bundle from cache; polling _app/version.json lets the client
+		// notice and turn its next navigation into a full reload.
+		version: {
+			pollInterval: 60_000
+		}
 	}
 };
 
