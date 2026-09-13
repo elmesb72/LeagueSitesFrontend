@@ -47,6 +47,32 @@ describe('TournamentBracketForm (creating)', () => {
 		renderCreate();
 		expect(screen.getByText(/8 teams gives 3 rounds/)).toBeInTheDocument();
 	});
+	test('arriving from a pool: named, seeded from its top two, marked as a champion, one round to build', () => {
+		render(TournamentBracketForm, {
+			props: {
+				tournamentId: 6,
+				referenceData: { ...mockReferenceData, seedingSources: mockBoardSources },
+				tournament: makeTournamentDetail(),
+				suggestedName: 'Pool A Final',
+				defaultSeeding: {
+					outputStart: 1,
+					outputEnd: 2,
+					result: 'Standings',
+					sourceType: 'TournamentRoundRobin',
+					sourceID: 7,
+					rankStart: 1,
+					rankEnd: 2
+				}
+			}
+		});
+		expect(screen.getByLabelText('Bracket name')).toHaveValue('Pool A Final');
+		expect(screen.getByRole('checkbox')).toBeChecked();
+		expect(screen.getByText(/2 teams gives 1 round\b/)).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Build the rounds' })).toBeEnabled();
+		expect(
+			screen.getByText(/Seeds can also come from a pool's final standings/)
+		).toBeInTheDocument();
+	});
 
 	test('builds the rounds on request and names them from the final backwards', async () => {
 		renderCreate();

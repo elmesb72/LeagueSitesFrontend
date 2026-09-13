@@ -196,6 +196,19 @@ describe('Playoffs Page (bracket overhaul)', () => {
 		expect(container.querySelector('#cup-series-4')).not.toBeNull();
 		expect(container.querySelector('#main-series-1')).toBeNull();
 	});
+	test('offers executives an edit link for the year being shown, and nobody else', () => {
+		const playoffs = makePlayoffs([makeFourTeamBracket({ played: 'semis' })]);
+		const { unmount } = render(PlayoffsPage, {
+			props: { data: { playoffs, state: 'ok', years: [2026], year: 2026, editUrl: '/Executive/Edit/Tournament/12' } }
+		});
+		const link = screen.getByRole('link', { name: 'Edit the 2026 playoffs' });
+		expect(link).toHaveAttribute('href', '/Executive/Edit/Tournament/12');
+		expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('2026 Playoffs');
+		unmount();
+
+		render(PlayoffsPage, { props: { data: { playoffs, state: 'ok', years: [2026], year: 2026, editUrl: null } } });
+		expect(screen.queryByRole('link', { name: /Edit the/ })).toBeNull();
+	});
 	test('tells the difference between a failed backend, an unknown year, and an empty season', () => {
 		render(PlayoffsPage, { props: { data: { playoffs: null, state: 'unavailable', years: [], year: null } } });
 		expect(screen.getByText(/temporarily unavailable/)).toBeInTheDocument();

@@ -27,12 +27,15 @@
 		referenceData,
 		existing = null,
 		defaultSeeding = null,
+		suggestedName = '',
 		tournament = null
 	}: {
 		tournamentId: number;
 		referenceData: TournamentReferenceData;
 		existing?: BracketStructure | null;
 		defaultSeeding?: SeedGroup | null;
+		/** A name to start a new bracket with ("B Side Final" when arriving from a pool). */
+		suggestedName?: string;
 		/** The whole tournament, so the seeding board can show team names. Optional: without it, ranks show as numbers. */
 		tournament?: TournamentDetail | null;
 	} = $props();
@@ -79,7 +82,7 @@
 	// overwrite what the executive has typed.
 	function initialValues() {
 		return {
-			name: existing?.name ?? '',
+			name: existing?.name ?? suggestedName,
 			format: (existing?.format ?? 'Re-seed') as BracketFormat,
 			historical: existing?.historical ?? true,
 			seeding: initialSeeding(),
@@ -247,6 +250,10 @@
 	</label>
 
 	<h2>Who plays in it?</h2>
+	<p class="executive-explanation">
+		Seeds can also come from a pool's final standings or from the teams knocked out of another
+		bracket. That is how a B-side final after a pool, or a consolation bracket, is built.
+	</p>
 	<TournamentSeedingBoard
 		bind:seeding
 		sources={referenceData.seedingSources}

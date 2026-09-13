@@ -109,6 +109,26 @@
 	padding: var(--space-2) 0;
 }
 
+/* Title with the executives' edit link (same treatment as the Locations page) */
+.playoff-title {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+}
+
+.playoff-edit-link {
+	font-size: var(--text-md);
+	color: var(--text-soft-contrast);
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+}
+
+.playoff-edit-link:hover,
+.playoff-edit-link:focus-visible {
+	color: var(--link-hover);
+}
+
 /* Year navigation */
 .playoff-years {
 	display: flex;

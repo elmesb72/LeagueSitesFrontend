@@ -31,6 +31,8 @@
 	/** The year being shown: the season's own year, else the one asked for in the URL. */
 	const year = $derived<number | null>(playoffs?.season?.year ?? data.year ?? null);
 	const years = $derived<number[]>(data.years ?? []);
+	/** Set only for executives: the admin page for the playoffs being shown. */
+	const editUrl = $derived<string | null>(data.editUrl ?? null);
 
 	// Neighbours in the league's list of seasons (newest first), for the arrows.
 	const index = $derived(year === null ? -1 : years.indexOf(year));
@@ -56,7 +58,15 @@
 
 <div class="row">
 	<div class="section playoff-section">
-		<h1>{year ? `${year} ` : ''}Playoffs</h1>
+		<h1 class="playoff-title">
+			{year ? `${year} ` : ''}Playoffs{#if editUrl}<a
+					class="playoff-edit-link"
+					href={editUrl}
+					title="Edit the {year ?? ''} playoffs"
+					aria-label="Edit the {year ?? ''} playoffs"
+					><i class="fa-solid fa-pen-to-square" aria-hidden="true"></i></a
+				>{/if}
+		</h1>
 
 		{#if years.length > 1}
 			<nav class="playoff-years" aria-label="Playoff year">

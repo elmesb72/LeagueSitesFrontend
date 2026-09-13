@@ -42,15 +42,39 @@ async function loadPlayoffs(
 	}
 }
 
-export const load = async ({ fetch, url }) => {
+/**
+ * Where an executive edits the playoffs being shown, or null for everyone else.
+ * The lookup sits behind the Executive/Webmaster policy, so a 403 doubles as
+ * "not allowed to edit"; only asked for signed-in users, and any failure just
+ * means no link.
+ */
+async function loadEditUrl(
+	fetchFn: typeof fetch,
+	seasonId: number | undefined,
+	signedIn: boolean
+): Promise<string | null> {
+	if (!signedIn || !seasonId) return null;
+	try {
+		const response = await fetchFn(`/api/Tournament/ForSeason/${seasonId}`);
+		if (!response.ok) return null;
+		const { id } = (await response.json()) as { id: number };
+		return `/Executive/Edit/Tournament/${id}`;
+	} catch {
+		return null;
+	}
+}
+
+export const load = async ({ fetch, url, parent }) => {
 	const requested = Number(url.searchParams.get('year'));
 	const year = Number.isInteger(requested) && requested > 0 ? requested : null;
 	const query = year ? `?year=${year}` : '';
 
-	const [{ playoffs, state }, years] = await Promise.all([
+	const [{ playoffs, state }, years, { user }] = await Promise.all([
 		loadPlayoffs(fetch, query),
-		loadYears(fetch)
+		loadYears(fetch),
+		parent()
 	]);
+	const editUrl = await loadEditUrl(fetch, playoffs?.season?.id, user?.isAuthenticated ?? false);
 
-	return { playoffs, state, years, year };
+	return { playoffs, state, years, year, editUrl };
 };

@@ -43,6 +43,11 @@
 			This creates the {year} playoffs as its own part of the season, separate from the regular season
 			schedule. Nothing appears on the public Playoffs page until you add a bracket.
 		</p>
+		<p class="executive-explanation">
+			A typical setup is a Main bracket, then a B-side pool for the teams knocked out early,
+			sometimes with its own final. You add each piece in turn and the tournament page suggests the
+			next one.
+		</p>
 		<p class="executive-explanation">Next you will:</p>
 		<ol class="playoffs-steps">
 			<li>Add a bracket and say which teams are in it</li>

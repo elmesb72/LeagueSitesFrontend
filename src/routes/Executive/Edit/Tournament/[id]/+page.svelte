@@ -2,6 +2,7 @@
 	import '../../../+page.css';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import TournamentFlow from '../../../../../components/TournamentFlow.svelte';
 
 	let { data } = $props();
 	const tournament = $derived(data.tournament);
@@ -50,6 +51,8 @@
 				Brackets and pools decide who plays whom. Once a matchup is known you can schedule its games
 				here, and scores go in on the game pages as usual.
 			</p>
+
+			<TournamentFlow detail={tournament} />
 
 			<h2>Brackets</h2>
 			{#if tournament.brackets.length === 0}
@@ -103,7 +106,8 @@
 			{#if tournament.roundRobins.length === 0}
 				<p>
 					No pools. Pools are useful for consolation play, where a group of teams all play each
-					other instead of a knockout series.
+					other instead of a knockout series. Want a final after the pool? Add a bracket and seed it
+					from the pool's standings.
 				</p>
 			{:else}
 				<table class="executive-table">
