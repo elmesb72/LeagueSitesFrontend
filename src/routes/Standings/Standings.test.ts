@@ -42,8 +42,8 @@ describe('Standings Page', () => {
 		expect(screen.getByText('Shelbyville Sharks')).toBeInTheDocument();
 
 		const links = screen.getAllByRole('link');
-		expect(links.some(l => l.getAttribute('href') === '/Team/SPR')).toBe(true);
-		expect(links.some(l => l.getAttribute('href') === '/Team/SHL')).toBe(true);
+		expect(links.some((l) => l.getAttribute('href') === '/Team/SPR')).toBe(true);
+		expect(links.some((l) => l.getAttribute('href') === '/Team/SHL')).toBe(true);
 	});
 
 	test('renders stats for each team', () => {
@@ -68,10 +68,10 @@ describe('Standings Page', () => {
 	});
 
 	test('shows dash for null streak', () => {
-		const standingsWithNullStreak = [
-			{ ...mockStandings[0], streak: null }
-		];
-		render(StandingsPage, { props: { data: { season: mockSeason, standings: standingsWithNullStreak } } });
+		const standingsWithNullStreak = [{ ...mockStandings[0], streak: null }];
+		render(StandingsPage, {
+			props: { data: { season: mockSeason, standings: standingsWithNullStreak } }
+		});
 		expect(screen.getByText('-')).toBeInTheDocument();
 	});
 
@@ -93,14 +93,66 @@ describe('Standings Page', () => {
 		const standingsWithZeroDiff = [
 			{ ...mockStandings[0], runDifferential: 0, runsScored: 30, runsAllowed: 30 }
 		];
-		render(StandingsPage, { props: { data: { season: mockSeason, standings: standingsWithZeroDiff } } });
+		render(StandingsPage, {
+			props: { data: { season: mockSeason, standings: standingsWithZeroDiff } }
+		});
 		const zeroCells = screen.getAllByText('0');
-		const diffCell = zeroCells.find(el => el.tagName === 'TD' && !el.classList.contains('green') && !el.classList.contains('red'));
+		const diffCell = zeroCells.find(
+			(el) =>
+				el.tagName === 'TD' && !el.classList.contains('green') && !el.classList.contains('red')
+		);
 		expect(diffCell).toBeDefined();
 	});
 
 	test('does not render table when standings are empty', () => {
-		const { container } = render(StandingsPage, { props: { data: { season: mockSeason, standings: [] } } });
+		const { container } = render(StandingsPage, {
+			props: { data: { season: mockSeason, standings: [] } }
+		});
 		expect(container.querySelector('table')).toBeNull();
+	});
+});
+
+describe("Standings Page — the year's tournaments", () => {
+	test('lists the playoffs and cups under the heading', () => {
+		render(StandingsPage, {
+			props: {
+				data: {
+					season: mockSeason,
+					standings: mockStandings,
+					tournaments: [
+						{
+							seasonId: 8,
+							tournamentId: 30,
+							name: '2026 Playoffs',
+							shortName: 'Playoffs',
+							kind: 'playoffs'
+						},
+						{
+							seasonId: 9,
+							tournamentId: 31,
+							name: '2026 Canada Day Cup',
+							shortName: 'Canada Day Cup',
+							kind: 'tournament'
+						}
+					]
+				}
+			}
+		});
+		expect(screen.getByText(/Also in 2026/)).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: 'Playoffs' })).toHaveAttribute(
+			'href',
+			'/Playoffs?year=2026'
+		);
+		expect(screen.getByRole('link', { name: 'Canada Day Cup' })).toHaveAttribute(
+			'href',
+			'/Tournaments/31'
+		);
+	});
+
+	test('shows nothing when the year has no tournaments', () => {
+		render(StandingsPage, {
+			props: { data: { season: mockSeason, standings: mockStandings, tournaments: [] } }
+		});
+		expect(screen.queryByText(/Also in/)).toBeNull();
 	});
 });

@@ -1,5 +1,6 @@
 import type { HistoryYear } from '$lib/models/HistoryYear';
 import type { PlayoffsData } from '$lib/models/Playoffs';
+import { loadTournamentSummaries } from '$lib/tournaments/summaries';
 
 /**
  * What the page should say when there is nothing to draw:
@@ -74,7 +75,12 @@ export const load = async ({ fetch, url, parent }) => {
 		loadYears(fetch),
 		parent()
 	]);
-	const editUrl = await loadEditUrl(fetch, playoffs?.season?.id, user?.isAuthenticated ?? false);
+	const shownYear = playoffs?.season?.year ?? year ?? null;
+	const [editUrl, others] = await Promise.all([
+		loadEditUrl(fetch, playoffs?.season?.id, user?.isAuthenticated ?? false),
+		// The year's mid-season tournaments, for the "Also in {year}" strip.
+		shownYear ? loadTournamentSummaries(fetch, shownYear) : Promise.resolve([])
+	]);
 
-	return { playoffs, state, years, year, editUrl };
+	return { playoffs, state, years, year, editUrl, others };
 };

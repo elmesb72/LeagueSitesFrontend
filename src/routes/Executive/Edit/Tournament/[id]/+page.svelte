@@ -32,6 +32,57 @@
 			.filter((slot) => slot.game === null).length;
 	}
 
+	/** A mid-season tournament is its own season of kind Tournament; the playoffs are not deletable here. */
+	const isCup = $derived(tournament?.season.subseason === 'Tournament');
+
+	/** The public page for this tournament: the playoffs by year, a cup by id. */
+	const publicHref = $derived(
+		tournament
+			? isCup
+				? `/Tournaments/${tournament.id}`
+				: `/Playoffs?year=${tournament.season.year}`
+			: '/Playoffs'
+	);
+
+	/** Games that are scheduled or played (anything not in the recycle bin) across brackets and pools. */
+	const liveGameCount = $derived(
+		tournament
+			? tournament.brackets
+					.flatMap((b) => b.rounds)
+					.flatMap((r) => r.series)
+					.flatMap((s) => s.gameSlots)
+					.map((slot) => slot.game)
+					.concat(tournament.roundRobins.flatMap((p) => p.games).map((g) => g.game))
+					.filter((g) => g !== null && g.status.name !== 'Deleted').length
+			: 0
+	);
+
+	let deleting = $state(false);
+	let deleteError = $state('');
+
+	async function deleteTournament(): Promise<void> {
+		if (!tournament) return;
+		const name = tournament.season.name;
+		if (
+			!confirm(
+				`Delete ${name}? This removes the tournament, its brackets and pools, and any of its games in the recycle bin. This cannot be undone.`
+			)
+		)
+			return;
+
+		deleting = true;
+		deleteError = '';
+		const response = await fetch(`/api/Executive/Season/Tournament/${tournament.season.id}`, {
+			method: 'DELETE'
+		});
+		deleting = false;
+		if (response.ok) {
+			goto('/Executive', { invalidateAll: true });
+		} else {
+			deleteError = (await response.text()) || 'Could not delete the tournament.';
+		}
+	}
+
 	onMount(() => {
 		if (data.redirect) {
 			goto(data.redirect);
@@ -153,10 +204,42 @@
 			<h2>Elsewhere</h2>
 			<ul>
 				<li>
-					<a href="/Playoffs?year={tournament.season.year}">See what the public page shows</a>
+					<a href={publicHref}>See what the public page shows</a>
 				</li>
 				<li><a href="/Executive">Back to league administration</a></li>
 			</ul>
+
+			{#if isCup}
+				<h2>Remove this tournament</h2>
+				{#if liveGameCount > 0}
+					<p class="executive-explanation">
+						{#if liveGameCount === 1}
+							1 game is scheduled in this tournament. Remove it from its series or pool first, then
+							the tournament can be deleted.
+						{:else}
+							{liveGameCount} games are scheduled in this tournament. Remove them from their series and
+							pools first, then the tournament can be deleted.
+						{/if}
+					</p>
+				{:else}
+					<p class="executive-explanation">
+						Deletes the tournament, its brackets and pools, and any of its games in the recycle bin.
+						This cannot be undone.
+					</p>
+				{/if}
+				{#if deleteError}
+					<p class="tournament-error">{deleteError}</p>
+				{/if}
+				<button
+					type="button"
+					class="tournament-delete"
+					disabled={liveGameCount > 0 || deleting}
+					title={liveGameCount > 0 ? 'Remove the scheduled games first' : 'Delete this tournament'}
+					onclick={deleteTournament}
+				>
+					{deleting ? 'Deleting...' : 'Delete this tournament'}
+				</button>
+			{/if}
 		</div>
 	</div>
 {/if}
@@ -172,6 +255,27 @@
 		font-size: var(--text-xs, 11px);
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
+	}
+
+	.tournament-delete {
+		background: none;
+		border: 1px solid var(--color-loss);
+		border-radius: var(--radius-sm);
+		padding: var(--space-2) var(--space-4);
+		color: var(--color-loss);
+		font-family: inherit;
+		font-size: var(--text-sm);
+		cursor: pointer;
+	}
+
+	.tournament-delete:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.tournament-error {
+		margin-top: var(--space-3);
+		color: var(--color-loss);
 	}
 
 	.tournament-muted {

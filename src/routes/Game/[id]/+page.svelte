@@ -2,6 +2,7 @@
 	import './+page.css';
 	import { goto } from '$app/navigation';
 	import { formatTime } from '$lib/utils/date';
+	import { tournamentHref } from '$lib/tournaments/summaries';
 	import TeamLogoMedium from '../../../components/TeamLogoMedium.svelte';
 
 	let { data } = $props();
@@ -25,7 +26,12 @@
 
 	async function deleteGame(): Promise<void> {
 		if (!game || !gameData?.canDelete) return;
-		if (!confirm('Are you sure you want to delete this game? It can be recovered from the Deleted Games page.')) return;
+		if (
+			!confirm(
+				'Are you sure you want to delete this game? It can be recovered from the Deleted Games page.'
+			)
+		)
+			return;
 
 		const response = await fetch(`/api/Game/${game.id}`, { method: 'DELETE' });
 		if (response.ok) {
@@ -54,13 +60,18 @@
 			<div class="section game-header">
 				{#if game.status.name === 'Played'}
 					<div class="game-matchup">
-						{game.visitingTeam.name} {game.scoreVisitor}, {game.hostTeam.name} {game.scoreHost}
+						{game.visitingTeam.name}
+						{game.scoreVisitor}, {game.hostTeam.name}
+						{game.scoreHost}
 					</div>
 				{:else if game.status.name.startsWith('Forfeit')}
-					{@const forfeitingTeam = game.status.name === 'Forfeit (Home)' ? game.hostTeam : game.visitingTeam}
+					{@const forfeitingTeam =
+						game.status.name === 'Forfeit (Home)' ? game.hostTeam : game.visitingTeam}
 					<div class="game-matchup">
-						{game.visitingTeam.name} {game.visitingTeam.id === forfeitingTeam.id ? '0' : '7'},
-						{game.hostTeam.name} {game.hostTeam.id === forfeitingTeam.id ? '0' : '7'}
+						{game.visitingTeam.name}
+						{game.visitingTeam.id === forfeitingTeam.id ? '0' : '7'},
+						{game.hostTeam.name}
+						{game.hostTeam.id === forfeitingTeam.id ? '0' : '7'}
 					</div>
 				{:else}
 					<div class="game-matchup">
@@ -68,6 +79,20 @@
 					</div>
 				{/if}
 				<div class="game-time">{formatTime(game.date)} • {formatFullDate(game.date)}</div>
+				{#if data.tournament}
+					<div class="game-tournament">
+						Part of the
+						<a
+							href={tournamentHref(
+								data.tournament.kind,
+								data.tournament.tournamentId,
+								game.season.year
+							)}
+						>
+							{data.tournament.name}
+						</a>
+					</div>
+				{/if}
 				<div class="game-location">
 					<a href="/Locations/#{game.location.name}">{game.location.name}</a>
 				</div>
@@ -85,12 +110,11 @@
 
 	{#if game.status.name === 'Upcoming'}
 		<div class="row">
-			<div class="section game-upcoming">
-				This game has not yet been played or scored.
-			</div>
+			<div class="section game-upcoming">This game has not yet been played or scored.</div>
 		</div>
 	{:else if game.status.name.startsWith('Forfeit')}
-		{@const forfeitingTeam = game.status.name === 'Forfeit (Home)' ? game.hostTeam : game.visitingTeam}
+		{@const forfeitingTeam =
+			game.status.name === 'Forfeit (Home)' ? game.hostTeam : game.visitingTeam}
 		<div class="row">
 			<div class="section game-forfeit">
 				This game was considered forfeit by the {forfeitingTeam.name}, resulting in a 7-0 score.
@@ -104,15 +128,11 @@
 		</div>
 	{:else if game.status.name === 'Cancelled'}
 		<div class="row">
-			<div class="section game-upcoming">
-				This game has been cancelled and will not be played.
-			</div>
+			<div class="section game-upcoming">This game has been cancelled and will not be played.</div>
 		</div>
 	{:else if game.status.name === 'Deleted'}
 		<div class="row">
-			<div class="section game-upcoming">
-				This game has been deleted.
-			</div>
+			<div class="section game-upcoming">This game has been deleted.</div>
 		</div>
 	{/if}
 

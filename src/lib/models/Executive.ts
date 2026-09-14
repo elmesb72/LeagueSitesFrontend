@@ -41,4 +41,6 @@ export interface ExecutiveDashboard {
 	locations: ExecutiveLocation[];
 	currentSeason: ExecutiveSeasonData | null;
 	currentPlayoffs: ExecutivePlayoffsData | null;
+	/** This year's mid-season tournaments, each its own season (kind Tournament), by start date. */
+	currentTournaments?: ExecutivePlayoffsData[];
 }

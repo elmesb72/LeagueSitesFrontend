@@ -51,14 +51,18 @@ const mockScheduleGames: Game[] = [
 describe('Schedule Page', () => {
 	test('renders year in heading', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		expect(screen.getByText('2026 Schedule')).toBeInTheDocument();
 	});
 
 	test('renders location names as column headers', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		expect(screen.getByText('Diamond Park')).toBeInTheDocument();
 		expect(screen.getByText('Shark Stadium')).toBeInTheDocument();
@@ -66,7 +70,9 @@ describe('Schedule Page', () => {
 
 	test('renders Home and Away sub-headers for each location', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		const homeHeaders = screen.getAllByText('Home');
 		const awayHeaders = screen.getAllByText('Away');
@@ -76,7 +82,9 @@ describe('Schedule Page', () => {
 
 	test('renders date rows', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		expect(screen.getByText('Fri, May 1')).toBeInTheDocument();
 		expect(screen.getByText('Sat, May 2')).toBeInTheDocument();
@@ -84,7 +92,9 @@ describe('Schedule Page', () => {
 
 	test('renders team names in correct cells', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		expect(screen.getAllByText('Isotopes').length).toBe(2);
 		expect(screen.getAllByText('Sharks').length).toBe(2);
@@ -92,7 +102,9 @@ describe('Schedule Page', () => {
 
 	test('game cells link to game page', () => {
 		render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		const links = screen.getAllByRole('link');
 		expect(links.some((l) => l.getAttribute('href') === '/Game/1')).toBe(true);
@@ -115,9 +127,75 @@ describe('Schedule Page', () => {
 
 	test('weekend rows get weekend class', () => {
 		const { container } = render(SchedulePage, {
-			props: { data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] } }
+			props: {
+				data: { year: 2026, games: mockScheduleGames, locations: [mockLocation1, mockLocation2] }
+			}
 		});
 		const weekendRows = container.querySelectorAll('tr.weekend');
 		expect(weekendRows.length).toBeGreaterThan(0);
+	});
+});
+
+describe('Schedule Page — tournament tags', () => {
+	const cupGame: Game = {
+		...mockScheduleGames[0],
+		id: 3,
+		date: '2026-07-01T19:00:00',
+		season: { id: 9, year: 2026, subseason: 'Tournament' }
+	};
+	const tournaments = [
+		{
+			seasonId: 8,
+			tournamentId: 30,
+			name: '2026 Playoffs',
+			shortName: 'Playoffs',
+			kind: 'playoffs' as const
+		},
+		{
+			seasonId: 9,
+			tournamentId: 31,
+			name: '2026 Canada Day Cup',
+			shortName: 'Canada Day Cup',
+			kind: 'tournament' as const
+		}
+	];
+
+	test('tags a cup game with its tournament and links to its page; league games get no tag', () => {
+		render(SchedulePage, {
+			props: {
+				data: {
+					year: 2026,
+					games: [mockScheduleGames[0], cupGame],
+					locations: [mockLocation1, mockLocation2],
+					tournaments
+				}
+			}
+		});
+		const tag = screen.getByRole('link', { name: 'Canada Day Cup' });
+		expect(tag).toHaveAttribute('href', '/Tournaments/31');
+		expect(tag).toHaveAttribute('title', '2026 Canada Day Cup');
+		expect(document.querySelectorAll('.league-schedule-tag')).toHaveLength(1);
+	});
+
+	test('a playoffs game links to the playoffs page for that year', () => {
+		const playoffGame: Game = {
+			...cupGame,
+			id: 4,
+			season: { id: 8, year: 2026, subseason: 'Playoffs' }
+		};
+		render(SchedulePage, {
+			props: {
+				data: {
+					year: 2026,
+					games: [playoffGame],
+					locations: [mockLocation1, mockLocation2],
+					tournaments
+				}
+			}
+		});
+		expect(screen.getByRole('link', { name: 'Playoffs' })).toHaveAttribute(
+			'href',
+			'/Playoffs?year=2026'
+		);
 	});
 });

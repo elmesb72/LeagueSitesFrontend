@@ -2,9 +2,11 @@
 	import './+page.css';
 	import type { StandingsEntry } from '$lib/models/StandingsEntry';
 	import TeamLogoSmall from '../../components/TeamLogoSmall.svelte';
+	import TournamentStrip from '../../components/TournamentStrip.svelte';
 
 	let { data } = $props();
 	const season = $derived(data.season);
+	const tournaments = $derived(data.tournaments ?? []);
 	const standings = $derived(data.standings);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
@@ -16,6 +18,7 @@
 <div class="row">
 	<div class="section standings-section">
 		<h1>{season?.name ?? 'Standings'}</h1>
+		<TournamentStrip links={tournaments} year={season?.year ?? null} />
 		{#if standings.length === 0}
 			<p>No standings data available.</p>
 		{:else}

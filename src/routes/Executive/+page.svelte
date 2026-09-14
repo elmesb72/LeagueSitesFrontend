@@ -77,16 +77,18 @@
 			.filter((t) => !t.active)
 			.sort((a, b) => a.fullName.localeCompare(b.fullName))
 	);
-	const visibleTeams = $derived(showInactiveTeams ? [...activeTeams, ...inactiveTeams] : activeTeams);
+	const visibleTeams = $derived(
+		showInactiveTeams ? [...activeTeams, ...inactiveTeams] : activeTeams
+	);
 
 	const activeParks = $derived((dashboard?.locations ?? []).filter((l) => l.active));
 	const inactiveParks = $derived((dashboard?.locations ?? []).filter((l) => !l.active));
-	const visibleParks = $derived(showInactiveParks ? [...activeParks, ...inactiveParks] : activeParks);
+	const visibleParks = $derived(
+		showInactiveParks ? [...activeParks, ...inactiveParks] : activeParks
+	);
 
 	const progressPct = $derived(
-		season && season.gamesScheduled > 0
-			? (season.gamesPlayed / season.gamesScheduled) * 100
-			: 0
+		season && season.gamesScheduled > 0 ? (season.gamesPlayed / season.gamesScheduled) * 100 : 0
 	);
 
 	async function toggleStatus(entity: string, id: number): Promise<void> {
@@ -175,7 +177,9 @@
 		savingRules = false;
 		if (response.ok) {
 			rulesSaved = true;
-			setTimeout(() => { rulesSaved = false; }, 3000);
+			setTimeout(() => {
+				rulesSaved = false;
+			}, 3000);
 		} else {
 			alert(await response.text());
 		}
@@ -348,7 +352,10 @@
 
 					<div class="executive-import" class:disabled={season.gamesScheduled > 0}>
 						<span>Import schedule:</span>
-						<label class="executive-import-button" class:disabled={importing || season.gamesScheduled > 0}>
+						<label
+							class="executive-import-button"
+							class:disabled={importing || season.gamesScheduled > 0}
+						>
 							<i class="fa-regular fa-file-excel"></i> Choose spreadsheet
 							<input
 								type="file"
@@ -371,19 +378,33 @@
 						<div class="season-progress-bar">
 							{#if season.gamesScheduled > 0}
 								{#if progressPct < 100}
-									<div style="flex: 0 0 {progressPct.toFixed(1)}%; background-color: var(--surface-heading-primary);" title="Games played">
+									<div
+										style="flex: 0 0 {progressPct.toFixed(
+											1
+										)}%; background-color: var(--surface-heading-primary);"
+										title="Games played"
+									>
 										{season.gamesPlayed} GP
 									</div>
-									<div style="flex: 1 0 0; color: var(--text-inverted); background-color: var(--surface-heading-secondary);" title="Games remaining">
+									<div
+										style="flex: 1 0 0; color: var(--text-inverted); background-color: var(--surface-heading-secondary);"
+										title="Games remaining"
+									>
 										{season.gamesScheduled - season.gamesPlayed} GR
 									</div>
 								{:else}
-									<div style="flex: 0 0 100%; background-color: var(--surface-heading-primary);" title="Games played">
+									<div
+										style="flex: 0 0 100%; background-color: var(--surface-heading-primary);"
+										title="Games played"
+									>
 										{season.gamesPlayed}/{season.gamesPlayed} GP
 									</div>
 								{/if}
 							{:else}
-								<div style="flex: 1 0 0; color: var(--text-inverted); background-color: var(--surface-heading-secondary);" title="No games">
+								<div
+									style="flex: 1 0 0; color: var(--text-inverted); background-color: var(--surface-heading-secondary);"
+									title="No games"
+								>
 									No games scheduled
 								</div>
 							{/if}
@@ -395,39 +416,88 @@
 					</ul>
 
 					<h2>Tournaments</h2>
+					<p class="executive-explanation">
+						A mid-season tournament is its own event with its own public page. Its games do not
+						count in the regular-season standings.
+					</p>
+					{#if (dashboard?.currentTournaments ?? []).length > 0}
+						<ul>
+							{#each dashboard?.currentTournaments ?? [] as cup (cup.season.id)}
+								{#each cup.tournaments as tournament (tournament.id)}
+									<li>
+										<a href="/Executive/Edit/Tournament/{tournament.id}">Manage {cup.season.name}</a
+										>
+										{#if tournament.brackets.length > 0 || tournament.roundRobins.length > 0}
+											<span class="executive-summary"
+												>({[...tournament.brackets, ...tournament.roundRobins]
+													.map((t) => t.name)
+													.join(', ')})</span
+											>
+										{:else}
+											<span class="executive-summary">(no brackets yet)</span>
+										{/if}
+									</li>
+								{/each}
+							{/each}
+						</ul>
+					{/if}
 					{#if season.tournaments && season.tournaments.length > 0}
+						<!-- Legacy: tournaments created inside the regular season itself. -->
 						<ul>
 							{#each season.tournaments as tournament}
-								<li><a href="/Executive/Edit/Tournament/{tournament.id}">Manage mid-season tournament</a>
+								<li>
+									<a href="/Executive/Edit/Tournament/{tournament.id}"
+										>Manage mid-season tournament</a
+									>
 									{#if tournament.brackets.length > 0 || tournament.roundRobins.length > 0}
-										<span class="executive-summary">({[...tournament.brackets, ...tournament.roundRobins].map((t) => t.name).join(', ')})</span>
+										<span class="executive-summary"
+											>({[...tournament.brackets, ...tournament.roundRobins]
+												.map((t) => t.name)
+												.join(', ')})</span
+										>
 									{/if}
 								</li>
 							{/each}
 						</ul>
 					{/if}
 					<ul>
-						<li><a href="/Executive/Create/Tournament/{season.season.id}">Add mid-season tournament</a></li>
+						<li><a href="/Executive/Create/Tournament">Add mid-season tournament</a></li>
 					</ul>
 
 					{#if !playoffs}
 						<ul>
-							<li><a href="/Executive/Create/Playoffs/{season.season.id}">Set up year-end playoffs</a></li>
+							<li>
+								<a href="/Executive/Create/Playoffs/{season.season.id}">Set up year-end playoffs</a>
+							</li>
 						</ul>
 					{/if}
 				{:else}
-					<p>No regular season has been created for {new Date().getFullYear()} yet. Create one to start scheduling games.</p>
-					<button class="executive-action" onclick={createSeason}>Create {new Date().getFullYear()} Regular Season</button>
+					<p>
+						No regular season has been created for {new Date().getFullYear()} yet. Create one to start
+						scheduling games.
+					</p>
+					<button class="executive-action" onclick={createSeason}
+						>Create {new Date().getFullYear()} Regular Season</button
+					>
 				{/if}
 
 				{#if playoffs}
 					<h2>Playoffs</h2>
-					<p class="executive-explanation">Set up the brackets, then schedule each round as the matchups become known.</p>
+					<p class="executive-explanation">
+						Set up the brackets, then schedule each round as the matchups become known.
+					</p>
 					<ul>
 						{#each playoffs.tournaments as tournament}
-							<li><a href="/Executive/Edit/Tournament/{tournament.id}">Manage {playoffs.season.year} playoffs</a>
+							<li>
+								<a href="/Executive/Edit/Tournament/{tournament.id}"
+									>Manage {playoffs.season.year} playoffs</a
+								>
 								{#if tournament.brackets.length > 0 || tournament.roundRobins.length > 0}
-									<span class="executive-summary">({[...tournament.brackets, ...tournament.roundRobins].map((t) => t.name).join(', ')})</span>
+									<span class="executive-summary"
+										>({[...tournament.brackets, ...tournament.roundRobins]
+											.map((t) => t.name)
+											.join(', ')})</span
+									>
 								{:else}
 									<span class="executive-summary">(no brackets yet)</span>
 								{/if}
@@ -441,7 +511,10 @@
 		<div class="row">
 			<div class="section executive-section executive-league">
 				<h1>Teams ({activeTeams.length} active)</h1>
-				<p class="executive-explanation">Active teams appear in the site header and can be selected in drop-down lists. Deactivate teams that are not playing in the current season.</p>
+				<p class="executive-explanation">
+					Active teams appear in the site header and can be selected in drop-down lists. Deactivate
+					teams that are not playing in the current season.
+				</p>
 				<table class="executive-table">
 					<thead>
 						<tr>
@@ -466,7 +539,9 @@
 									<button
 										type="button"
 										class="executive-delete"
-										title={team.canDelete ? `Delete ${team.fullName}` : `${team.fullName} has associated records and cannot be deleted`}
+										title={team.canDelete
+											? `Delete ${team.fullName}`
+											: `${team.fullName} has associated records and cannot be deleted`}
 										aria-label="Delete {team.fullName}"
 										disabled={!team.canDelete}
 										onclick={() => deleteTeam(team.id, team.fullName)}
@@ -484,15 +559,39 @@
 						class="executive-show-inactive"
 						onclick={() => (showInactiveTeams = !showInactiveTeams)}
 					>
-						{showInactiveTeams ? 'Hide' : 'Show'} {inactiveTeams.length} inactive team{inactiveTeams.length === 1 ? '' : 's'}
+						{showInactiveTeams ? 'Hide' : 'Show'}
+						{inactiveTeams.length} inactive team{inactiveTeams.length === 1 ? '' : 's'}
 					</button>
 				{/if}
-				<form class="executive-create-form" onsubmit={(e) => { e.preventDefault(); createTeam(); }}>
+				<form
+					class="executive-create-form"
+					onsubmit={(e) => {
+						e.preventDefault();
+						createTeam();
+					}}
+				>
 					<h3>Add a team</h3>
 					<div class="executive-create-fields">
-						<input type="text" placeholder="Location (e.g. Springfield)" bind:value={newTeamLocation} disabled={creatingTeam} />
-						<input type="text" placeholder="Name (e.g. Isotopes)" bind:value={newTeamName} disabled={creatingTeam} />
-						<input type="text" placeholder="Abbrev." maxlength="5" bind:value={newTeamAbbreviation} disabled={creatingTeam} class="executive-input-short" />
+						<input
+							type="text"
+							placeholder="Location (e.g. Springfield)"
+							bind:value={newTeamLocation}
+							disabled={creatingTeam}
+						/>
+						<input
+							type="text"
+							placeholder="Name (e.g. Isotopes)"
+							bind:value={newTeamName}
+							disabled={creatingTeam}
+						/>
+						<input
+							type="text"
+							placeholder="Abbrev."
+							maxlength="5"
+							bind:value={newTeamAbbreviation}
+							disabled={creatingTeam}
+							class="executive-input-short"
+						/>
 						<button type="submit" class="executive-action" disabled={creatingTeam}>Add team</button>
 					</div>
 				</form>
@@ -502,7 +601,10 @@
 		<div class="row">
 			<div class="section executive-section executive-league">
 				<h1>Parks ({activeParks.length} active)</h1>
-				<p class="executive-explanation">Active parks appear on the Locations page and can be selected in drop-down lists. Deactivate parks that are not being used in the current season.</p>
+				<p class="executive-explanation">
+					Active parks appear on the Locations page and can be selected in drop-down lists.
+					Deactivate parks that are not being used in the current season.
+				</p>
 				<table class="executive-table">
 					<thead>
 						<tr>
@@ -529,7 +631,9 @@
 									<button
 										type="button"
 										class="executive-delete"
-										title={location.canDelete ? `Delete ${location.name}` : `${location.name} has associated records and cannot be deleted`}
+										title={location.canDelete
+											? `Delete ${location.name}`
+											: `${location.name} has associated records and cannot be deleted`}
 										aria-label="Delete {location.name}"
 										disabled={!location.canDelete}
 										onclick={() => deleteLocation(location.id, location.name)}
@@ -547,16 +651,40 @@
 						class="executive-show-inactive"
 						onclick={() => (showInactiveParks = !showInactiveParks)}
 					>
-						{showInactiveParks ? 'Hide' : 'Show'} {inactiveParks.length} inactive park{inactiveParks.length === 1 ? '' : 's'}
+						{showInactiveParks ? 'Hide' : 'Show'}
+						{inactiveParks.length} inactive park{inactiveParks.length === 1 ? '' : 's'}
 					</button>
 				{/if}
-				<form class="executive-create-form" onsubmit={(e) => { e.preventDefault(); createLocation(); }}>
+				<form
+					class="executive-create-form"
+					onsubmit={(e) => {
+						e.preventDefault();
+						createLocation();
+					}}
+				>
 					<h3>Add a location</h3>
 					<div class="executive-create-fields">
-						<input type="text" placeholder="City" bind:value={newLocationCity} disabled={creatingLocation} />
-						<input type="text" placeholder="Short name (e.g. Springfield or Shelbyville - 3)" bind:value={newLocationName} disabled={creatingLocation} />
-						<input type="text" placeholder="Park" bind:value={newLocationFormalName} disabled={creatingLocation} />
-						<button type="submit" class="executive-action" disabled={creatingLocation}>Add location</button>
+						<input
+							type="text"
+							placeholder="City"
+							bind:value={newLocationCity}
+							disabled={creatingLocation}
+						/>
+						<input
+							type="text"
+							placeholder="Short name (e.g. Springfield or Shelbyville - 3)"
+							bind:value={newLocationName}
+							disabled={creatingLocation}
+						/>
+						<input
+							type="text"
+							placeholder="Park"
+							bind:value={newLocationFormalName}
+							disabled={creatingLocation}
+						/>
+						<button type="submit" class="executive-action" disabled={creatingLocation}
+							>Add location</button
+						>
 					</div>
 				</form>
 			</div>
@@ -567,10 +695,9 @@
 				<h1>Standings Rules</h1>
 				{#if rulesData && rulesData.years.length > 0}
 					<p class="executive-explanation">
-						How teams are ranked. Rules are stored per season, so a change to
-						one year never re-ranks another; they apply everywhere that
-						year's rankings are shown — the standings page, homepage, team
-						records, and playoff seeding.
+						How teams are ranked. Rules are stored per season, so a change to one year never
+						re-ranks another; they apply everywhere that year's rankings are shown — the standings
+						page, homepage, team records, and playoff seeding.
 					</p>
 					<label class="executive-rules-year">
 						Season:
@@ -596,7 +723,12 @@
 							disabled={savingRules || rulesLoading}
 						/>
 					{/key}
-					<button type="button" class="executive-action" onclick={saveStandingsRules} disabled={savingRules || rulesLoading}>
+					<button
+						type="button"
+						class="executive-action"
+						onclick={saveStandingsRules}
+						disabled={savingRules || rulesLoading}
+					>
 						{savingRules ? 'Saving...' : `Save ${rulesData.year} standings rules`}
 					</button>
 					{#if rulesSaved}
@@ -604,8 +736,8 @@
 					{/if}
 				{:else if rulesData}
 					<p>
-						No seasons exist yet — standings rules live on seasons. Create the
-						season on the Season tab first, then set its rules here.
+						No seasons exist yet — standings rules live on seasons. Create the season on the Season
+						tab first, then set its rules here.
 					</p>
 				{:else}
 					<p>Could not load the standings rules. Refresh the page to try again.</p>

@@ -37,6 +37,14 @@
 			</a>
 		</div>
 	{/if}
+	{#each data.tournaments ?? [] as tournament (tournament.tournamentId)}
+		<div class="section mobile-only">
+			<a href="/Tournaments/{tournament.tournamentId}">
+				<h1>{tournament.shortName}</h1>
+				<h2>Click here to view the bracket and games</h2>
+			</a>
+		</div>
+	{/each}
 
 	<div class="section home-main-left home-left">
 		<h1 title="Overdue (unscored), Recent (last 7 days), Upcoming (7 days)">Games</h1>
@@ -74,7 +82,11 @@
 			</div>
 		{:else}
 			{#each data.news as entry}
-				<HomepageNews news={entry.news} canEdit={entry.canEdit} renderedContents={entry.renderedContents} />
+				<HomepageNews
+					news={entry.news}
+					canEdit={entry.canEdit}
+					renderedContents={entry.renderedContents}
+				/>
 			{/each}
 		{/if}
 	</div>
@@ -88,6 +100,14 @@
 				</a>
 			</div>
 		{/if}
+		{#each data.tournaments ?? [] as tournament (tournament.tournamentId)}
+			<div class="home-playoffs desktop-only">
+				<a href="/Tournaments/{tournament.tournamentId}">
+					<h1>{tournament.shortName}</h1>
+					{tournament.name} — click here to view the bracket, matchups, and games!
+				</a>
+			</div>
+		{/each}
 
 		{#if data.standings.length > 0}
 			<HomepageStandings standings={data.standings} />

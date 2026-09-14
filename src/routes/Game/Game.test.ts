@@ -1,11 +1,22 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, test, expect } from 'vitest';
 import GamePage from './[id]/+page.svelte';
-import { mockTeamA, mockTeamB, mockPlayedGame, mockUpcomingGame, mockForfeitGame } from '../../tests/mocks';
+import {
+	mockTeamA,
+	mockTeamB,
+	mockPlayedGame,
+	mockUpcomingGame,
+	mockForfeitGame
+} from '../../tests/mocks';
 
 const baseData = (game: typeof mockPlayedGame, canEdit = false) => ({
 	gameData: { game, canEdit },
-	siteConfig: { siteName: 'Test League', shortName: 'TL', home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} }, apiKeys: { googleMaps: '' } }
+	siteConfig: {
+		siteName: 'Test League',
+		shortName: 'TL',
+		home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} },
+		apiKeys: { googleMaps: '' }
+	}
 });
 
 describe('Game Page', () => {
@@ -60,7 +71,9 @@ describe('Game Page', () => {
 	});
 
 	test('shows not found when gameData is null', () => {
-		render(GamePage, { props: { data: { gameData: null, siteConfig: baseData(mockPlayedGame).siteConfig } } });
+		render(GamePage, {
+			props: { data: { gameData: null, siteConfig: baseData(mockPlayedGame).siteConfig } }
+		});
 		expect(screen.getByText('Game Not Found')).toBeInTheDocument();
 	});
 
@@ -72,5 +85,35 @@ describe('Game Page', () => {
 	test('does not show upcoming message for played games', () => {
 		render(GamePage, { props: { data: baseData(mockPlayedGame) } });
 		expect(screen.queryByText(/not yet been played/)).toBeNull();
+	});
+});
+
+describe('Game Page — tournament games', () => {
+	test('says which tournament a cup game belongs to, linking to its page', () => {
+		const cupGame = { ...mockUpcomingGame, season: { id: 9, year: 2026, subseason: 'Tournament' } };
+		render(GamePage, {
+			props: {
+				data: {
+					...baseData(cupGame),
+					tournament: {
+						seasonId: 9,
+						tournamentId: 31,
+						name: '2026 Canada Day Cup',
+						shortName: 'Canada Day Cup',
+						kind: 'tournament'
+					}
+				}
+			}
+		});
+		expect(screen.getByText(/Part of the/)).toBeInTheDocument();
+		expect(screen.getByRole('link', { name: '2026 Canada Day Cup' })).toHaveAttribute(
+			'href',
+			'/Tournaments/31'
+		);
+	});
+
+	test('a league game says nothing about tournaments', () => {
+		render(GamePage, { props: { data: { ...baseData(mockUpcomingGame), tournament: null } } });
+		expect(screen.queryByText(/Part of the/)).toBeNull();
 	});
 });

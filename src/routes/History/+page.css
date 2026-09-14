@@ -26,3 +26,25 @@
 .history tr:hover {
 	background-color: var(--standings-hover-bg);
 }
+
+/* Mid-season tournaments of the year, linked from the champion cell */
+.history-tournaments {
+	display: block;
+	margin-top: 2px;
+	font-size: var(--text-xs);
+}
+
+.history-tournament-link {
+	display: inline-block;
+	margin-right: var(--space-2);
+	padding: 0 5px;
+	border: 1px solid var(--color-grey-light);
+	border-radius: var(--radius-sm);
+	text-decoration: none;
+	color: var(--text-soft-contrast);
+}
+
+.history-tournament-link:hover {
+	color: var(--link-hover);
+	border-color: var(--link-hover);
+}

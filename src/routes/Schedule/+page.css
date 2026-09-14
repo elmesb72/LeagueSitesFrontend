@@ -78,3 +78,18 @@
 .league-schedule-create:hover .header-icon {
 	color: var(--text-default);
 }
+
+/* Playoffs / cup games carry a small tag linking to their tournament page */
+.league-schedule-game .league-schedule-tag {
+	display: block;
+	margin-top: 2px;
+	font-size: var(--text-xs);
+	font-weight: normal;
+	letter-spacing: 0.3px;
+	opacity: 0.85;
+	text-decoration: none;
+}
+
+.league-schedule-game .league-schedule-tag:hover {
+	text-decoration: underline;
+}

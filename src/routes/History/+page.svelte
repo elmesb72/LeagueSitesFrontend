@@ -31,16 +31,30 @@
 							<td>
 								{#if year.exceptionYearDescription}
 									<span>{year.exceptionYearDescription}</span>
-								{:else if year.playoffsComplete && year.champion}
+								{:else if year.champion && (year.playoffsComplete || (year.tournaments ?? []).some((t) => t.decided))}
 									<a href="/Playoffs?year={year.calendarYear}">{year.champion}</a>
 								{:else}
 									<span>-</span>
+								{/if}
+								{#if (year.tournaments ?? []).length > 0}
+									<span class="history-tournaments">
+										{#each year.tournaments ?? [] as tournament (tournament.id)}
+											<a
+												class="history-tournament-link"
+												href="/Tournaments/{tournament.id}"
+												title={tournament.name}
+											>
+												{tournament.shortName}
+											</a>
+										{/each}
+									</span>
 								{/if}
 							</td>
 							<td>
 								{#if year.regularSeasonComplete && year.bestRecord}
 									<a href="/Team/{year.bestRecordAbbreviation}?year={year.calendarYear}">
-										{year.bestRecord} {year.bestRecordResults}
+										{year.bestRecord}
+										{year.bestRecordResults}
 									</a>
 								{:else if year.exceptionYearDescription}
 									<span>&nbsp;</span>

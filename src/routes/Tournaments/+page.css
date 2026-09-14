@@ -1,0 +1,55 @@
+/* The year's tournaments as a list of cards */
+.tournament-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+}
+
+.tournament-card {
+	list-style: none; /* the layout gives every li a » marker */
+	padding: var(--space-3) var(--space-4);
+	border: var(--game-border);
+	border-left: 4px solid var(--surface-heading-primary);
+	border-radius: var(--radius-md);
+	background: var(--surface-section);
+}
+
+.tournament-card-decided {
+	border-left-color: var(--surface-heading-secondary);
+}
+
+.tournament-card-head {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-3);
+	flex-wrap: wrap;
+}
+
+.tournament-card-name {
+	font-family: var(--font-condensed);
+	font-size: var(--text-lg);
+	text-decoration: none;
+}
+
+.tournament-card-name:hover {
+	text-decoration: underline;
+}
+
+.tournament-card-kind {
+	padding: 1px 6px;
+	border-radius: var(--radius-sm);
+	background-color: var(--surface-heading-secondary);
+	color: var(--text-inverted);
+	font-size: var(--text-xs);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.tournament-card-dates,
+.tournament-card-progress {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+}

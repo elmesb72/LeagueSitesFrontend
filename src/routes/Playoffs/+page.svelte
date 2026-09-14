@@ -1,15 +1,13 @@
 <script lang="ts">
 	import './+page.css';
 	import { goto } from '$app/navigation';
-	import type { Bracket, Series } from '$lib/models/Playoffs';
-	import { comingUp } from '$lib/playoffs/nextGames';
-	import PlayoffBracket from '../../components/PlayoffBracket.svelte';
-	import PlayoffChampion from '../../components/PlayoffChampion.svelte';
-	import PlayoffComingUp from '../../components/PlayoffComingUp.svelte';
-	import PlayoffRoundRobin from '../../components/PlayoffRoundRobin.svelte';
-	import PlayoffSeriesDetail from '../../components/PlayoffSeriesDetail.svelte';
+	import TournamentStrip from '../../components/TournamentStrip.svelte';
+	import TournamentView from '../../components/TournamentView.svelte';
+	import { toLinks } from '$lib/tournaments/summaries';
 
 	let { data } = $props();
+	/** The year's mid-season tournaments, for the strip under the year picker. */
+	const others = $derived(toLinks(data.others ?? []));
 	const playoffs = $derived(data.playoffs);
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 
@@ -39,16 +37,9 @@
 	const newer = $derived(index > 0 ? years[index - 1] : null);
 	const older = $derived(index >= 0 && index < years.length - 1 ? years[index + 1] : null);
 
-	const upcoming = $derived(playoffs ? comingUp(playoffs) : []);
-
 	function pickYear(event: Event): void {
 		const chosen = (event.currentTarget as HTMLSelectElement).value;
 		goto(`/Playoffs?year=${chosen}`);
-	}
-
-	/** Detail sections exist for series whose teams are both known. */
-	function detailed(bracket: Bracket): Series[] {
-		return bracket.rounds.flatMap((r) => r.series).filter((s) => s.spot1?.team && s.spot2?.team);
 	}
 </script>
 
@@ -98,40 +89,10 @@
 			</nav>
 		{/if}
 
+		<TournamentStrip links={others} {year} excludeKind="playoffs" />
+
 		{#if state === 'ok' && playoffs}
-			<PlayoffComingUp entries={upcoming} />
-
-			{#if playoffs.brackets.length > 0}
-				<!-- Brackets and pools are keyed by position: the backend requires names, not unique ones. -->
-				<div class="tournament">
-					{#each playoffs.brackets as bracket, i (i)}
-						{#if bracket.winner && bracket.historical}
-							<PlayoffChampion team={bracket.winner} {year} bracketName={bracket.name} />
-						{:else if bracket.winner}
-							<p class="playoff-won-by">
-								{bracket.name} bracket won by <strong>{bracket.winner.fullName}</strong>.
-							</p>
-						{/if}
-						<PlayoffBracket {bracket} />
-					{/each}
-				</div>
-			{/if}
-
-			{#each playoffs.roundRobins as roundRobin, i (i)}
-				<PlayoffRoundRobin {roundRobin} />
-			{/each}
-
-			{#each playoffs.brackets as bracket, i (i)}
-				{@const series = detailed(bracket)}
-				{#if series.length > 0}
-					<section class="tournament-items-bracket" aria-label="{bracket.name} bracket series">
-						<h2>{bracket.name} Bracket &middot; Series</h2>
-						{#each series as s (s.number)}
-							<PlayoffSeriesDetail series={s} {bracket} />
-						{/each}
-					</section>
-				{/if}
-			{/each}
+			<TournamentView tournament={playoffs} {year} />
 		{:else}
 			<div class="subsection no-playoffs">
 				<p>

@@ -3,6 +3,7 @@
 	import type { Game } from '$lib/models/Game';
 	import type { Location } from '$lib/models/Location';
 	import { toDateKey, formatDateLabel, getDayOfWeek, addDays } from '$lib/utils/date';
+	import { tournamentHref } from '$lib/tournaments/summaries';
 
 	let { data } = $props();
 	const games = $derived(data.games);
@@ -35,6 +36,14 @@
 		return games.find((g) => toDateKey(g.date) === dateStr && g.location.id === location.id);
 	}
 
+	/** The tournament a game belongs to (playoffs or a cup), by its season; regular-season games have none. */
+	const tournamentBySeason = $derived(
+		new Map((data.tournaments ?? []).map((t) => [t.seasonId, t]))
+	);
+	function tagFor(game: Game) {
+		return tournamentBySeason.get(game.season.id) ?? null;
+	}
+
 	const dateRange = $derived(getDateRange(games));
 	const shortName = $derived(data.siteConfig?.shortName ?? '');
 </script>
@@ -48,7 +57,9 @@
 		<h1>
 			{data.year} Schedule
 			{#if canCreateGame}
-				<a title="Create Game" href="/Game/Create"><i class="fa-regular fa-square-plus header-icon"></i></a>
+				<a title="Create Game" href="/Game/Create"
+					><i class="fa-regular fa-square-plus header-icon"></i></a
+				>
 			{/if}
 		</h1>
 		{#if games.length === 0 && !(canCreateGame && dateRange.length > 0)}
@@ -80,22 +91,31 @@
 							{#each locations as location}
 								{@const game = findGame(games, dateStr, location)}
 								{#if game}
+									{@const tag = tagFor(game)}
 									<td class="league-schedule-game league-schedule-game-home">
 										<a href="/Game/{game.id}">{game.hostTeam.name}</a>
+										{#if tag}
+											<a
+												class="league-schedule-tag"
+												href={tournamentHref(tag.kind, tag.tournamentId, data.year)}
+												title={tag.name}>{tag.shortName}</a
+											>
+										{/if}
 									</td>
 									<td class="league-schedule-game league-schedule-game-away">
 										<a href="/Game/{game.id}">{game.visitingTeam.name}</a>
 									</td>
+								{:else if canCreateGame}
+									<td colspan="2" class="league-schedule-empty league-schedule-create">
+										<a
+											title="Create Game on {dateStr} at {location.name}"
+											href="/Game/Create?date={dateStr}&location={location.id}"
+										>
+											<i class="fa-regular fa-square-plus header-icon"></i>
+										</a>
+									</td>
 								{:else}
-									{#if canCreateGame}
-										<td colspan="2" class="league-schedule-empty league-schedule-create">
-											<a title="Create Game on {dateStr} at {location.name}" href="/Game/Create?date={dateStr}&location={location.id}">
-												<i class="fa-regular fa-square-plus header-icon"></i>
-											</a>
-										</td>
-									{:else}
-										<td colspan="2" class="league-schedule-empty"></td>
-									{/if}
+									<td colspan="2" class="league-schedule-empty"></td>
 								{/if}
 							{/each}
 						</tr>

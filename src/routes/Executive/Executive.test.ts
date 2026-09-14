@@ -5,26 +5,80 @@ import type { ExecutiveDashboard } from '$lib/models/Executive';
 
 const mockDashboard: ExecutiveDashboard = {
 	teams: [
-		{ id: 1, location: 'Springfield', name: 'Isotopes', fullName: 'Springfield Isotopes', abbreviation: 'SPR', backgroundColor: '003366', color: 'FFFFFF', active: true, hidden: false, canDelete: false },
-		{ id: 2, location: 'Shelbyville', name: 'Sharks', fullName: 'Shelbyville Sharks', abbreviation: 'SHL', backgroundColor: 'CC0000', color: 'FFFFFF', active: false, hidden: false, canDelete: true }
+		{
+			id: 1,
+			location: 'Springfield',
+			name: 'Isotopes',
+			fullName: 'Springfield Isotopes',
+			abbreviation: 'SPR',
+			backgroundColor: '003366',
+			color: 'FFFFFF',
+			active: true,
+			hidden: false,
+			canDelete: false
+		},
+		{
+			id: 2,
+			location: 'Shelbyville',
+			name: 'Sharks',
+			fullName: 'Shelbyville Sharks',
+			abbreviation: 'SHL',
+			backgroundColor: 'CC0000',
+			color: 'FFFFFF',
+			active: false,
+			hidden: false,
+			canDelete: true
+		}
 	],
 	locations: [
-		{ id: 1, active: true, name: 'Diamond Park', formalName: 'Central Park', city: 'Springfield', address: null, mapsPlaceId: null, canDelete: false },
-		{ id: 2, active: false, name: 'Shark Field', formalName: null, city: 'Shelbyville', address: null, mapsPlaceId: null, canDelete: true }
+		{
+			id: 1,
+			active: true,
+			name: 'Diamond Park',
+			formalName: 'Central Park',
+			city: 'Springfield',
+			address: null,
+			mapsPlaceId: null,
+			canDelete: false
+		},
+		{
+			id: 2,
+			active: false,
+			name: 'Shark Field',
+			formalName: null,
+			city: 'Shelbyville',
+			address: null,
+			mapsPlaceId: null,
+			canDelete: true
+		}
 	],
 	currentSeason: {
-		season: { id: 1, year: 2026, subseason: 'Regular Season', name: '2026 Regular Season', startDate: '2026-05-01' },
+		season: {
+			id: 1,
+			year: 2026,
+			subseason: 'Regular Season',
+			name: '2026 Regular Season',
+			startDate: '2026-05-01'
+		},
 		gamesScheduled: 20,
 		gamesPlayed: 12,
 		tournaments: [
-			{ id: 1, brackets: [{ id: 10, name: 'Championship' }], roundRobins: [{ id: 20, name: 'Pool A' }] }
+			{
+				id: 1,
+				brackets: [{ id: 10, name: 'Championship' }],
+				roundRobins: [{ id: 20, name: 'Pool A' }]
+			}
 		]
 	},
 	currentPlayoffs: {
-		season: { id: 2, year: 2026, subseason: 'Playoffs', name: '2026 Playoffs', startDate: '2026-09-01' },
-		tournaments: [
-			{ id: 2, brackets: [{ id: 11, name: 'Finals' }], roundRobins: [] }
-		]
+		season: {
+			id: 2,
+			year: 2026,
+			subseason: 'Playoffs',
+			name: '2026 Playoffs',
+			startDate: '2026-09-01'
+		},
+		tournaments: [{ id: 2, brackets: [{ id: 11, name: 'Finals' }], roundRobins: [] }]
 	}
 };
 
@@ -40,10 +94,22 @@ const mockStandingsRules = {
 		tiebreakers: ['Points', 'Wins', 'RunDifferential']
 	},
 	comparators: [
-		{ name: 'Points', description: 'Points, using the configured win/tie/loss values', groupRestricted: false },
+		{
+			name: 'Points',
+			description: 'Points, using the configured win/tie/loss values',
+			groupRestricted: false
+		},
 		{ name: 'Wins', description: 'Most wins', groupRestricted: false },
-		{ name: 'RunDifferential', description: 'Run differential: runs scored minus runs allowed', groupRestricted: false },
-		{ name: 'HeadToHeadPoints', description: 'Points in games between the tied teams, using the configured values', groupRestricted: true }
+		{
+			name: 'RunDifferential',
+			description: 'Run differential: runs scored minus runs allowed',
+			groupRestricted: false
+		},
+		{
+			name: 'HeadToHeadPoints',
+			description: 'Points in games between the tied teams, using the configured values',
+			groupRestricted: true
+		}
 	]
 };
 const baseData = {
@@ -51,7 +117,12 @@ const baseData = {
 	dashboard: mockDashboard,
 	standingsRules: mockStandingsRules,
 	teams: [],
-	siteConfig: { siteName: 'Test League', shortName: 'TL', home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} }, apiKeys: { googleMaps: '' } },
+	siteConfig: {
+		siteName: 'Test League',
+		shortName: 'TL',
+		home: { aboutBlurb: '', executives: {}, socials: {}, links: {}, information: {} },
+		apiKeys: { googleMaps: '' }
+	},
 	user: { isAuthenticated: true, name: 'Admin', claims: [] }
 };
 
@@ -132,7 +203,10 @@ describe('Executive Page', () => {
 
 	test('links each mid-season tournament to its management page', () => {
 		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getByText('Manage mid-season tournament')).toHaveAttribute('href', '/Executive/Edit/Tournament/1');
+		expect(screen.getByText('Manage mid-season tournament')).toHaveAttribute(
+			'href',
+			'/Executive/Edit/Tournament/1'
+		);
 	});
 
 	test('lists what a tournament already contains', () => {
@@ -142,7 +216,54 @@ describe('Executive Page', () => {
 
 	test('links the playoffs to its management page', () => {
 		render(ExecutivePage, { props: { data: baseData } });
-		expect(screen.getByText(/Manage 2026 playoffs/)).toHaveAttribute('href', '/Executive/Edit/Tournament/2');
+		expect(screen.getByText(/Manage 2026 playoffs/)).toHaveAttribute(
+			'href',
+			'/Executive/Edit/Tournament/2'
+		);
+	});
+	test('lists mid-season tournaments by name, and offers to add one', () => {
+		const withCups = {
+			...baseData,
+			dashboard: {
+				...mockDashboard,
+				currentTournaments: [
+					{
+						season: {
+							id: 9,
+							year: 2026,
+							subseason: 'Tournament',
+							name: '2026 Canada Day Cup',
+							startDate: '2026-07-01'
+						},
+						tournaments: [{ id: 31, brackets: [{ id: 12, name: 'Cup Final' }], roundRobins: [] }]
+					},
+					{
+						season: {
+							id: 10,
+							year: 2026,
+							subseason: 'Tournament',
+							name: '2026 Labour Day Classic',
+							startDate: '2026-09-04'
+						},
+						tournaments: [{ id: 32, brackets: [], roundRobins: [] }]
+					}
+				]
+			}
+		};
+		render(ExecutivePage, { props: { data: withCups } });
+		expect(screen.getByText('Manage 2026 Canada Day Cup')).toHaveAttribute(
+			'href',
+			'/Executive/Edit/Tournament/31'
+		);
+		expect(screen.getByText('(Cup Final)')).toBeInTheDocument();
+		expect(screen.getByText('Manage 2026 Labour Day Classic')).toHaveAttribute(
+			'href',
+			'/Executive/Edit/Tournament/32'
+		);
+		expect(screen.getByText('Add mid-season tournament')).toHaveAttribute(
+			'href',
+			'/Executive/Create/Tournament'
+		);
 	});
 
 	test('renders playoffs section', () => {
@@ -256,7 +377,7 @@ describe('Executive Page', () => {
 		expect(screen.getByText('Save 2026 standings rules')).toBeInTheDocument();
 	});
 
-	test('choosing another year fetches and shows that year\'s rules', async () => {
+	test("choosing another year fetches and shows that year's rules", async () => {
 		const rules2025 = {
 			...mockStandingsRules,
 			year: 2025,

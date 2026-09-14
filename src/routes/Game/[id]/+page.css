@@ -54,3 +54,10 @@
 .game-reschedule-link {
 	margin-left: var(--space-6);
 }
+
+/* "Part of the 2027 Canada Day Cup" for playoffs and cup games */
+.game-tournament {
+	font-size: var(--text-sm);
+	color: var(--text-soft-contrast);
+	padding-bottom: 2px;
+}
