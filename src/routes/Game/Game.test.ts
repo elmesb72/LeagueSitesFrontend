@@ -1,13 +1,7 @@
 import { render, screen } from '@testing-library/svelte';
 import { describe, test, expect } from 'vitest';
 import GamePage from './[id]/+page.svelte';
-import {
-	mockTeamA,
-	mockTeamB,
-	mockPlayedGame,
-	mockUpcomingGame,
-	mockForfeitGame
-} from '../../tests/mocks';
+import { mockPlayedGame, mockUpcomingGame, mockForfeitGame } from '../../tests/mocks';
 
 const baseData = (game: typeof mockPlayedGame, canEdit = false) => ({
 	gameData: { game, canEdit },
@@ -48,8 +42,10 @@ describe('Game Page', () => {
 
 	test('renders team logo components', () => {
 		const { container } = render(GamePage, { props: { data: baseData(mockPlayedGame) } });
-		const logos = container.querySelectorAll('.game-team object');
+		const logos = container.querySelectorAll('.game-team img.team-logo-md');
 		expect(logos.length).toBe(2);
+		expect(logos[0].getAttribute('src')).toBe('/images/teams/2-md.webp');
+		expect(logos[1].getAttribute('src')).toBe('/images/teams/1-md.webp');
 	});
 
 	test('renders team links on logos', () => {
