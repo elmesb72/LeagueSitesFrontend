@@ -88,6 +88,10 @@
 	margin-block-end: 0;
 	padding-inline-start: 25px;
 }
-.home-news-post li {
-	list-style-type: unset;
+/* Markdown lists in a post keep ordinary bullets and numbers, not the site's ». */
+.home-news-post ul {
+	list-style-type: disc;
+}
+.home-news-post ol {
+	list-style-type: decimal;
 }

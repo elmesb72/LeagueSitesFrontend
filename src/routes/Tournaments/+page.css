@@ -9,7 +9,6 @@
 }
 
 .tournament-card {
-	list-style: none; /* the layout gives every li a » marker */
 	padding: var(--space-3) var(--space-4);
 	border: var(--game-border);
 	border-left: 4px solid var(--surface-heading-primary);

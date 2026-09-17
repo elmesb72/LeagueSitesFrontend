@@ -77,7 +77,12 @@ ul {
 	margin: 0;
 	padding-left: 12px;
 }
-li {
+/* The site's bullet, declared on the list rather than on li so that a list's
+   own `list-style: none` wins as written: a declaration on the item itself
+   would beat anything it inherits from its ul/ol, and the marker then hangs
+   outside any list that also zeroes its padding. */
+ul,
+ol {
 	list-style-type: '» ';
 }
 
